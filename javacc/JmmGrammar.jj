@@ -9,12 +9,61 @@ TOKEN :
 	< MINUS : "-" > |
 	< TIMES : "*" > |
 	< DIVIDE : "/" > |
+	< ASSIGNMENT : "="> |
+	< AND : "&&" > | 
+	< EQUALS : "==" > | 
 	< OPEN_PAREN : "(" > |
 	< CLOSE_PAREN : ")" > |
-	< INTEGER : (["0" - "9"])+ >
+	< DIGIT : (["0" - "9"])+ > |
+	< OPEN_RECT_PAREN : "[" > |
+	< CLOSE_RECT_PAREN : "]" > |
+	< OPEN_BRACKET : "{" > |
+	< CLOSE_BRACKET : "}" > |
+	< IF : "if" > |
+	< ELSE : "else" > |
+	< WHILE : "while" > |
+	< TRUE : "true" > |
+	< FALSE : "false" > |
+	< THIS : "this" > |
+	< NEW : "new" > |
+	< INT : "int" > | 
+	< BOOLEAN : "boolean" > |
+	< STRING : "String" > | 
+	< MAIN : "main" > |
+	< RETURN : "return" > |
+	< EOE : ";" >
+	< COMMA : "," > |
+	< NOT | "!"> |
+	< FN_CALL : "." > |
+	< LENGTH : "length"> |
+	< ID : ((["A" - "Z"] | ["a" - "z"])(["0" - "9"] | ["A" - "Z"] | ["a" - "z"])*) > |
+	< CLASS : "class" >
+	< EXTENDS : "extends" >
+	< PUBLIC : "public" >
+	< PRIVATE : "private" >
+	< STATIC : "static" >
+	< VOID : "void" >
 ;
 
 Start : AdditiveExpression <EOF> ;
+
+Start: ImportDeclaration ClassDeclaration <EOF> ;
+
+ImportDeclaration : ImportDeclaration <EOE> (ImportDeclaration) *
+
+ClassDeclaration : <CLASS> <ID> (<EXTENDS> <ID>)? <OPEN_BRACKET>
+	(VarDeclaration | MethodDeclaration)*
+<CLOSE_BRACKET>;
+
+Type : <INT> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> | <BOOLEAN> | <ID> ;
+
+VarDeclaration : Type <ID> <EOE> ;
+
+MethodDeclaration : <public> Type Identifier
+
+Expression : Expression <FN_CALL> <LENGTH> |
+	Expression <OPEN_RECT_PAREN> NUMERICAL_EXPRESSION <CLOSE_RECT_PAREN> |
+	Expression <FN_CALL> <ID> <OPEN_PAREN> 
 
 AdditiveExpression :
 	MultiplicativeExpression
@@ -33,7 +82,7 @@ MultiplicativeExpression :
 ;
 
 Factor :
-	< INTEGER > |
+	< DIGIT > |
 	< MINUS> Factor |
 	< OPEN_PAREN > AdditiveExpression < CLOSE_PAREN >
 ;
