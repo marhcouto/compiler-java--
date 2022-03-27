@@ -32,6 +32,7 @@ public class SimpleParser implements JmmParser {
         try {
 
             JmmGrammarParser parser = new JmmGrammarParser(SpecsIo.toInputStream(jmmCode));
+            //TODO: Check why start is invalid and solve compilation error
             //parser.Start();
 
             Node root = parser.rootNode();

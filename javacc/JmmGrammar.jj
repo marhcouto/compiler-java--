@@ -81,13 +81,7 @@ Statement: <OPEN_BRACKET> Statement <CLOSE_BRACKET> |
     <ID> <ASSIGNMENT> Expression <EOE> |
     <ID> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression <EOE>;
 
-Expression: Expression (<AND> | <LT> | <PLUS> | <MINUS> | <TIMES> | <DIVIDE>) Expression |
-    Expression <OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN> |
-    Expression <DOT> <LENGTH> |
-    Expression <DOT> <ID> <OPEN_PAREN>
-        (Expression (<COMMA> Expression)*)?
-    <CLOSE_PAREN> |
-    <INTEGER_LITERAL> |
+ExpressionPrefix: <INTEGER_LITERAL> |
     <TRUE> |
     <FALSE> |
     <ID> |
@@ -97,3 +91,12 @@ Expression: Expression (<AND> | <LT> | <PLUS> | <MINUS> | <TIMES> | <DIVIDE>) Ex
     <NOT> Expression |
     <OPEN_PAREN>Expression<CLOSE_PAREN>
 ;
+
+ExpressionSufix: <OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN> |
+    <DOT> <LENGTH> |
+    <DOT> <ID> <OPEN_PAREN>
+        (Expression (<COMMA> Expression)*)?
+    <CLOSE_PAREN>
+;
+
+Expression: ExpressionPrefix ExpressionSufix;
