@@ -40,11 +40,10 @@ TOKEN :
 	< CLASS : "class" > |
 	< EXTENDS : "extends" > |
 	< PUBLIC : "public" > |
-	< PRIVATE : "private" > |
 	< STATIC : "static" > |
 	< VOID : "void" > |
 	<IMPORT : "import"> |
-	< ID : ((["A" - "Z"] | ["a" - "z"])(["0" - "9"] | ["A" - "Z"] | ["a" - "z"])*) >
+	< ID : (("_" | ["A" - "Z"] | ["a" - "z"])("_" | ["0" - "9"] | ["A" - "Z"] | ["a" - "z"])*) >
 ;
 
 Start: ImportDeclaration ClassDeclaration <EOF>;
@@ -52,51 +51,84 @@ Start: ImportDeclaration ClassDeclaration <EOF>;
 ImportDeclaration: (<IMPORT> <ID> (<DOT> <ID>)* <EOE>)*;
 
 ClassDeclaration: <CLASS> <ID> (<EXTENDS> <ID>)? <OPEN_BRACKET>
-    (VarDeclaration)* |
-    (MethodDeclaration)*
+    (
+        VarDeclaration |
+        MethodDeclaration
+    )*
 <CLOSE_BRACKET>;
 
 VarDeclaration: Type <ID> <EOE>;
 
-MethodDeclaration: <PUBLIC> Type <ID> <OPEN_PAREN>
-    (
-        Type <ID> (<COMMA> Type <ID>)*
-    )?
-<CLOSE_PAREN>
-<OPEN_BRACKET>
-    (VarDeclaration)*
-    (Statement)*
-<CLOSE_BRACKET>;
+MethodDeclaration: (<PUBLIC> MethodDeclarationSufix);
 
-Type: <INT> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> |
-    <BOOLEAN> |
-    <INT> |
-    <ID>
+MethodDeclarationSufix: ((<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> <ID> <CLOSE_PAREN>) |
+    (Type <ID> <OPEN_PAREN>
+        (
+            Type <ID> (<COMMA> Type <ID>)*
+        )?
+    <CLOSE_PAREN>))
+    <OPEN_BRACKET>
+            (
+                VarDeclaration |
+                Statement
+            )*
+    <CLOSE_BRACKET>
 ;
 
-Statement: <OPEN_BRACKET> Statement <CLOSE_BRACKET> |
-    <IF> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement <ELSE> Statement |
-    <WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement |
-    Expression <EOE> |
-    <ID> <ASSIGNMENT> Expression <EOE> |
-    <ID> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression <EOE>;
+Type: <INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN>)? |
+    <BOOLEAN>
+;
+
+Statement: (<OPEN_BRACKET> Statement <CLOSE_BRACKET>) |
+    (<IF> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement <ELSE> Statement) |
+    (<WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement) |
+    (Expression <EOE>) |
+    (<ID> AssignmentStatement);
+
+AssignmentStatement: (<ASSIGNMENT> Expression <EOE>) |
+    (<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression <EOE>)
+;
+
+Expression: ExpressionPrefix ExpressionSufix;
 
 ExpressionPrefix: <INTEGER_LITERAL> |
     <TRUE> |
     <FALSE> |
     <ID> |
     <THIS> |
-    <NEW> <INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> |
-    <NEW> <ID> <OPEN_PAREN> <CLOSE_PAREN> |
+    <NEW> CreatedObject |
     <NOT> Expression |
     <OPEN_PAREN>Expression<CLOSE_PAREN>
 ;
 
-ExpressionSufix: (<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN> |
-    <DOT> <LENGTH> |
-    <DOT> <ID> <OPEN_PAREN>
-        (Expression (<COMMA> Expression)*)?
-    <CLOSE_PAREN>)?
+ExpressionSufix: ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) |
+    (<DOT> ExpressionCall))?
 ;
 
-Expression: ExpressionPrefix ExpressionSufix;
+CreatedObject: <INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> |
+    <ID> <OPEN_PAREN> <CLOSE_PAREN>
+;
+
+ExpressionCall: <LENGTH> |
+    <ID> <OPEN_PAREN>
+        (Expression (<COMMA> Expression)*)?
+    <CLOSE_PAREN>
+;
+
+AndExpression: LessThanExpression ( <AND> LessThanExpression)*;
+
+LessThanExpression: AdditiveExpression ( <LT> AdditiveExpression)*;
+
+AdditiveExpression: MultiplicativeExpression ( <PLUS> MultiplicativeExpression)* |
+    MultiplicativeExpression ( <MINUS> MultiplicativeExpression)*
+;
+
+MultiplicativeExpression: UnaryOperator ( <TIMES> UnaryOperator)* |
+    UnaryOperator ( <DIVIDE> UnaryOperator)*
+;
+
+UnaryOperator: <MINUS> Factor |
+                Factor;
+
+Factor : Expression |
+    <OPEN_PAREN> AndExpression <CLOSE_PAREN>;
