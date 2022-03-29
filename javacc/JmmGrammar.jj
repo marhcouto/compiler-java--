@@ -47,7 +47,7 @@ TOKEN :
 	< ID : ((["A" - "Z"] | ["a" - "z"])(["0" - "9"] | ["A" - "Z"] | ["a" - "z"])*) >
 ;
 
-Program: ImportDeclaration ClassDeclaration <EOF>;
+Start: ImportDeclaration ClassDeclaration <EOF>;
 
 ImportDeclaration: (<IMPORT> <ID> (<DOT> <ID>)* <EOE>)*;
 
@@ -92,11 +92,11 @@ ExpressionPrefix: <INTEGER_LITERAL> |
     <OPEN_PAREN>Expression<CLOSE_PAREN>
 ;
 
-ExpressionSufix: <OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN> |
+ExpressionSufix: (<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN> |
     <DOT> <LENGTH> |
     <DOT> <ID> <OPEN_PAREN>
         (Expression (<COMMA> Expression)*)?
-    <CLOSE_PAREN>
+    <CLOSE_PAREN>)?
 ;
 
 Expression: ExpressionPrefix ExpressionSufix;
