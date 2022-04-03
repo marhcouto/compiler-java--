@@ -11,7 +11,7 @@ TOKEN :
 	< DIVIDE : "/" > |
 	< ASSIGNMENT : "="> |
 	< AND : "&&" > |
-	<LT: "<"> |
+	<LT : "<"> |
 	< EQUALS : "==" > | 
 	< OPEN_PAREN : "(" > |
 	< CLOSE_PAREN : ")" > |
@@ -57,8 +57,6 @@ ClassDeclaration: <CLASS> <ID> (<EXTENDS> <ID>)? <OPEN_BRACKET>
     )*
 <CLOSE_BRACKET>;
 
-VarDeclaration: Type <ID> <EOE>;
-
 MethodDeclaration: (<PUBLIC> MethodDeclarationSufix);
 
 MethodDeclarationSufix: ((<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> <ID> <CLOSE_PAREN>) |
@@ -69,32 +67,35 @@ MethodDeclarationSufix: ((<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RE
     <CLOSE_PAREN>))
     <OPEN_BRACKET>
             (
-                VarDeclaration |
-                Statement
+                (SCAN 2 VarDeclaration |
+                Statement)
             )*
     <CLOSE_BRACKET>
 ;
 
+VarDeclaration: Type <ID> <EOE>;
+
 Type: <INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN>)? |
-    <BOOLEAN>
+    <BOOLEAN> |
+    <ID>
 ;
 
-Statement: (<OPEN_BRACKET> Statement <CLOSE_BRACKET>) |
+Statement: (<OPEN_BRACKET> (Statement)* <CLOSE_BRACKET>) |
     (<IF> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement <ELSE> Statement) |
     (<WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement) |
-    (Expression <EOE>) |
-    (<ID> AssignmentStatement);
+    IDStatement <EOE>;
 
-AssignmentStatement: (<ASSIGNMENT> Expression <EOE>) |
-    (<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression <EOE>)
+IDStatement: (<ID> (AssignmentStatement | ExpressionSufix)) | (ExpressionPrefix ExpressionSufix);
+
+AssignmentStatement: (<ASSIGNMENT> Expression) |
+    (<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression)
 ;
 
-Expression: ExpressionPrefix ExpressionSufix;
-
-ExpressionPrefix: <INTEGER_LITERAL> |
+Expression: (<ID> | ExpressionPrefix) (ExpressionSufix)?;
+ExpressionPrefix: AndExpression |
+    <INTEGER_LITERAL> |
     <TRUE> |
     <FALSE> |
-    <ID> |
     <THIS> |
     <NEW> CreatedObject |
     <NOT> Expression |
@@ -115,20 +116,25 @@ ExpressionCall: <LENGTH> |
     <CLOSE_PAREN>
 ;
 
-AndExpression: LessThanExpression ( <AND> LessThanExpression)*;
+AndExpression: (LessThanExpression ( <AND> LessThanExpression)*);
 
-LessThanExpression: AdditiveExpression ( <LT> AdditiveExpression)*;
+LessThanExpression: (AdditiveExpression ( <LT> AdditiveExpression)*);
 
-AdditiveExpression: MultiplicativeExpression ( <PLUS> MultiplicativeExpression)* |
-    MultiplicativeExpression ( <MINUS> MultiplicativeExpression)*
+AdditiveExpression: (MultiplicativeExpression ( <PLUS> MultiplicativeExpression)*) |
+    (MultiplicativeExpression ( <MINUS> MultiplicativeExpression)*)
 ;
 
-MultiplicativeExpression: UnaryOperator ( <TIMES> UnaryOperator)* |
-    UnaryOperator ( <DIVIDE> UnaryOperator)*
+MultiplicativeExpression: (UnaryOperator ( <TIMES> UnaryOperator)*) |
+    (UnaryOperator ( <DIVIDE> UnaryOperator)*)
 ;
 
-UnaryOperator: <MINUS> Factor |
-                Factor;
+UnaryOperatorPrefix: <INTEGER_LITERAL> |
+    <TRUE> |
+    <FALSE> |
+    <THIS> |
+    <NEW> CreatedObject |
+    <NOT> Expression |
+    <OPEN_PAREN>Expression<CLOSE_PAREN> |
+    (<MINUS> Expression);
 
-Factor : Expression |
-    <OPEN_PAREN> AndExpression <CLOSE_PAREN>;
+UnaryOperator: UnaryOperatorPrefix ExpressionSufix;
