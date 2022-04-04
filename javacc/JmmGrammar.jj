@@ -1,6 +1,7 @@
 PARSER_PACKAGE=pt.up.fe.comp;
 PARSER_CLASS=JmmGrammarParser;
 SMART_NODE_CREATION=false;
+TOKENS_ARE_NODES=false;
 
 SKIP : " " | "\t" | "\r" | "\n";
 
@@ -94,54 +95,63 @@ Statement: (<OPEN_BRACKET> (Statement)* <CLOSE_BRACKET>) |
     (<WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement) |
     IDStatement <EOE>;
 
-IDStatement: (<ID> (AssignmentStatement | ExpressionSufix)) | (ExpressionPrefix ExpressionSufix);
+IDStatement #void: ((<ID> #VarName) (AssignmentStatement | ExpressionSufix)) | (ExpressionPrefix ExpressionSufix);
 
-AssignmentStatement: (<ASSIGNMENT> Expression) |
-    (<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression)
+AssignmentStatement #void: (<ASSIGNMENT> Expression) #AsmOp(2) |
+    (<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression) #ArrAsmOp(3)
 ;
 
-Expression: ExpressionPrefix ExpressionSufix;
-ExpressionPrefix: AndExpression |
-    <INTEGER_LITERAL> |
-    <TRUE> |
-    <FALSE> |
-    <THIS> |
-    <NEW> CreatedObject |
-    <NOT> Expression |
-    <OPEN_PAREN>Expression<CLOSE_PAREN>
+Expression #void: ExpressionPrefix ExpressionSufix;
+ExpressionPrefix #void: <INTEGER_LITERAL> #IntegerLiteral |
+    <TRUE> #BooleanLiteral |
+    <FALSE> #BooleanLiteral |
+    <THIS> #ObjectLiteral |
+    (<NEW> CreatedObject) |
+    (<NOT> Expression) #UnaryOp |
+    <OPEN_PAREN>Expression<CLOSE_PAREN> |
+    AndExpression
 ;
 
-ExpressionSufix: ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) |
-    (<DOT> ExpressionCall))?
+ExpressionSufix #void: ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) |
+    (<DOT> ExpressionCall) #FnCallOp(2))?
 ;
 
-CreatedObject: <INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> |
-    <ID> <OPEN_PAREN> <CLOSE_PAREN>
+CreatedObject #void: (<INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN>) #CreateArrObj(2) |
+    (<ID> #ObjName <OPEN_PAREN> <CLOSE_PAREN>) #CreateObj
 ;
 
-ExpressionCall: <LENGTH> |
+ExpressionCall #void: <LENGTH> #Length |
     <ID> <OPEN_PAREN>
         (Expression (<COMMA> Expression)*)?
     <CLOSE_PAREN>
 ;
 
-AndExpression: (LessThanExpression ( <AND> LessThanExpression)*);
+AndExpression #void: LessThanExpression (
+    (<AND> LessThanExpression) #BinOp(2)
+)*;
 
-LessThanExpression: (AdditiveExpression ( <LT> AdditiveExpression)*);
+LessThanExpression #void: AdditiveExpression (
+    (<LT> AdditiveExpression) #BinOp(2)
+)*;
 
-AdditiveExpression: MultiplicativeExpression ((<PLUS> MultiplicativeExpression) | (<MINUS> MultiplicativeExpression))*;
+AdditiveExpression #void: MultiplicativeExpression (
+    (<PLUS> MultiplicativeExpression) #BinOp(2) |
+    (<MINUS> MultiplicativeExpression) #BinOp(2)
+)*;
 
-MultiplicativeExpression: UnaryOperator ((<TIMES> UnaryOperator) | (<DIVIDE> UnaryOperator))*
-;
+MultiplicativeExpression #void: UnaryOperator (
+    (<TIMES> UnaryOperator) #BinOp(2) |
+    (<DIVIDE> UnaryOperator) #BinOp(2)
+)*;
 
-UnaryOperatorPrefix: <INTEGER_LITERAL> |
-    <ID> |
-    <TRUE> |
-    <FALSE> |
-    <THIS> |
-    <NEW> CreatedObject |
-    <NOT> Expression |
+UnaryOperatorPrefix #void: <INTEGER_LITERAL> #IntegerLiteral  |
+    <TRUE> #BooleanLiteral |
+    <FALSE> #BooleanLiteral |
+    <THIS> #ObjectLiteral |
+    (<NEW> CreatedObject) #UnaryOp |
+    (<NOT> Expression) #UnaryOp |
     <OPEN_PAREN>Expression<CLOSE_PAREN> |
-    (<MINUS> Expression);
+    (<MINUS> Expression) #UnaryOp |
+    <ID> #VarName;
 
-UnaryOperator: UnaryOperatorPrefix ExpressionSufix;
+UnaryOperator #void: UnaryOperatorPrefix ExpressionSufix;
