@@ -57,19 +57,28 @@ ClassDeclaration: <CLASS> <ID> (<EXTENDS> <ID>)? <OPEN_BRACKET>
     )*
 <CLOSE_BRACKET>;
 
-MethodDeclaration: (<PUBLIC> MethodDeclarationSufix);
+MethodDeclaration: (<PUBLIC> (MethodDeclarationSufix | MainMethodDeclarationSufix));
 
-MethodDeclarationSufix: ((<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> <ID> <CLOSE_PAREN>) |
-    (Type <ID> <OPEN_PAREN>
+MainMethodDeclarationSufix: (<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> <ID> <CLOSE_PAREN>)
+    <OPEN_BRACKET>
+        (
+            (SCAN 2 VarDeclaration |
+                Statement)
+            )*
+    <CLOSE_BRACKET>
+;
+
+MethodDeclarationSufix: (Type <ID> <OPEN_PAREN>
         (
             Type <ID> (<COMMA> Type <ID>)*
         )?
-    <CLOSE_PAREN>))
+    <CLOSE_PAREN>)
     <OPEN_BRACKET>
             (
                 (SCAN 2 VarDeclaration |
                 Statement)
             )*
+            <RETURN> Expression <EOE>
     <CLOSE_BRACKET>
 ;
 
@@ -91,7 +100,7 @@ AssignmentStatement: (<ASSIGNMENT> Expression) |
     (<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression)
 ;
 
-Expression: (<ID> | ExpressionPrefix) (ExpressionSufix)?;
+Expression: ExpressionPrefix ExpressionSufix;
 ExpressionPrefix: AndExpression |
     <INTEGER_LITERAL> |
     <TRUE> |
@@ -120,15 +129,13 @@ AndExpression: (LessThanExpression ( <AND> LessThanExpression)*);
 
 LessThanExpression: (AdditiveExpression ( <LT> AdditiveExpression)*);
 
-AdditiveExpression: (MultiplicativeExpression ( <PLUS> MultiplicativeExpression)*) |
-    (MultiplicativeExpression ( <MINUS> MultiplicativeExpression)*)
-;
+AdditiveExpression: MultiplicativeExpression ((<PLUS> MultiplicativeExpression) | (<MINUS> MultiplicativeExpression))*;
 
-MultiplicativeExpression: (UnaryOperator ( <TIMES> UnaryOperator)*) |
-    (UnaryOperator ( <DIVIDE> UnaryOperator)*)
+MultiplicativeExpression: UnaryOperator ((<TIMES> UnaryOperator) | (<DIVIDE> UnaryOperator))*
 ;
 
 UnaryOperatorPrefix: <INTEGER_LITERAL> |
+    <ID> |
     <TRUE> |
     <FALSE> |
     <THIS> |

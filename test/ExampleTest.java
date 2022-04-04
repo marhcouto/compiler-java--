@@ -12,7 +12,7 @@ public class ExampleTest {
     public void testExpression() {
         //TestUtils.mustFail(parseResult.getReports());
         try {
-            File myFile = new File("test/fixtures/public/bug2.jmm");
+            File myFile = new File("test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
             String myReader = new Scanner(myFile).useDelimiter("\\Z").next();
             System.out.println(myReader);
             var parserResult = TestUtils.parse(myReader);

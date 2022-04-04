@@ -1,6 +1,6 @@
 import ioPlus;
 class HelloWorld {
 	public static void main(String[] args) {
-		i = 1 < 3 < 4;
+		xMax = (lineLen - 1 + 2) * 3;
 	}
 }
