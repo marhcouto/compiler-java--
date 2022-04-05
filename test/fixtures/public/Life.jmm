@@ -32,11 +32,13 @@ class Life {
 
         lineLenA = new int[1];
 
+
         UNDERPOP_LIM = 2;
         OVERPOP_LIM = 3;
         REPRODUCE_NUM = 3;
 
         LOOPS_PER_MS = 225000;
+
 
         field = this.field(lineLenA);
         lineLen = lineLenA[0];
@@ -46,6 +48,7 @@ class Life {
 
         return true;
     }
+
 
     public int[] field(int[] lineLen) {
         int[] field;
@@ -173,6 +176,7 @@ class Life {
             neighN = this.getLiveNeighborN(i);
             
 
+
             if (!(cur < 1)) {
                 goodPop = this.ge(neighN,UNDERPOP_LIM) && this.le(neighN,OVERPOP_LIM);
                 if (!goodPop) {
@@ -285,6 +289,7 @@ class Life {
         }
 
         result = new int[8];
+
         result[0] = this.trIdx(x, upY);
         result[1] = this.trIdx(upX, upY);
         result[2] = this.trIdx(upX, y);
@@ -325,6 +330,7 @@ class Life {
         int n;
         
         n = ms * LOOPS_PER_MS;
+        
 
         i = 0;
         while (i < n) {
