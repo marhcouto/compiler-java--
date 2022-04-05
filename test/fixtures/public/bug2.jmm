@@ -1,6 +1,12 @@
 import ioPlus;
 class HelloWorld {
 	public static void main(String[] args) {
-		a = new Object();
+		int[] b;
+		if (this.ackermann(1, 2, 3)) {
+		    a = 1 * 5 + 2;
+		    b[1] = 10;
+		} else {
+
+		}
 	}
 }

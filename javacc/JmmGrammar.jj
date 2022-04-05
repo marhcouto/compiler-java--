@@ -3,7 +3,7 @@ PARSER_CLASS=JmmGrammarParser;
 SMART_NODE_CREATION=false;
 TOKENS_ARE_NODES=false;
 
-SKIP : " " | "\t" | "\r" | "\n";
+SKIP : " " | "\t" | "\r" | "\n" | <("//" (["0" - "9"])*)>;
 
 TOKEN :
 	< PLUS : "+" > |
@@ -90,10 +90,12 @@ Type: <INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN>)? |
     <ID>
 ;
 
-Statement: (<OPEN_BRACKET> (Statement)* <CLOSE_BRACKET>) |
-    (<IF> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement <ELSE> Statement) |
-    (<WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement) |
+Statement #void: (<OPEN_BRACKET> (Statement)* <CLOSE_BRACKET>) |
+    (<IF> <OPEN_PAREN>Expression<CLOSE_PAREN> StmBody <ELSE> StmBody) #IfStm(3) |
+    (<WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> StmBody) #WhileStm(2) |
     IDStatement <EOE>;
+
+StmBody: Statement;
 
 IDStatement #void: ((<ID> #VarName) (AssignmentStatement | ExpressionSufix)) | (ExpressionPrefix ExpressionSufix);
 
@@ -102,29 +104,31 @@ AssignmentStatement #void: (<ASSIGNMENT> Expression) #AsmOp(2) |
 ;
 
 Expression #void: ExpressionPrefix ExpressionSufix;
-ExpressionPrefix #void: <INTEGER_LITERAL> #IntegerLiteral |
+ExpressionPrefix #void: AndExpression |
+    <INTEGER_LITERAL> #IntegerLiteral |
     <TRUE> #BooleanLiteral |
     <FALSE> #BooleanLiteral |
     <THIS> #ObjectLiteral |
     (<NEW> CreatedObject) |
     (<NOT> Expression) #UnaryOp |
-    <OPEN_PAREN>Expression<CLOSE_PAREN> |
-    AndExpression
+    <OPEN_PAREN>Expression<CLOSE_PAREN>
 ;
 
 ExpressionSufix #void: ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) |
-    (<DOT> ExpressionCall) #FnCallOp(2))?
+    (<DOT> ExpressionCall) #FnCallOp(3))?
 ;
 
 CreatedObject #void: (<INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN>) #CreateArrObj(2) |
     (<ID> #ObjName <OPEN_PAREN> <CLOSE_PAREN>) #CreateObj
 ;
 
-ExpressionCall #void: <LENGTH> #Length |
-    <ID> <OPEN_PAREN>
-        (Expression (<COMMA> Expression)*)?
+ExpressionCall #void: (<LENGTH> #Length) |
+    (<ID> #MethodName <OPEN_PAREN>)
+        ArgumentList
     <CLOSE_PAREN>
 ;
+
+ArgumentList: (Expression (<COMMA> Expression)*)?;
 
 AndExpression #void: LessThanExpression (
     (<AND> LessThanExpression) #BinOp(2)
@@ -155,3 +159,31 @@ UnaryOperatorPrefix #void: <INTEGER_LITERAL> #IntegerLiteral  |
     <ID> #VarName;
 
 UnaryOperator #void: UnaryOperatorPrefix ExpressionSufix;
+
+// Injections for the implementation of JmmNode
+// Since this is injected into BaseNode, it affects only non-terminals
+INJECT BaseNode :
+		import pt.up.fe.comp.jmm.ast.JmmNode;
+		import pt.up.fe.comp.jmm.ast.AJmmNode;
+		import pt.up.fe.specs.util.SpecsCollections;
+		extends AJmmNode
+{
+    @Override
+    public List<JmmNode> getChildren() {
+
+        return SpecsCollections.cast(children(), JmmNode.class);
+    }
+
+    @Override
+    public void add(JmmNode child, int index) {
+
+        if (child instanceof Node) {
+
+            addChild(index, (Node) child);
+        } else {
+
+            throw new RuntimeException("Node " + child + " is not a Node.");
+        }
+
+    }
+}
