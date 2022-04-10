@@ -3,7 +3,7 @@ import ioPlus;
 
 class MonteCarloPi extends VeryHardOp{
 	public boolean performSingleEstimate() {
-		int rand1
+		int rand1;
 		int rand2;
 		boolean in_circle;
 		int squareDist;

@@ -97,9 +97,9 @@ VarDeclaration: (Type) (
     <ID> { jjtThis.put("image", lastConsumedToken.getImage()); }
 ) #VarName <EOE>;
 
-Type #void: (<INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN>)?) #Type |
-    (<BOOLEAN> { jjtThis.put("image", "bool"); }) #Type |
-    (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #Type
+Type: (<INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN>)?) |
+    (<BOOLEAN> { jjtThis.put("image", "bool"); }) |
+    (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); })
 ;
 
 Statement #void: (<OPEN_BRACKET> (Statement)* <CLOSE_BRACKET>) |

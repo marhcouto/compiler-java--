@@ -12,7 +12,7 @@ public class ExampleTest {
     public void testExpression() {
         //TestUtils.mustFail(parseResult.getReports());
         try {
-            File myFile = new File("test/fixtures/public/MonteCarloPi.jmm");
+            File myFile = new File("test/fixtures/public/bug2.jmm");
             String myReader = new Scanner(myFile).useDelimiter("\\Z").next();
             var parserResult = TestUtils.parse(myReader);
             parserResult.getReports().get(0).getException().get().printStackTrace();

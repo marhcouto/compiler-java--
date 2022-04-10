@@ -1,6 +1,5 @@
-import system.io.plus;
-class HelloWorld extends Object {
+class HelloWorld {
 	public static void main(String[] args) {
-		name = -(1 + 2);
+		int[] a;
 	}
 }
