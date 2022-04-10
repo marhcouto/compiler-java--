@@ -12,9 +12,8 @@ public class ExampleTest {
     public void testExpression() {
         //TestUtils.mustFail(parseResult.getReports());
         try {
-            File myFile = new File("test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
+            File myFile = new File("test/fixtures/public/MonteCarloPi.jmm");
             String myReader = new Scanner(myFile).useDelimiter("\\Z").next();
-            System.out.println(myReader);
             var parserResult = TestUtils.parse(myReader);
             parserResult.getReports().get(0).getException().get().printStackTrace();
             //var analysisResult = TestUtils.analyse(parserResult);

@@ -1,6 +1,6 @@
-import ioPlus;
-class HelloWorld {
+import system.io.plus;
+class HelloWorld extends Object {
 	public static void main(String[] args) {
-		xMax = (lineLen - 1 + 2) * 3;
+		name = -(1 + 2);
 	}
 }
