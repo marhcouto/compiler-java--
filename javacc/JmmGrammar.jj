@@ -3,7 +3,7 @@ PARSER_CLASS=JmmGrammarParser;
 SMART_NODE_CREATION=false;
 TOKENS_ARE_NODES=false;
 
-SKIP : " " | "\t" | "\r" | "\n" | <("//" (["0" - "9"])*)>;
+SKIP : " " | "\t" | "\r" | "\n" | <("//" ([" " - "~"])*)> | <("/*" ([" " - "~"] | "\t" | "\r" | "\n")* "*/")>;
 
 TOKEN :
 	< PLUS : "+" > |
