@@ -59,13 +59,13 @@ ImportDeclaration: <IMPORT> ((<ID> { jjtThis.put("image", lastConsumedToken.getI
 ClassDeclaration: <CLASS> ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ClassName) (<EXTENDS> (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ClassParent)? <OPEN_BRACKET>
     (
         VarDeclaration |
-        MethodDeclaration
+        GeneralMethodDeclaration
     )*
 <CLOSE_BRACKET>;
 
-MethodDeclaration #void: (<PUBLIC> (MethodDeclarationSufix | MainMethodDeclarationSufix));
+GeneralMethodDeclaration #void: (<PUBLIC> (MethodDeclaration | MainMethodDeclaration));
 
-MainMethodDeclarationSufix: (<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MainArgsName <CLOSE_PAREN>)
+MainMethodDeclaration: (<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MainArgsName <CLOSE_PAREN>)
     <OPEN_BRACKET>
         MethodBody
     <CLOSE_BRACKET>
@@ -76,7 +76,7 @@ MethodBody: (
         Statement)
 )*;
 
-MethodDeclarationSufix: (Type <ID> <OPEN_PAREN>
+MethodDeclaration: (Type MethodName <OPEN_PAREN>
         MethodArgsList
     <CLOSE_PAREN>)
     <OPEN_BRACKET>
@@ -84,6 +84,8 @@ MethodDeclarationSufix: (Type <ID> <OPEN_PAREN>
             ReturnStatement
     <CLOSE_BRACKET>
 ;
+
+MethodName: <ID> { jjtThis.put("image", lastConsumedToken.getImage()); };
 
 ReturnStatement: <RETURN> Expression <EOE>;
 
@@ -93,11 +95,11 @@ MethodArg: (Type) (
     <ID> { jjtThis.put("image", lastConsumedToken.getImage()); }
 ) #ArgName;
 
-VarDeclaration: (Type) (
-    <ID> { jjtThis.put("image", lastConsumedToken.getImage()); }
-) #VarName <EOE>;
+VarDeclaration: Type VarName <EOE>;
 
-Type: (<INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN>)?) |
+VarName: <ID> { jjtThis.put("image", lastConsumedToken.getImage()); };
+
+Type: (<INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> { jjtThis.put("arr", "true"); })? { jjtThis.put("image", "int"); }) |
     (<BOOLEAN> { jjtThis.put("image", "bool"); }) |
     (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); })
 ;
