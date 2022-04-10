@@ -47,47 +47,59 @@ TOKEN :
 	< ID : (("_" | ["A" - "Z"] | ["a" - "z"])("_" | ["0" - "9"] | ["A" - "Z"] | ["a" - "z"])*) >
 ;
 
-Start: ImportDeclaration ClassDeclaration <EOF>;
+Start: ImportDeclarations ClassDeclaration <EOF>;
 
-ImportDeclaration: (<IMPORT> <ID> (<DOT> <ID>)* <EOE>)*;
+ImportDeclarations #void: (ImportDeclaration)*;
 
-ClassDeclaration: <CLASS> <ID> (<EXTENDS> <ID>)? <OPEN_BRACKET>
+ImportDeclaration: <IMPORT> ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ImportPath) (
+    <DOT> (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ImportPath
+)* <EOE>;
+
+
+ClassDeclaration: <CLASS> ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ClassName) (<EXTENDS> (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ClassParent)? <OPEN_BRACKET>
     (
         VarDeclaration |
         MethodDeclaration
     )*
 <CLOSE_BRACKET>;
 
-MethodDeclaration: (<PUBLIC> (MethodDeclarationSufix | MainMethodDeclarationSufix));
+MethodDeclaration #void: (<PUBLIC> (MethodDeclarationSufix | MainMethodDeclarationSufix));
 
-MainMethodDeclarationSufix: (<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> <ID> <CLOSE_PAREN>)
+MainMethodDeclarationSufix: (<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MainArgsName <CLOSE_PAREN>)
     <OPEN_BRACKET>
-        (
-            (SCAN 2 VarDeclaration |
-                Statement)
-            )*
+        MethodBody
     <CLOSE_BRACKET>
 ;
+
+MethodBody: (
+        (SCAN 2 VarDeclaration |
+        Statement)
+)*;
 
 MethodDeclarationSufix: (Type <ID> <OPEN_PAREN>
-        (
-            Type <ID> (<COMMA> Type <ID>)*
-        )?
+        MethodArgsList
     <CLOSE_PAREN>)
     <OPEN_BRACKET>
-            (
-                (SCAN 2 VarDeclaration |
-                Statement)
-            )*
-            <RETURN> Expression <EOE>
+            MethodBody
+            ReturnStatement
     <CLOSE_BRACKET>
 ;
 
-VarDeclaration: Type <ID> <EOE>;
+ReturnStatement: <RETURN> Expression <EOE>;
 
-Type: <INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN>)? |
-    <BOOLEAN> |
-    <ID>
+MethodArgsList: (MethodArg (<COMMA> MethodArg)*)?;
+
+MethodArg: (Type) (
+    <ID> { jjtThis.put("image", lastConsumedToken.getImage()); }
+) #ArgName;
+
+VarDeclaration: (Type) (
+    <ID> { jjtThis.put("image", lastConsumedToken.getImage()); }
+) #VarName <EOE>;
+
+Type #void: (<INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN>)?) #Type |
+    (<BOOLEAN> { jjtThis.put("image", "bool"); }) #Type |
+    (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #Type
 ;
 
 Statement #void: (<OPEN_BRACKET> (Statement)* <CLOSE_BRACKET>) |
@@ -97,7 +109,7 @@ Statement #void: (<OPEN_BRACKET> (Statement)* <CLOSE_BRACKET>) |
 
 StmBody: Statement;
 
-IDStatement #void: ((<ID> #VarName) (AssignmentStatement | ExpressionSufix)) | (ExpressionPrefix ExpressionSufix);
+IDStatement #void: (((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #VarName) (AssignmentStatement | ExpressionSufix)) | (ExpressionPrefix ExpressionSufix);
 
 AssignmentStatement #void: (<ASSIGNMENT> Expression) #AsmOp(2) |
     (<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression) #ArrAsmOp(3)
@@ -105,12 +117,12 @@ AssignmentStatement #void: (<ASSIGNMENT> Expression) #AsmOp(2) |
 
 Expression #void: ExpressionPrefix ExpressionSufix;
 ExpressionPrefix #void: AndExpression |
-    <INTEGER_LITERAL> #IntegerLiteral |
-    <TRUE> #BooleanLiteral |
-    <FALSE> #BooleanLiteral |
-    <THIS> #ObjectLiteral |
+    (<INTEGER_LITERAL> { jjtThis.put("image", lastConsumedToken.getImage()); }) #IntegerLiteral |
+    <TRUE> #True |
+    <FALSE> #False |
+    <THIS> #This |
     (<NEW> CreatedObject) |
-    (<NOT> Expression) #UnaryOp |
+    (<NOT> Expression { jjtThis.put("op", "NOT"); }) #UnaryOp |
     <OPEN_PAREN>Expression<CLOSE_PAREN>
 ;
 
@@ -119,11 +131,11 @@ ExpressionSufix #void: ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) |
 ;
 
 CreatedObject #void: (<INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN>) #CreateArrObj(2) |
-    (<ID> #ObjName <OPEN_PAREN> <CLOSE_PAREN>) #CreateObj
+    ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ObjName <OPEN_PAREN> <CLOSE_PAREN>) #CreateObj
 ;
 
 ExpressionCall #void: (<LENGTH> #Length) |
-    (<ID> #MethodName <OPEN_PAREN>)
+    ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MethodName <OPEN_PAREN>)
         ArgumentList
     <CLOSE_PAREN>
 ;
@@ -131,32 +143,32 @@ ExpressionCall #void: (<LENGTH> #Length) |
 ArgumentList: (Expression (<COMMA> Expression)*)?;
 
 AndExpression #void: LessThanExpression (
-    (<AND> LessThanExpression) #BinOp(2)
+    (<AND> LessThanExpression { jjtThis.put("op", "AND"); }) #BinOp(2)
 )*;
 
 LessThanExpression #void: AdditiveExpression (
-    (<LT> AdditiveExpression) #BinOp(2)
+    (<LT> AdditiveExpression { jjtThis.put("op", "LT"); }) #BinOp(2)
 )*;
 
 AdditiveExpression #void: MultiplicativeExpression (
-    (<PLUS> MultiplicativeExpression) #BinOp(2) |
-    (<MINUS> MultiplicativeExpression) #BinOp(2)
+    (<PLUS> MultiplicativeExpression { jjtThis.put("op", "ADD"); }) #BinOp(2) |
+    (<MINUS> MultiplicativeExpression { jjtThis.put("op", "SUB"); } ) #BinOp(2)
 )*;
 
 MultiplicativeExpression #void: UnaryOperator (
-    (<TIMES> UnaryOperator) #BinOp(2) |
-    (<DIVIDE> UnaryOperator) #BinOp(2)
+    (<TIMES> UnaryOperator { jjtThis.put("op", "MUL"); }) #BinOp(2) |
+    (<DIVIDE> UnaryOperator { jjtThis.put("op", "DIV"); }) #BinOp(2)
 )*;
 
-UnaryOperatorPrefix #void: <INTEGER_LITERAL> #IntegerLiteral  |
-    <TRUE> #BooleanLiteral |
-    <FALSE> #BooleanLiteral |
-    <THIS> #ObjectLiteral |
-    (<NEW> CreatedObject) #UnaryOp |
-    (<NOT> Expression) #UnaryOp |
+UnaryOperatorPrefix #void: (<INTEGER_LITERAL> { jjtThis.put("image", lastConsumedToken.getImage()); }) #IntegerLiteral  |
+    <TRUE> #True |
+    <FALSE> #False |
+    <THIS> #This |
+    (<NEW> CreatedObject) |
+    (<NOT> Expression { jjtThis.put("op", "NOT"); } ) #UnaryOp |
     <OPEN_PAREN>Expression<CLOSE_PAREN> |
-    (<MINUS> Expression) #UnaryOp |
-    <ID> #VarName;
+    (<MINUS> Expression { jjtThis.put("op", "SIM"); }) #UnaryOp |
+    (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #VarName;
 
 UnaryOperator #void: UnaryOperatorPrefix ExpressionSufix;
 

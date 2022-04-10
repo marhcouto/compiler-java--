@@ -32,11 +32,11 @@ public class SimpleParser implements JmmParser {
         try {
 
             JmmGrammarParser parser = new JmmGrammarParser(SpecsIo.toInputStream(jmmCode));
-            //TODO: Check why start is invalid and solve compilation error
+
             parser.Start();
 
-            Node root = parser.rootNode();
-            root.dump("");
+            var root = ((JmmNode) parser.rootNode()).sanitize();
+            System.out.println(root.toTree());
 
             if (!(root instanceof JmmNode)) {
                 return JmmParserResult.newError(new Report(ReportType.WARNING, Stage.SYNTATIC, -1,
@@ -45,8 +45,13 @@ public class SimpleParser implements JmmParser {
 
             return new JmmParserResult((JmmNode) root, Collections.emptyList(), config);
 
-        } catch (Exception e) {
-            return JmmParserResult.newError(Report.newError(Stage.SYNTATIC, -1, -1, "Exception during parsing", e));
+        } catch (ParseException e) {
+            Token t = e.getToken();
+            int line = t.getBeginLine();
+            int column = t.getBeginColumn();
+            String message = e.getMessage();
+            Report report = Report.newError(Stage.SYNTATIC, line, column, message, e);
+            return JmmParserResult.newError(report);
         }
     }
 }

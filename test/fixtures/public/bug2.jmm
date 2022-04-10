@@ -1,12 +1,6 @@
-import ioPlus;
-class HelloWorld {
+import system.io.plus;
+class HelloWorld extends Object {
 	public static void main(String[] args) {
-		int[] b;
-		if (this.ackermann(1, 2, 3)) {
-		    a = 1 * 5 + 2;
-		    b[1] = 10;
-		} else {
-
-		}
+		name = -(1 + 2);
 	}
 }
