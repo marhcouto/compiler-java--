@@ -17,7 +17,7 @@ import org.junit.Test;
 
 public class GrammarTest {
 
-    private static final String IMPORT = "";
+    private static final String IMPORT = "ImportDeclarations";
     private static final String MAIN_METHOD = "";
     private static final String INSTANCE_METHOD = "";
     private static final String STATEMENT = "";
