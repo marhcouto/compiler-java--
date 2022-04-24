@@ -12,7 +12,7 @@ TOKEN :
 	< DIVIDE : "/" > |
 	< ASSIGNMENT : "="> |
 	< AND : "&&" > |
-	<LT : "<"> |
+	< LT : "<" > |
 	< EQUALS : "==" > | 
 	< OPEN_PAREN : "(" > |
 	< CLOSE_PAREN : ")" > |
@@ -24,9 +24,9 @@ TOKEN :
 	< IF : "if" > |
 	< ELSE : "else" > |
 	< WHILE : "while" > |
-	< TRUE : "true" > |
-	< FALSE : "false" > |
-	< THIS : "this" > |
+	< TRUE_TOKEN : "true" > |
+	< FALSE_TOKEN : "false" > |
+	< THIS_TOKEN : "this" > |
 	< NEW : "new" > |
 	< INT : "int" > | 
 	< BOOLEAN : "boolean" > |
@@ -37,13 +37,13 @@ TOKEN :
 	< COMMA : "," > |
 	< NOT : "!"> |
 	< DOT : "." > |
-	< LENGTH : "length"> |
+	< LENGTH_TOKEN : "length"> |
 	< CLASS : "class" > |
 	< EXTENDS : "extends" > |
 	< PUBLIC : "public" > |
 	< STATIC : "static" > |
 	< VOID : "void" > |
-	<IMPORT : "import"> |
+	< IMPORT : "import" > |
 	< ID : (("_" | ["A" - "Z"] | ["a" - "z"])("_" | ["0" - "9"] | ["A" - "Z"] | ["a" - "z"])*) >
 ;
 
@@ -101,6 +101,7 @@ VarName: <ID> { jjtThis.put("image", lastConsumedToken.getImage()); };
 
 Type: (<INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> { jjtThis.put("arr", "true"); })? { jjtThis.put("image", "int"); }) |
     (<BOOLEAN> { jjtThis.put("image", "bool"); }) |
+    (<STRING> { jjtThis.put("image", "String"); }) |
     (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); })
 ;
 
@@ -120,9 +121,9 @@ AssignmentStatement #void: (<ASSIGNMENT> Expression) #AsmOp(2) |
 Expression #void: ExpressionPrefix ExpressionSufix;
 ExpressionPrefix #void: AndExpression |
     (<INTEGER_LITERAL> { jjtThis.put("image", lastConsumedToken.getImage()); }) #IntegerLiteral |
-    <TRUE> #True |
-    <FALSE> #False |
-    <THIS> #This |
+    <TRUE_TOKEN> #True |
+    <FALSE_TOKEN> #False |
+    <THIS_TOKEN> #This |
     (<NEW> CreatedObject) |
     (<NOT> Expression { jjtThis.put("op", "NOT"); }) #UnaryOp |
     <OPEN_PAREN>Expression<CLOSE_PAREN>
@@ -136,7 +137,7 @@ CreatedObject #void: (<INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN>) #Crea
     ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ObjName <OPEN_PAREN> <CLOSE_PAREN>) #CreateObj
 ;
 
-ExpressionCall #void: (<LENGTH> #Length) |
+ExpressionCall #void: (<LENGTH_TOKEN> #Length) |
     ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MethodName <OPEN_PAREN>)
         ArgumentList
     <CLOSE_PAREN>
@@ -163,9 +164,9 @@ MultiplicativeExpression #void: UnaryOperator (
 )*;
 
 UnaryOperatorPrefix #void: (<INTEGER_LITERAL> { jjtThis.put("image", lastConsumedToken.getImage()); }) #IntegerLiteral  |
-    <TRUE> #True |
-    <FALSE> #False |
-    <THIS> #This |
+    <TRUE_TOKEN> #True |
+    <FALSE_TOKEN> #False |
+    <THIS_TOKEN> #This |
     (<NEW> CreatedObject) |
     (<NOT> Expression { jjtThis.put("op", "NOT"); } ) #UnaryOp |
     <OPEN_PAREN>Expression<CLOSE_PAREN> |
