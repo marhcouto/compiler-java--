@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
@@ -51,7 +52,12 @@ public class Launcher {
         // Check if there are parsing errors
         // TestUtils.noErrors(parserResult.getReports());
 
-        // ... add remaining stages
+        // Semantic Analysis Stage
+        JmmAnalyser analyser = new JmmAnalyser();
+
+        JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
+
+        TestUtils.noErrors(analysisResult.getReports());
     }
 
 }
