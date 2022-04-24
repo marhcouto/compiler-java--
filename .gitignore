@@ -5,6 +5,7 @@
 /.settings/
 /generated/
 /run/
+out/
 
 # Class files
 **/*.class
