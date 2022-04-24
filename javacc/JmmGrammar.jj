@@ -130,17 +130,19 @@ ExpressionPrefix #void: AndExpression |
 ;
 
 ExpressionSufix #void: ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) |
-    (<DOT> ExpressionCall) #FnCallOp(3))?
+    (<DOT> ExpressionCall))*
 ;
 
-CreatedObject #void: (<INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN>) #CreateArrObj(2) |
+CreatedObject #void: (<INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN>) #CreateArrObj(1) |
     ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ObjName <OPEN_PAREN> <CLOSE_PAREN>) #CreateObj
 ;
 
-ExpressionCall #void: (<LENGTH_TOKEN> #Length) |
-    ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MethodName <OPEN_PAREN>)
-        ArgumentList
-    <CLOSE_PAREN>
+ExpressionCall #void: (<LENGTH_TOKEN> #Length(1)) | (FnCall #FnCallOp(3))
+;
+
+FnCall #void: ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MethodName <OPEN_PAREN>)
+    ArgumentList
+<CLOSE_PAREN>
 ;
 
 ArgumentList: (Expression (<COMMA> Expression)*)?;
