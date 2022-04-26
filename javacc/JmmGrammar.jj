@@ -114,8 +114,8 @@ StmBody: Statement;
 
 IDStatement #void: (((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #VarName) (AssignmentStatement | ExpressionSufix)) | (ExpressionPrefix ExpressionSufix);
 
-AssignmentStatement #void: (<ASSIGNMENT> Expression) #AsmOp(2) |
-    (<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression) #ArrAsmOp(3)
+AssignmentStatement #void: ((<ASSIGNMENT> Expression) |
+    ((<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN>) #ArrGet(2) <ASSIGNMENT> Expression)) #AsmOp(2)
 ;
 
 Expression #void: ExpressionPrefix ExpressionSufix;
@@ -129,7 +129,7 @@ ExpressionPrefix #void: AndExpression |
     <OPEN_PAREN>Expression<CLOSE_PAREN>
 ;
 
-ExpressionSufix #void: ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) |
+ExpressionSufix #void: ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) #ArrGet(2) |
     (<DOT> ExpressionCall))*
 ;
 

@@ -2,6 +2,7 @@ package pt.up.fe.comp.semantic;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
+import pt.up.fe.comp.semantic.visitors.Origin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,6 @@ import java.util.Map;
 public class Method {
     private String name;
     private Type returnType;
-
     private Map<String, Symbol> parentTable;
     private Map<String, OSymbol> variables;
 
@@ -55,7 +55,7 @@ public class Method {
     public Map<String, Symbol> getParameters() {
         Map<String, Symbol> parameters = new HashMap<>();
         for (OSymbol variable: variables.values()) {
-            if (variable.getOrigin() == ORIGIN.PARAMS) {
+            if (variable.getOrigin() == Origin.PARAMS) {
                 parameters.put(variable.getName(), variable);
             }
         }
@@ -65,7 +65,7 @@ public class Method {
     public Map<String, Symbol> getLocalVars() {
         Map<String, Symbol> parameters = new HashMap<>();
         for (OSymbol variable: variables.values()) {
-            if (variable.getOrigin() == ORIGIN.LOCAL) {
+            if (variable.getOrigin() == Origin.LOCAL) {
                 parameters.put(variable.getName(), variable);
             }
         }

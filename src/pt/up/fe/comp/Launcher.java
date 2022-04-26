@@ -9,6 +9,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.semantic.JmmAnalyser;
 import pt.up.fe.comp.semantic.visitors.ClassDataCollector;
 import pt.up.fe.comp.semantic.visitors.ImportCollector;
+import pt.up.fe.comp.semantic.visitors.MethodDataCollector;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -49,10 +50,18 @@ public class Launcher {
             System.out.println(r.getException().get());
         }
 
-        new ClassDataCollector().visit(parserResult.getRootNode());
+        /*MethodDataCollector teste = new MethodDataCollector(null);
+        teste.visitStart(parserResult.getRootNode(), null);
+        for (var method: teste.getMethods().values()) {
+            System.out.println(method.getName());
+            for (var vars: method.getLocalVars().values()) {
+                System.out.println("    " + vars.toString());
+            }
+        }*/
+
 
         // Check if there are parsing errors
-        //TestUtils.noErrors(parserResult.getReports());
+        TestUtils.noErrors(parserResult.getReports());
 
         // Semantic Analysis Stage
         //JmmAnalyser analyser = new JmmAnalyser();

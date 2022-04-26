@@ -1,17 +1,22 @@
 package pt.up.fe.comp.semantic;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
-
-enum ORIGIN { PARAMS, LOCAL };
+import pt.up.fe.comp.semantic.visitors.Origin;
 
 public class OSymbol extends pt.up.fe.comp.jmm.analysis.table.Symbol {
-    private ORIGIN origin;
+    private Origin origin;
 
-    public OSymbol(Type type, String name) {
-        super(type, name);
+    public static OSymbol fromSymbol(Symbol symbol, Origin origin) {
+        return new OSymbol(symbol.getType(), symbol.getName(), origin);
     }
 
-    public ORIGIN getOrigin() {
+    public OSymbol(Type type, String name, Origin origin) {
+        super(type, name);
+        this.origin = origin;
+    }
+
+    public Origin getOrigin() {
         return origin;
     }
 }
