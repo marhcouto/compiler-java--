@@ -11,11 +11,19 @@ import java.util.Map;
 public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable {
     private String thisSuper;
     private String className;
-    private List<String> imports = new LinkedList<>();
+    private List<String> imports;
 
-    private Map<String, Symbol> attributes = new HashMap();
+    private Map<String, Symbol> attributes;
 
-    private Map<String, Method> methods = new HashMap<>();
+    private Map<String, Method> methods;
+
+    public SymbolTable(String superName, String className, List<String> imports, Map<String, Symbol> attributes, Map<String, Method> methods) {
+        this.thisSuper = superName;
+        this.className = className;
+        this.imports = imports;
+        this.attributes = attributes;
+        this.methods = methods;
+    }
 
     @Override
     public List<String> getImports() {

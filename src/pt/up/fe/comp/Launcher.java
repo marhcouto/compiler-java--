@@ -1,14 +1,14 @@
 package pt.up.fe.comp;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.semantic.JmmAnalyser;
+import pt.up.fe.comp.semantic.visitors.ClassDataCollector;
+import pt.up.fe.comp.semantic.visitors.ImportCollector;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -49,15 +49,17 @@ public class Launcher {
             System.out.println(r.getException().get());
         }
 
+        new ClassDataCollector().visit(parserResult.getRootNode());
+
         // Check if there are parsing errors
         //TestUtils.noErrors(parserResult.getReports());
 
         // Semantic Analysis Stage
-        JmmAnalyser analyser = new JmmAnalyser();
+        //JmmAnalyser analyser = new JmmAnalyser();
 
-        JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
+        //JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
 
-        TestUtils.noErrors(analysisResult.getReports());
+        //TestUtils.noErrors(analysisResult.getReports());
     }
 
 }

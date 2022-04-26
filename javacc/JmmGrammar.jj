@@ -58,7 +58,7 @@ ImportDeclaration: <IMPORT> ((<ID> { jjtThis.put("image", lastConsumedToken.getI
 
 ClassDeclaration: <CLASS> ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ClassName) (<EXTENDS> (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ClassParent)? <OPEN_BRACKET>
     (
-        VarDeclaration |
+        StatementVarDeclaration |
         GeneralMethodDeclaration
     )*
 <CLOSE_BRACKET>;
@@ -72,7 +72,7 @@ MainMethodDeclaration: (<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT
 ;
 
 MethodBody: (
-        (SCAN 2 VarDeclaration |
+        (SCAN 2 StatementVarDeclaration |
         Statement)
 )*;
 
@@ -89,13 +89,13 @@ MethodName: <ID> { jjtThis.put("image", lastConsumedToken.getImage()); };
 
 ReturnStatement: <RETURN> Expression <EOE>;
 
-MethodArgsList: (MethodArg (<COMMA> MethodArg)*)?;
+MethodArgsList: (VarDeclaration (<COMMA> VarDeclaration)*)?;
 
-MethodArg: (Type) (
+VarDeclaration: (Type) (
     <ID> { jjtThis.put("image", lastConsumedToken.getImage()); }
 ) #ArgName;
 
-VarDeclaration: Type VarName <EOE>;
+StatementVarDeclaration #void: VarDeclaration <EOE>;
 
 VarName: <ID> { jjtThis.put("image", lastConsumedToken.getImage()); };
 
