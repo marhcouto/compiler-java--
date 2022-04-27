@@ -89,8 +89,13 @@ public class JasminResult implements ReportsProvider {
      * @return a reference to the .class file
      */
     public File compile(File outputDir) {
-        File jasminFile = new File(SpecsIo.getTempFolder("jasmin"), getClassName() + ".j");
+        var pathToJasminFile = SpecsIo.getTempFolder("jasmin");
+        var pathChild = getClassName() + ".j";
+        System.out.println(pathToJasminFile);
+        System.out.println(pathChild);
+        File jasminFile = new File(pathToJasminFile, pathChild);
         SpecsIo.write(jasminFile, getJasminCode());
+
         return JasminUtils.assemble(jasminFile, outputDir);
     }
 

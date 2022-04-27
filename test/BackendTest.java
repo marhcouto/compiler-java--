@@ -36,5 +36,6 @@ public class BackendTest {
         String jasminCode = SpecsIo.getResource("fixtures/public/jasmin/HelloWorld.j");
         var output = TestUtils.runJasmin(jasminCode);
         assertEquals("Hello World!\nHello World Again!\n", SpecsStrings.normalizeFileContents(output));
+
     }
 }

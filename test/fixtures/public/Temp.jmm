@@ -1,0 +1,9 @@
+import foo.bar;
+import a.b.c;
+import d.e.f.g;
+
+class HelloWorld {
+	public static void main(String[] args) {
+		int[] a;
+	}
+}
