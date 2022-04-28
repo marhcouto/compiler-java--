@@ -91,9 +91,7 @@ ReturnStatement: <RETURN> Expression <EOE>;
 
 MethodArgsList: (VarDeclaration (<COMMA> VarDeclaration)*)?;
 
-VarDeclaration: (Type) (
-    <ID> { jjtThis.put("image", lastConsumedToken.getImage()); }
-) #ArgName;
+VarDeclaration: Type VarName;
 
 StatementVarDeclaration #void: VarDeclaration <EOE>;
 
