@@ -28,7 +28,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
     }
 
     public Symbol visitStart(JmmNode node, Object dummy) {
-        for (var child: node.getChildren()) {
+        for (JmmNode child: node.getJmmChild(1).getChildren()) {
             visit(child);
         }
         return null;
@@ -60,7 +60,6 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
     }
 
     private Symbol visitMethodDecl(JmmNode node, Object dummy) {
-
         // Method return type
         boolean isArray = true;
         try {

@@ -17,7 +17,6 @@ public class SymbolTableFactory {
         this.classVisitor.visit(node);
         MethodDataCollector methodVisitor = new MethodDataCollector(this.classVisitor.getFields());
         methodVisitor.visit(node);
-        System.out.println("Methods:" + methodVisitor.getMethods());
         return new SymbolTable(this.classVisitor.getThisSuper(), this.classVisitor.getClassName(), this.importVisitor.getImports(), this.classVisitor.getFields(), methodVisitor.getMethods());
     }
 }
