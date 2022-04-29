@@ -46,6 +46,9 @@ public class Launcher {
 
         //System.out.println(parserResult.getRootNode().toJson());
 
+        // Check if there are parsing errors
+        // TestUtils.noErrors(parserResult.getReports());
+
         for (Report r : parserResult.getReports()) {
             System.out.println(r.getException().get());
         }
@@ -60,15 +63,15 @@ public class Launcher {
         }*/
 
 
-        // Check if there are parsing errors
-        //TestUtils.noErrors(parserResult.getReports());
-
         // Semantic Analysis Stage
-//        JmmAnalyser analyser = new JmmAnalyser();
-//
-//        JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
-//
-//        TestUtils.noErrors(analysisResult.getReports());
+        JmmAnalyser analyser = new JmmAnalyser();
+
+        JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
+
+        // HOLY TABLE PRINTER
+        System.out.println(analysisResult.getSymbolTable().print());
+
+        TestUtils.noErrors(analysisResult.getReports());
     }
 
 }

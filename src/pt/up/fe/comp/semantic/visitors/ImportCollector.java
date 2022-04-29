@@ -17,7 +17,7 @@ public class ImportCollector extends AJmmVisitor<Object, Boolean> {
     }
 
     private Boolean visitStartNode(JmmNode root, Object dummy) {
-        for (var child: root.getChildren().get(0).getChildren()) {
+        for (var child: root.getChildren()) {
             visit(child);
         }
         return true;
@@ -26,7 +26,7 @@ public class ImportCollector extends AJmmVisitor<Object, Boolean> {
     private Boolean visitImportDeclaration(JmmNode importNode, Object dummy) {
         String importPath = "";
         for (var importPathNode: importNode.getChildren()) {
-            importPath = String.join(importPath, importPathNode.get("image"));
+            importPath = importPath + "." + importPathNode.get("image");
         }
         imports.add(importPath);
         return true;

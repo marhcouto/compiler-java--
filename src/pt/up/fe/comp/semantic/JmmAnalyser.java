@@ -10,7 +10,7 @@ import java.util.Collections;
 public class JmmAnalyser implements JmmAnalysis {
     @Override
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
-        SymbolTable symbolTable = null;
+        SymbolTable symbolTable = new SymbolTableFactory().generateTable(parserResult.getRootNode());
         return new JmmSemanticsResult(parserResult, symbolTable, Collections.emptyList());
     }
 }

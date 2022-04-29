@@ -74,4 +74,8 @@ public class Method {
     public Map<String, OSymbol> getVariables() {
         return variables;
     }
+
+    public void addVariable(OSymbol variable) {
+        this.variables.put(variable.getName(), variable);
+    }
 }

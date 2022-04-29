@@ -12,14 +12,13 @@ import java.util.Map;
 public class ClassDataCollector extends AJmmVisitor<Object, Boolean> {
     private String thisSuper;
     private String className;
-    private final Map<String, Symbol> attributes = new HashMap<>();
-
+    private final Map<String, Symbol> fields = new HashMap<>();
     public ClassDataCollector() {
         addVisit("Start", this::visitStart);
         addVisit("ClassDeclaration", this::visitClassNode);
         addVisit("ClassName", this::collectClassName);
         addVisit("ClassParent", this::collectParent);
-        addVisit("VarDeclaration", this::collectAttrData);
+        addVisit("Variable", this::collectAttrData);
         setDefaultVisit((node, dummy) -> true);
     }
 
@@ -60,7 +59,7 @@ public class ClassDataCollector extends AJmmVisitor<Object, Boolean> {
             declChildren.get(0).get("image"),
             isArray
         ), declChildren.get(1).get("image"));
-        attributes.put(newSymbol.getName(), newSymbol);
+        fields.put(newSymbol.getName(), newSymbol);
         return true;
     }
 
@@ -71,8 +70,7 @@ public class ClassDataCollector extends AJmmVisitor<Object, Boolean> {
     public String getClassName() {
         return className;
     }
-
-    public Map<String, Symbol> getAttributes() {
-        return attributes;
+    public Map<String, Symbol> getFields() {
+        return fields;
     }
 }

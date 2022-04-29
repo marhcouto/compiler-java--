@@ -11,14 +11,14 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
     private final String thisSuper;
     private final String className;
     private final List<String> imports;
-    private final Map<String, Symbol> attributes;
+    private final Map<String, Symbol> fields;
     private final Map<String, Method> methods;
 
-    public SymbolTable(String superName, String className, List<String> imports, Map<String, Symbol> attributes, Map<String, Method> methods) {
+    public SymbolTable(String superName, String className, List<String> imports, Map<String, Symbol> fields, Map<String, Method> methods) {
         this.thisSuper = superName;
         this.className = className;
         this.imports = imports;
-        this.attributes = attributes;
+        this.fields = fields;
         this.methods = methods;
     }
 
@@ -39,7 +39,7 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
 
     @Override
     public List<Symbol> getFields() {
-        return new LinkedList<>(attributes.values());
+        return new LinkedList<>(fields.values());
     }
 
     @Override
