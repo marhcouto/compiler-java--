@@ -2,7 +2,6 @@ package pt.up.fe.comp.semantic;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
-import pt.up.fe.comp.semantic.visitors.Origin;
 
 import java.util.HashMap;
 import java.util.Map;

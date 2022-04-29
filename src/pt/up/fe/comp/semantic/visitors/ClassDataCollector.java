@@ -12,7 +12,7 @@ import java.util.Map;
 public class ClassDataCollector extends AJmmVisitor<Object, Boolean> {
     private String thisSuper;
     private String className;
-    private Map<String, Symbol> attributes = new HashMap<>();
+    private final Map<String, Symbol> attributes = new HashMap<>();
 
     public ClassDataCollector() {
         addVisit("Start", this::visitStart);

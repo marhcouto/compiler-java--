@@ -6,6 +6,7 @@ import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.semantic.Method;
 import pt.up.fe.comp.semantic.OSymbol;
+import pt.up.fe.comp.semantic.Origin;
 
 import java.util.HashMap;
 import java.util.List;

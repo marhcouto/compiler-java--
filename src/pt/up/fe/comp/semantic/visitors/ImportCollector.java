@@ -7,37 +7,32 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ImportCollector extends AJmmVisitor<List<String>, Integer> {
-    private int visitedNodes;
+public class ImportCollector extends AJmmVisitor<Object, Boolean> {
+    private final List<String> imports = new LinkedList<>();
 
     public ImportCollector() {
-        this.visitedNodes = 0;
         addVisit("Start", this::visitStartNode);
         addVisit("ImportDeclaration", this::visitImportDeclaration);
-        addVisit("ImportPath", this::visitImportPath);
-        setDefaultVisit((node, imports) -> ++visitedNodes);
+        setDefaultVisit((node, imports) -> true);
     }
 
-    private Integer visitStartNode(JmmNode root, List<String> imports) {
-        for (var child: root.getChildren()) {
-            visit(child, imports);
+    private Boolean visitStartNode(JmmNode root, Object dummy) {
+        for (var child: root.getChildren().get(0).getChildren()) {
+            visit(child);
         }
-        return ++visitedNodes;
+        return true;
     }
 
-    private Integer visitImportDeclaration(JmmNode importNode, List<String> imports) {
-        List<String> importPath = new LinkedList<>();
-        int importPathNNodes = 0;
+    private Boolean visitImportDeclaration(JmmNode importNode, Object dummy) {
+        String importPath = "";
         for (var importPathNode: importNode.getChildren()) {
-            importPathNNodes += visit(importPathNode, importPath);
+            importPath = String.join(importPath, importPathNode.get("image"));
         }
-        imports.add(String.join(".", importPath));
-        visitedNodes += importPathNNodes;
-        return importPathNNodes;
+        imports.add(importPath);
+        return true;
     }
 
-    private Integer visitImportPath(JmmNode path, List<String> importDeclPath) {
-        importDeclPath.add(path.get("image"));
-        return 1;
+    public List<String> getImports() {
+        return imports;
     }
 }

@@ -64,11 +64,11 @@ public class Launcher {
         //TestUtils.noErrors(parserResult.getReports());
 
         // Semantic Analysis Stage
-        //JmmAnalyser analyser = new JmmAnalyser();
-
-        //JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
-
-        //TestUtils.noErrors(analysisResult.getReports());
+//        JmmAnalyser analyser = new JmmAnalyser();
+//
+//        JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
+//
+//        TestUtils.noErrors(analysisResult.getReports());
     }
 
 }
