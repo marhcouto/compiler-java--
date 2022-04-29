@@ -38,40 +38,33 @@ public class Launcher {
         config.put("registerAllocation", "-1");
         config.put("debug", "false");
 
-        // Instantiate JmmParser
+        // PARSING STAGE
         SimpleParser parser = new SimpleParser();
-
-        // Parse stage
         JmmParserResult parserResult = parser.parse(input, config);
 
+        // Print tree
+        System.out.println(parserResult.getRootNode().toTree());
         //System.out.println(parserResult.getRootNode().toJson());
 
         // Check if there are parsing errors
         // TestUtils.noErrors(parserResult.getReports());
-
         for (Report r : parserResult.getReports()) {
             System.out.println(r.getException().get());
         }
 
-        /*MethodDataCollector teste = new MethodDataCollector(null);
-        teste.visitStart(parserResult.getRootNode(), null);
-        for (var method: teste.getMethods().values()) {
-            System.out.println(method.getName());
-            for (var vars: method.getLocalVars().values()) {
-                System.out.println("    " + vars.toString());
-            }
-        }*/
 
-
-        // Semantic Analysis Stage
+        // SEMANTIC ANALYSIS STAGE
         JmmAnalyser analyser = new JmmAnalyser();
-
         JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
 
         // HOLY TABLE PRINTER
         System.out.println(analysisResult.getSymbolTable().print());
 
-        TestUtils.noErrors(analysisResult.getReports());
+        // Check if there are semantic errors
+        // TestUtils.noErrors(analysisResult.getReports());
+        for (Report r : analysisResult.getReports()) {
+            System.out.println(r.getException().get());
+        }
     }
 
 }
