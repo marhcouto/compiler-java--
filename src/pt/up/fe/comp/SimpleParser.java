@@ -34,7 +34,6 @@ public class SimpleParser implements JmmParser {
             parser.Start();
 
             var root = ((JmmNode) parser.rootNode()).sanitize();
-            System.out.println(root.toTree());
 
             if (!(root instanceof JmmNode)) {
                 return JmmParserResult.newError(new Report(ReportType.WARNING, Stage.SYNTATIC, -1,

@@ -1,14 +1,15 @@
 package pt.up.fe.comp;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.jmm.report.ReportType;
+import pt.up.fe.comp.semantic.JmmAnalyser;
+import pt.up.fe.comp.semantic.visitors.ClassDataCollector;
+import pt.up.fe.comp.semantic.visitors.ImportCollector;
+import pt.up.fe.comp.semantic.visitors.MethodDataCollector;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -37,27 +38,33 @@ public class Launcher {
         config.put("registerAllocation", "-1");
         config.put("debug", "false");
 
-        // Instantiate JmmParser
+        // PARSING STAGE
         SimpleParser parser = new SimpleParser();
-
-        // Parse stage
         JmmParserResult parserResult = parser.parse(input, config);
 
+        // Print tree
+        System.out.println(parserResult.getRootNode().toTree());
         //System.out.println(parserResult.getRootNode().toJson());
 
+        // Check if there are parsing errors
+        // TestUtils.noErrors(parserResult.getReports());
         for (Report r : parserResult.getReports()) {
             System.out.println(r.getException().get());
         }
 
-        // Check if there are parsing errors
-        // TestUtils.noErrors(parserResult.getReports());
 
-        // Semantic Analysis Stage
+        // SEMANTIC ANALYSIS STAGE
         JmmAnalyser analyser = new JmmAnalyser();
-
         JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
 
-        TestUtils.noErrors(analysisResult.getReports());
+        // HOLY TABLE PRINTER
+        System.out.println(analysisResult.getSymbolTable().print());
+
+        // Check if there are semantic errors
+        // TestUtils.noErrors(analysisResult.getReports());
+        for (Report r : analysisResult.getReports()) {
+            System.out.println(r.getException().get());
+        }
     }
 
 }

@@ -3,7 +3,7 @@ PARSER_CLASS=JmmGrammarParser;
 SMART_NODE_CREATION=false;
 TOKENS_ARE_NODES=false;
 
-SKIP : " " | "\t" | "\r" | "\n" | <("//" ([" " - "~"])*)> | <("/*" ([" " - "~"] | "\t" | "\r" | "\n")* "*/")>;
+SKIP : " " | "\t" | "\r" | "\n" | <LINE_COMMENT:"//" (~["\n","\r"])*> | <BLOCK_COMMENT: "/*" (~["*"])* "*" (~["*","/"] (~["*"])* "*" | "*")* "/">;
 
 TOKEN :
 	< PLUS : "+" > |
@@ -47,6 +47,8 @@ TOKEN :
 	< ID : (("_" | ["A" - "Z"] | ["a" - "z"])("_" | ["0" - "9"] | ["A" - "Z"] | ["a" - "z"])*) >
 ;
 
+
+// PRE-CLASS
 Start: ImportDeclarations ClassDeclaration <EOF>;
 
 ImportDeclarations #void: (ImportDeclaration)*;
@@ -56,6 +58,7 @@ ImportDeclaration: <IMPORT> ((<ID> { jjtThis.put("image", lastConsumedToken.getI
 )* <EOE>;
 
 
+// CLASS
 ClassDeclaration: <CLASS> ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ClassName) (<EXTENDS> (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ClassParent)? <OPEN_BRACKET>
     (
         VarDeclaration |
@@ -63,6 +66,8 @@ ClassDeclaration: <CLASS> ((<ID> { jjtThis.put("image", lastConsumedToken.getIma
     )*
 <CLOSE_BRACKET>;
 
+
+// METHODS
 GeneralMethodDeclaration #void: (<PUBLIC> (MethodDeclaration | MainMethodDeclaration));
 
 MainMethodDeclaration: (<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MainArgsName <CLOSE_PAREN>)
@@ -70,11 +75,6 @@ MainMethodDeclaration: (<STATIC> <VOID> <MAIN>  <OPEN_PAREN> <STRING> <OPEN_RECT
         MethodBody
     <CLOSE_BRACKET>
 ;
-
-MethodBody: (
-        (SCAN 2 VarDeclaration |
-        Statement)
-)*;
 
 MethodDeclaration: (Type MethodName <OPEN_PAREN>
         MethodArgsList
@@ -85,17 +85,22 @@ MethodDeclaration: (Type MethodName <OPEN_PAREN>
     <CLOSE_BRACKET>
 ;
 
+MethodBody: (
+        (SCAN 2 VarDeclaration |
+        Statement)
+)*;
+
 MethodName: <ID> { jjtThis.put("image", lastConsumedToken.getImage()); };
 
 ReturnStatement: <RETURN> Expression <EOE>;
 
-MethodArgsList: (MethodArg (<COMMA> MethodArg)*)?;
 
-MethodArg: (Type) (
-    <ID> { jjtThis.put("image", lastConsumedToken.getImage()); }
-) #ArgName;
+// VARIABLE DECLARATIONS AND ARGUMENTS
+MethodArgsList: (Variable (<COMMA> Variable)*)?;
 
-VarDeclaration: Type VarName <EOE>;
+Variable: Type VarName;
+
+VarDeclaration #void: Variable <EOE>;
 
 VarName: <ID> { jjtThis.put("image", lastConsumedToken.getImage()); };
 
@@ -105,47 +110,20 @@ Type: (<INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> { jjtThis.put("arr", "true");
     (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); })
 ;
 
+
+// STATEMENTS
 Statement #void: (<OPEN_BRACKET> (Statement)* <CLOSE_BRACKET>) |
-    (<IF> <OPEN_PAREN>Expression<CLOSE_PAREN> StmBody <ELSE> StmBody) #IfStm(3) |
-    (<WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> StmBody) #WhileStm(2) |
+    (<IF> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement <ELSE> Statement) #IfStm(3) |
+    (<WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement) #WhileStm(2) |
     IDStatement <EOE>;
 
-StmBody: Statement;
+IDStatement #void:  ((ArrOrVar) (AssignmentStatement | DotExpressionCalls)) | (Expression); // Statements starting with an ID
 
-IDStatement #void: (((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #VarName) (AssignmentStatement | ExpressionSufix)) | (ExpressionPrefix ExpressionSufix);
+AssignmentStatement #void: (<ASSIGNMENT> Expression) #AsmOp(2);
 
-AssignmentStatement #void: (<ASSIGNMENT> Expression) #AsmOp(2) |
-    (<OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN> <ASSIGNMENT> Expression) #ArrAsmOp(3)
-;
 
-Expression #void: ExpressionPrefix ExpressionSufix;
-ExpressionPrefix #void: AndExpression |
-    (<INTEGER_LITERAL> { jjtThis.put("image", lastConsumedToken.getImage()); }) #IntegerLiteral |
-    <TRUE_TOKEN> #True |
-    <FALSE_TOKEN> #False |
-    <THIS_TOKEN> #This |
-    (<NEW> CreatedObject) |
-    (<NOT> Expression { jjtThis.put("op", "NOT"); }) #UnaryOp |
-    <OPEN_PAREN>Expression<CLOSE_PAREN>
-;
-
-ExpressionSufix #void: ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) |
-    (<DOT> ExpressionCall))*
-;
-
-CreatedObject #void: (<INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN>) #CreateArrObj(1) |
-    ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ObjName <OPEN_PAREN> <CLOSE_PAREN>) #CreateObj
-;
-
-ExpressionCall #void: (<LENGTH_TOKEN> #Length(1)) | (FnCall #FnCallOp(3))
-;
-
-FnCall #void: ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MethodName <OPEN_PAREN>)
-    ArgumentList
-<CLOSE_PAREN>
-;
-
-ArgumentList: (Expression (<COMMA> Expression)*)?;
+// EXPRESSIONS
+Expression #void: AndExpression;
 
 AndExpression #void: LessThanExpression (
     (<AND> LessThanExpression { jjtThis.put("op", "AND"); }) #BinOp(2)
@@ -173,10 +151,30 @@ UnaryOperatorPrefix #void: (<INTEGER_LITERAL> { jjtThis.put("image", lastConsume
     (<NOT> Expression { jjtThis.put("op", "NOT"); } ) #UnaryOp |
     <OPEN_PAREN>Expression<CLOSE_PAREN> |
     (<MINUS> Expression { jjtThis.put("op", "SIM"); }) #UnaryOp |
-    (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #VarName;
+    ArrOrVar;
 
-UnaryOperator #void: UnaryOperatorPrefix ExpressionSufix;
+UnaryOperator #void: UnaryOperatorPrefix DotExpressionCalls;
 
+CreatedObject #void: (<INT> <OPEN_RECT_PAREN>Expression<CLOSE_RECT_PAREN>) #CreateArrObj(1) |
+    ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #ObjName <OPEN_PAREN> <CLOSE_PAREN>) #CreateObj
+;
+
+ArrOrVar #void: ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #VarName ) ((<OPEN_RECT_PAREN> Expression <CLOSE_RECT_PAREN>) #ArrAccess(2))?;
+
+// FUNCTION CALLS
+DotExpressionCalls #void: (<DOT> ExpressionCall)*;
+
+ExpressionCall #void: (<LENGTH_TOKEN> #Length(1)) | (FnCall #FnCallOp(3));
+
+FnCall #void: ((<ID> { jjtThis.put("image", lastConsumedToken.getImage()); }) #MethodName <OPEN_PAREN>)
+    ArgumentList
+<CLOSE_PAREN>
+;
+
+ArgumentList: (Expression (<COMMA> Expression)*)?;
+
+
+// NODE INJECTIONS
 // Injections for the implementation of JmmNode
 // Since this is injected into BaseNode, it affects only non-terminals
 INJECT BaseNode :
