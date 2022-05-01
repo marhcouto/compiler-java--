@@ -47,18 +47,14 @@ public class ClassDataCollector extends AJmmVisitor<Object, Boolean> {
     }
 
     private Boolean collectAttrData(JmmNode declNode, Object dummy) {
-        List<JmmNode> declChildren = declNode.getChildren();
-        boolean isArray;
-        try {
-            declChildren.get(0).get("arr");
+        boolean isArray = false;
+        if (declNode.getJmmChild(0).getAttributes().contains("arr")) {
             isArray = true;
-        } catch (NullPointerException e) {
-            isArray = false;
         }
         Symbol newSymbol = new Symbol(new Type(
-            declChildren.get(0).get("image"),
+            declNode.getJmmChild(0).get("image"),
             isArray
-        ), declChildren.get(1).get("image"));
+        ), declNode.getJmmChild(1).get("image"));
         fields.put(newSymbol.getName(), newSymbol);
         return true;
     }
