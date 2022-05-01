@@ -15,11 +15,10 @@ public class SymbolTableFactory {
     private final ImportCollector importVisitor = new ImportCollector();
     private final ClassDataCollector classVisitor = new ClassDataCollector();
 
-    public SymbolTable generateTable(JmmNode node) {
+    public SymbolTable generateTable(JmmNode node, List<Report> reports) {
         this.importVisitor.visit(node);
         this.classVisitor.visit(node);
-        List<Report> reportList = new LinkedList<>();
-        MethodDataCollector methodVisitor = new MethodDataCollector(this.classVisitor.getFields(), reportList);
+        MethodDataCollector methodVisitor = new MethodDataCollector(this.classVisitor.getFields(), reports);
         methodVisitor.visit(node);
         return new SymbolTable(
                 this.classVisitor.getThisSuper(),
@@ -27,7 +26,7 @@ public class SymbolTableFactory {
                 this.importVisitor.getImports(),
                 this.classVisitor.getFields(),
                 methodVisitor.getMethods(),
-                reportList
+                reports
         );
     }
 }

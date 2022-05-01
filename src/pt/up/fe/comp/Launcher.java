@@ -1,6 +1,7 @@
 package pt.up.fe.comp;
 
 import java.io.File;
+import java.sql.SQLOutput;
 import java.util.*;
 
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
@@ -44,12 +45,11 @@ public class Launcher {
 
         // Print tree
         System.out.println(parserResult.getRootNode().toTree());
-        //System.out.println(parserResult.getRootNode().toJson());
 
         // Check if there are parsing errors
         // TestUtils.noErrors(parserResult.getReports());
         for (Report r : parserResult.getReports()) {
-            System.out.println(r.getException().get());
+            System.out.println(r.toString());
         }
 
 
@@ -57,18 +57,14 @@ public class Launcher {
         JmmAnalyser analyser = new JmmAnalyser();
         JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
 
-        for (var r: analysisResult.getReports()) {
-            System.out.println(r.getException().get());
+        // Check if there are semantic errors
+        // TestUtils.noErrors(analysisResult.getReports());
+        for (Report r : analysisResult.getReports()) {
+            System.out.println(r.toString());
         }
 
         // HOLY TABLE PRINTER
         System.out.println(analysisResult.getSymbolTable().print());
-
-        // Check if there are semantic errors
-        // TestUtils.noErrors(analysisResult.getReports());
-        for (Report r : analysisResult.getReports()) {
-            System.out.println(r.getException().get());
-        }
     }
 
 }

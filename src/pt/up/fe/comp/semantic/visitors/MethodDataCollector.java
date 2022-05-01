@@ -5,6 +5,7 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp.semantic.Method;
 import pt.up.fe.comp.semantic.OSymbol;
@@ -27,6 +28,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
         this.reportList = reportList;
 
         addVisit("Start", this::visitStart);
+        addVisit("ClassDeclaration", this::visitClassDecl);
         addVisit("MainMethodDeclaration", this::visitMainMethodDecl);
         addVisit("MethodDeclaration", this::visitMethodDecl);
         addVisit("Variable", this::visitVarDecl);
@@ -34,7 +36,16 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
     }
 
     public Symbol visitStart(JmmNode node, Object dummy) {
-        for (JmmNode child: node.getJmmChild(1).getChildren()) {
+        System.out.println("Visited Start");
+        for (JmmNode child: node.getChildren()) {
+            System.out.println( child.toJson() );
+            visit(child);
+        }
+        return null;
+    }
+
+    public Symbol visitClassDecl(JmmNode node, Object dummy) {
+        for (var child: node.getChildren()) {
             visit(child);
         }
         return null;
@@ -42,16 +53,15 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
 
     private Symbol visitMainMethodDecl(JmmNode node, Object dummy) {
         if (methods.containsKey("main")) {
-            reportList.add(Report.newError(
+            reportList.add(new Report(
+                ReportType.ERROR,
                 Stage.SEMANTIC,
                 Integer.parseInt(node.get("line")),
                 Integer.parseInt(node.get("column")),
-                "Found method previously declared: " + "main",
-                null
+                "Found method previously declared: " + "main"
             ));
             return null;
         }
-        Map<String, OSymbol> methodAttributeMap = new HashMap<>();
         List<JmmNode> methodChildren = node.getChildren();
         Method newMethod = new Method("main", new Type("void", false), parentScope);
 
@@ -76,13 +86,25 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
     }
 
     private Symbol visitMethodDecl(JmmNode node, Object dummy) {
-        // Method return type
+        String methodName = node.getChildren().get(1).get("image");
+        if (methods.containsKey(methodName)) {
+            reportList.add(new Report(
+                    ReportType.ERROR,
+                    Stage.SEMANTIC,
+                    Integer.parseInt(node.get("line")),
+                    Integer.parseInt(node.get("column")),
+                    "Found method previously declared: " + methodName
+            ));
+            return null;
+        }
+
         boolean isArray = false;
         if (node.getJmmChild(0).getAttributes().contains("arr")) {
             isArray = true;
         }
+
+        // Method return type
         Type type = new Type(node.getChildren().get(0).get("image"), isArray);
-        String methodName = node.getChildren().get(1).get("image");
         Method newMethod = new Method(methodName, type, this.parentScope);
 
         // Arguments
@@ -107,11 +129,9 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
 
     private Symbol visitVarDecl(JmmNode node, Object dummy) {
         List<JmmNode> varDecl = node.getChildren();
-        boolean isArray = true;
-        try {
-            node.getChildren().get(0).get("arr");
-        } catch (NullPointerException e) {
-            isArray = false;
+        boolean isArray = false;
+        if (node.getJmmChild(0).getAttributes().contains("arr")) {
+            isArray = true;
         }
         return new OSymbol(new Type(node.getChildren().get(0).get("image"), isArray),
                 node.getChildren().get(1).get("image"),
