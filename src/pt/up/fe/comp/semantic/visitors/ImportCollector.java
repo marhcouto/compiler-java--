@@ -6,6 +6,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ImportCollector extends AJmmVisitor<Object, Boolean> {
     private final List<String> imports = new LinkedList<>();
@@ -24,11 +25,12 @@ public class ImportCollector extends AJmmVisitor<Object, Boolean> {
     }
 
     private Boolean visitImportDeclaration(JmmNode importNode, Object dummy) {
-        String importPath = "";
-        for (var importPathNode: importNode.getChildren()) {
-            importPath = importPath + "." + importPathNode.get("image");
-        }
-        imports.add(importPath);
+        imports.add(importNode
+                .getChildren()
+                .stream()
+                .map(path -> path.get("image"))
+                .collect(Collectors.joining("."))
+        );
         return true;
     }
 

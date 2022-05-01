@@ -77,11 +77,9 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
 
     private Symbol visitMethodDecl(JmmNode node, Object dummy) {
         // Method return type
-        boolean isArray = true;
-        try {
-            node.getChildren().get(0).get("arr");
-        } catch (NullPointerException e) {
-            isArray = false;
+        boolean isArray = false;
+        if (node.getJmmChild(0).getAttributes().contains("arr")) {
+            isArray = true;
         }
         Type type = new Type(node.getChildren().get(0).get("image"), isArray);
         String methodName = node.getChildren().get(1).get("image");

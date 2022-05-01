@@ -2,6 +2,7 @@ package pt.up.fe.comp;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Stack;
 
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.parser.JmmParser;
@@ -26,12 +27,26 @@ import pt.up.fe.specs.util.SpecsSystem;
  */
 
 public class SimpleParser implements JmmParser {
+    private void includeLocation(BaseNode root) {
+        Stack<BaseNode> nodeStack = new Stack<>();
+        nodeStack.add(root);
+        while(!nodeStack.empty()) {
+            BaseNode curNode = nodeStack.pop();
+            curNode.put("line", String.valueOf(curNode.getBeginLine()));
+            curNode.put("column", String.valueOf(curNode.getBeginColumn()));
+            for (var child: curNode.children) {
+                nodeStack.add((BaseNode) child);
+            }
+        }
+    }
 
     @Override
     public JmmParserResult parse(String jmmCode, Map<String, String> config) {
         try {
             JmmGrammarParser parser = new JmmGrammarParser(SpecsIo.toInputStream(jmmCode));
             parser.Start();
+
+            includeLocation((BaseNode) parser.rootNode());
 
             var root = ((JmmNode) parser.rootNode()).sanitize();
 
