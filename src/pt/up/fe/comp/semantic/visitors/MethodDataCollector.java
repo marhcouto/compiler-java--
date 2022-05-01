@@ -4,6 +4,8 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp.semantic.Method;
 import pt.up.fe.comp.semantic.OSymbol;
 import pt.up.fe.comp.semantic.Origin;
@@ -13,12 +15,16 @@ import java.util.List;
 import java.util.Map;
 
 public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
+
+    private List<Report> reportList;
+
     private final Map<String, Method> methods = new HashMap<>();
 
     private final Map<String, Symbol> parentScope;
 
-    public MethodDataCollector(Map<String, Symbol> parentScope) {
+    public MethodDataCollector(Map<String, Symbol> parentScope, List<Report> reportList) {
         this.parentScope = parentScope;
+        this.reportList = reportList;
 
         addVisit("Start", this::visitStart);
         addVisit("MainMethodDeclaration", this::visitMainMethodDecl);
@@ -35,6 +41,16 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
     }
 
     private Symbol visitMainMethodDecl(JmmNode node, Object dummy) {
+        if (methods.containsKey("main")) {
+            reportList.add(Report.newError(
+                Stage.SEMANTIC,
+                Integer.parseInt(node.get("line")),
+                Integer.parseInt(node.get("column")),
+                "Found method previously declared: " + "main",
+                null
+            ));
+            return null;
+        }
         Map<String, OSymbol> methodAttributeMap = new HashMap<>();
         List<JmmNode> methodChildren = node.getChildren();
         Method newMethod = new Method("main", new Type("void", false), parentScope);

@@ -57,6 +57,10 @@ public class Launcher {
         JmmAnalyser analyser = new JmmAnalyser();
         JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
 
+        for (var r: analysisResult.getReports()) {
+            System.out.println(r.getException().get());
+        }
+
         // HOLY TABLE PRINTER
         System.out.println(analysisResult.getSymbolTable().print());
 

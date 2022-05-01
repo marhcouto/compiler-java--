@@ -2,24 +2,28 @@ package pt.up.fe.comp.semantic;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
+import pt.up.fe.comp.jmm.report.Report;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable {
+    private List<Report> reports;
     private final String thisSuper;
+
     private final String className;
     private final List<String> imports;
     private final Map<String, Symbol> fields;
     private final Map<String, Method> methods;
 
-    public SymbolTable(String superName, String className, List<String> imports, Map<String, Symbol> fields, Map<String, Method> methods) {
+    public SymbolTable(String superName, String className, List<String> imports, Map<String, Symbol> fields, Map<String, Method> methods, List<Report> reports) {
         this.thisSuper = superName;
         this.className = className;
         this.imports = imports;
         this.fields = fields;
         this.methods = methods;
+        this.reports = reports;
     }
 
     @Override
