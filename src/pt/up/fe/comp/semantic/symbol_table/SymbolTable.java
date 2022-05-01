@@ -83,6 +83,16 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
         return methods.get(methodName).getVariables().containsKey(symbolName) || fields.containsKey(symbolName) || hasSymbolInImportPath(symbolName);
     }
 
+    public Symbol getSymbol(String methodName, String symbolName) {
+        if (methods.get(methodName).getVariables().containsKey(symbolName)) {
+            return methods.get(methodName).getVariables().get(symbolName);
+        }
+        if (fields.containsKey(symbolName)) {
+            return fields.get(symbolName);
+        }
+        return null;
+    }
+
     @Override
     public List<Symbol> getLocalVariables(String methodSignature) {
         return new LinkedList<>(methods.get(methodSignature).getLocalVars().values());
