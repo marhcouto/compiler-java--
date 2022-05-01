@@ -1,16 +1,12 @@
 package pt.up.fe.comp;
 
 import java.io.File;
-import java.sql.SQLOutput;
 import java.util.*;
 
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.semantic.JmmAnalyser;
-import pt.up.fe.comp.semantic.visitors.ClassDataCollector;
-import pt.up.fe.comp.semantic.visitors.ImportCollector;
-import pt.up.fe.comp.semantic.visitors.MethodDataCollector;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;

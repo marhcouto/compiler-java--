@@ -1,13 +1,11 @@
-package pt.up.fe.comp.semantic;
+package pt.up.fe.comp.semantic.symbol_table;
 
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.semantic.visitors.ClassDataCollector;
-import pt.up.fe.comp.semantic.visitors.ImportCollector;
-import pt.up.fe.comp.semantic.visitors.MethodDataCollector;
+import pt.up.fe.comp.semantic.symbol_table.visitors.ClassDataCollector;
+import pt.up.fe.comp.semantic.symbol_table.visitors.ImportCollector;
+import pt.up.fe.comp.semantic.symbol_table.visitors.MethodDataCollector;
 
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 public class SymbolTableFactory {

@@ -1,17 +1,18 @@
-package pt.up.fe.comp.semantic;
+package pt.up.fe.comp.semantic.symbol_table;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.semantic.Method;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable {
     private List<Report> reports;
     private final String thisSuper;
-
     private final String className;
     private final List<String> imports;
     private final Map<String, Symbol> fields;
@@ -59,6 +60,27 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
     @Override
     public List<Symbol> getParameters(String methodSignature) {
         return new LinkedList<>(methods.get(methodSignature).getParameters().values());
+    }
+
+    public Method getMethodScope(String name) {
+        return methods.get(name);
+    }
+
+    private Boolean hasSymbolInImportPath(String symbol) {
+        /* The following regex tries to match the imput symbol against the end of an import statement
+         * to check if a given symbol was imported.
+         */
+        Pattern pattern = Pattern.compile(String.format("%s\\b", symbol));
+        for (var importPath: imports) {
+            if (pattern.matcher(importPath).find()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Boolean hasSymbol(String methodName, String symbolName) {
+        return methods.get(methodName).getVariables().containsKey(symbolName) || fields.containsKey(symbolName) || hasSymbolInImportPath(symbolName);
     }
 
     @Override

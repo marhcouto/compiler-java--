@@ -1,4 +1,4 @@
-package pt.up.fe.comp.semantic.visitors;
+package pt.up.fe.comp.semantic.symbol_table.visitors;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
