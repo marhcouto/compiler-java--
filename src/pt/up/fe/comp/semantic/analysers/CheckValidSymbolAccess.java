@@ -5,6 +5,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
+import pt.up.fe.comp.semantic.Constants;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class CheckValidSymbolAccess extends TopDownScopeAnalyser {
         //Node is at the table
         if (visit(node.getJmmChild(0), scope)) {
             Symbol symbol = symbolTable.getSymbol(scope, node.getJmmChild(0).get("image"));
-            if (symbol != null && !symbol.getType().isArray()) {
+            if (symbol != null && !symbol.getType().isArray() && !symbol.getType().getName().equals(Constants.ANY_TYPE)) {
                 reports.add(new Report(
                     ReportType.ERROR,
                     Stage.SEMANTIC,

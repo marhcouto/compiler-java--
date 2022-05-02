@@ -46,13 +46,14 @@ public class SimpleParser implements JmmParser {
             JmmGrammarParser parser = new JmmGrammarParser(SpecsIo.toInputStream(jmmCode));
             parser.Start();
 
+            includeLocation((BaseNode) parser.rootNode());
+
             var root = ((JmmNode) parser.rootNode()).sanitize();
 
             if (!(root instanceof JmmNode)) {
                 return JmmParserResult.newError(new Report(ReportType.WARNING, Stage.SYNTATIC, -1,
                         "JmmNode interface not yet implemented, returning null root node"));
             }
-            includeLocation((BaseNode) parser.rootNode());
             return new JmmParserResult((JmmNode) root, Collections.emptyList(), config);
 
         } catch (ParseException e) {

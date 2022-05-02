@@ -66,7 +66,7 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
         return methods.get(name);
     }
 
-    private Boolean hasSymbolInImportPath(String symbol) {
+    public Boolean hasSymbolInImportPath(String symbol) {
         /* The following regex tries to match the imput symbol against the end of an import statement
          * to check if a given symbol was imported.
          */
@@ -89,6 +89,12 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
         }
         if (fields.containsKey(symbolName)) {
             return fields.get(symbolName);
+        }
+        if (hasSymbolInImportPath(symbolName)) {
+            return new Symbol(
+                new Type(symbolName, false),
+                "symbolName"
+            );
         }
         return null;
     }

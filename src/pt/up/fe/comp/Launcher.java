@@ -39,9 +39,6 @@ public class Launcher {
         SimpleParser parser = new SimpleParser();
         JmmParserResult parserResult = parser.parse(input, config);
 
-        // Print tree
-        System.out.println(parserResult.getRootNode().toTree());
-
         // Check if there are parsing errors
         // TestUtils.noErrors(parserResult.getReports());
         for (Report r : parserResult.getReports()) {
@@ -58,6 +55,9 @@ public class Launcher {
         for (Report r : analysisResult.getReports()) {
             System.out.println(r.toString());
         }
+
+        //Tree Printer
+        System.out.println(parserResult.getRootNode().toTree());
 
         // HOLY TABLE PRINTER
         System.out.println(analysisResult.getSymbolTable().print());
