@@ -58,6 +58,17 @@ public class JasminGenerator implements JasminBackend {
         return jasminHeader + jasminFields + jasminMethods;
     }
 
+    public String convertFieldTypeToPrimitiveJasmin(Field field){
+        String fieldType = "";
+
+        //Add other types
+        if(field.getFieldType().toString() == "INT32")
+            fieldType += "I ";
+        if(field.isInitialized())
+            fieldType += "=" + field.getInitialValue();
+        return fieldType;
+    }
+
     public String createField(Field field)
     {
         String fieldStr = ".field ";
@@ -66,18 +77,11 @@ public class JasminGenerator implements JasminBackend {
         createAccessSpecsStr(accModifiers, field.isStaticField(), field.isFinalField());
 
         fieldStr += field.getFieldName() + " ";
+        String fieldType = convertFieldTypeToPrimitiveJasmin(field);
 
-        //TODO - convertFieldTypeToPrimitiveJasmin();
-        if(field.getFieldType().toString() == "INT32")
-            fieldStr += "I ";
-        if(field.isInitialized())
-            fieldStr += "=" + field.getInitialValue();
-
-        return fieldStr;
+        return fieldStr + fieldType;
     }
 
-
-    //TODO 1 - go through all fields
     public String createJasminFields(ArrayList<Field> fields){
 
         System.out.println("Printing "+ fields.size() + " Fields");
@@ -94,6 +98,7 @@ public class JasminGenerator implements JasminBackend {
         return fieldsStr;
     }
 
+    //TODO - Refactoring
     public String createMethod(Method method) {
 
         String methodStr = ".method ";
@@ -129,7 +134,6 @@ public class JasminGenerator implements JasminBackend {
 
     }
 
-    //TODO 2 - go through methods
     public String createJasminMethods(ArrayList<Method> methods ){
 
         //.method <access-spec> <method-name><method-signature>
