@@ -23,7 +23,7 @@ public class JasminGenerator implements JasminBackend {
         ollirResult.getOllirClass().show();
 
         ClassUnit ollirClass = ollirResult.getOllirClass();
-        String jasminStr = constructJasminStr(ollirClass);
+        String jasminStr = createJasminStr(ollirClass);
         showJasmin(jasminStr);
 
         //(String className, String jasminCode, List< Report > reports, Map<String, String> config)
@@ -49,17 +49,17 @@ public class JasminGenerator implements JasminBackend {
         System.out.println(jasminStr);
     }
 
-    public String constructJasminStr(ClassUnit ollirClass){
+    public String createJasminStr(ClassUnit ollirClass){
 
-        String jasminHeader = this.constructJasminHeader(ollirClass);
-        String jasminFields = this.constructJasminFields(ollirClass.getFields());
-        String jasminMethods = this.constructJasminMethods(ollirClass.getMethods());
+        String jasminHeader = this.createJasminHeader(ollirClass);
+        String jasminFields = this.createJasminFields(ollirClass.getFields());
+        String jasminMethods = this.createJasminMethods(ollirClass.getMethods());
 
         return jasminHeader + jasminFields + jasminMethods;
     }
 
     //TODO 1 - go through all fields
-    public String constructJasminFields(ArrayList<Field> fields){
+    public String createJasminFields(ArrayList<Field> fields){
 
         System.out.println("Printing "+ fields.size() + " Fields");
         String fieldsStr = "";
@@ -103,7 +103,7 @@ public class JasminGenerator implements JasminBackend {
     }
 
     //TODO 2 - go through methods
-    public String constructJasminMethods(ArrayList<Method> methods ){
+    public String createJasminMethods(ArrayList<Method> methods ){
 
         //.method <access-spec> <method-name><method-signature>
         //<statements>
@@ -115,7 +115,7 @@ public class JasminGenerator implements JasminBackend {
         {
             methodStr += ".method ";
             System.out.println(method.getMethodName());
-            //TODO - constructStatements();
+            //TODO - createStatements();
             String accessSpec = method.getMethodAccessModifier().name();
 
             if(method.isStaticMethod())
@@ -126,7 +126,7 @@ public class JasminGenerator implements JasminBackend {
 
             methodStr += method.getMethodName() + "\n";
 
-            if(method.isConstructMethod())
+            if(method.iscreateMethod())
             {
                 methodStr += "<init>()" + method.getReturnType() + "\n";
 
@@ -148,39 +148,53 @@ public class JasminGenerator implements JasminBackend {
         return methodStr;
     }
 
-
-    public String constructJasminHeader(ClassUnit ollirClass)
+    public String createAccessSpecsStr(ClassUnit ollirClass)
     {
-        String className = ollirClass.getClassName();
-        String packageName = ollirClass.getPackage();
         String classType = ollirClass.getClassAccessModifier().name();
-        String superClassName = ollirClass.getSuperClass();
-        String classDirective = ".class ";
+        String accessSpecsStr = "";
 
         if(classType != "DEFAULT")
-            classDirective += classType;
+            accessSpecsStr += classType;
         if(ollirClass.isStaticClass())
-            classDirective += "static ";
+            accessSpecsStr += "static ";
         if(ollirClass.isFinalClass())
-            classDirective += "final ";
+            accessSpecsStr += "final ";
 
-        if(packageName != null)
-        {
-            classDirective += packageName + "/";
+        return accessSpecsStr;
+    }
+
+
+    public String createClassDirective(ClassUnit ollirClass){
+
+        String accessSpecsStr = createAccessSpecsStr(ollirClass);
+        String className = ollirClass.getClassName();
+        String packageName = ollirClass.getPackage();
+
+        if(packageName != null) {
+            className = packageName + "/" + className;
         }
-        classDirective += className + "\n";
 
-        String superNameJasmin = ".super ";
+        return ".class" + accessSpecsStr + className + '\n';
+    }
+
+    public String createSuperDirective(ClassUnit ollirClass){
+
+        String superClassName = ollirClass.getSuperClass();
 
         //Assume-se isto?
-        if(superClassName == null )
-        {
-            superNameJasmin += "java/lang/Object" + "\n";
-
+        if(superClassName == null ) {
+            superClassName = "java/lang/Object";
         }
-        else
-            superNameJasmin += superClassName + "\n";
 
-        return classDirective + superNameJasmin;
+        return ".super"  + superClassName + '\n';
+    }
+
+
+    public String createJasminHeader(ClassUnit ollirClass)
+    {
+        String classDirective = createClassDirective(ollirClass);
+        String superDirective = createSuperDirective(ollirClass);
+
+        return classDirective + superDirective;
     }
 }
