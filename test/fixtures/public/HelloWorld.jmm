@@ -3,7 +3,4 @@ class HelloWorld {
 	public static void main(String[] args) {
 		ioPlus.printHelloWorld();
 	}
-	public static void main(String[] args) {
-    		ioPlus.printHelloWorld();
-    	}
 }

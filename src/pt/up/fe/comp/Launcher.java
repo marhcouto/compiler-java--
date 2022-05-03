@@ -1,16 +1,12 @@
 package pt.up.fe.comp;
 
 import java.io.File;
-import java.sql.SQLOutput;
 import java.util.*;
 
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.semantic.JmmAnalyser;
-import pt.up.fe.comp.semantic.visitors.ClassDataCollector;
-import pt.up.fe.comp.semantic.visitors.ImportCollector;
-import pt.up.fe.comp.semantic.visitors.MethodDataCollector;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -43,9 +39,6 @@ public class Launcher {
         SimpleParser parser = new SimpleParser();
         JmmParserResult parserResult = parser.parse(input, config);
 
-        // Print tree
-        System.out.println(parserResult.getRootNode().toTree());
-
         // Check if there are parsing errors
         // TestUtils.noErrors(parserResult.getReports());
         for (Report r : parserResult.getReports()) {
@@ -62,6 +55,9 @@ public class Launcher {
         for (Report r : analysisResult.getReports()) {
             System.out.println(r.toString());
         }
+
+        //Tree Printer
+        System.out.println(parserResult.getRootNode().toTree());
 
         // HOLY TABLE PRINTER
         System.out.println(analysisResult.getSymbolTable().print());

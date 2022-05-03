@@ -1,4 +1,4 @@
-package pt.up.fe.comp.semantic.visitors;
+package pt.up.fe.comp.semantic.symbol_table.visitors;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -38,7 +38,6 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
     public Symbol visitStart(JmmNode node, Object dummy) {
         System.out.println("Visited Start");
         for (JmmNode child: node.getChildren()) {
-            System.out.println( child.toJson() );
             visit(child);
         }
         return null;

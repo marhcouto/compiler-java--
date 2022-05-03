@@ -31,18 +31,6 @@ public class Method {
         this.name = name;
     }
 
-    public void setReturnType(Type returnType) {
-        this.returnType = returnType;
-    }
-
-    public void setParentTable(Map<String, Symbol> parentTable) {
-        this.parentTable = parentTable;
-    }
-
-    public void setVariables(Map<String, OSymbol> variables) {
-        this.variables = variables;
-    }
-
     public String getName() {
         return name;
     }
