@@ -4,8 +4,10 @@ import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.semantic.analysers.AnalysisException;
 import pt.up.fe.comp.semantic.analysers.CheckValidSymbolAccess;
-import pt.up.fe.comp.semantic.analysers.TypeAnnotatorAndCheckMethodExistence;
+import pt.up.fe.comp.semantic.analysers.ScopeAnnotator;
+import pt.up.fe.comp.semantic.analysers.TypeChecker;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTableFactory;
 
@@ -19,8 +21,12 @@ public class JmmAnalyser implements JmmAnalysis {
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
         SymbolTable symbolTable = new SymbolTableFactory().generateTable(parserResult.getRootNode(), reports);
         new CheckValidSymbolAccess(symbolTable, reports).visit(parserResult.getRootNode());
-        TypeAnnotatorAndCheckMethodExistence typeAnnotator = new TypeAnnotatorAndCheckMethodExistence(symbolTable, reports);
-        typeAnnotator.visit(parserResult.getRootNode());
+        if (reports.isEmpty()) {
+            new ScopeAnnotator().visit(parserResult.getRootNode());
+            try {
+                new TypeChecker(symbolTable, reports).visit(parserResult.getRootNode());
+            } catch (AnalysisException e) { /* Errors are already handled somewhere*/ }
+        }
         return new JmmSemanticsResult(parserResult, symbolTable, reports);
     }
 }

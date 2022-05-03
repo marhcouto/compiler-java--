@@ -113,9 +113,11 @@ Type: (<INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> { jjtThis.put("arr", "true");
 
 // STATEMENTS
 Statement #void: (<OPEN_BRACKET> (Statement)* <CLOSE_BRACKET>) |
-    (<IF> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement <ELSE> Statement) #IfStm(3) |
-    (<WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> Statement) #WhileStm(2) |
+    (<IF> <OPEN_PAREN>Expression<CLOSE_PAREN> LoopBody <ELSE> LoopBody) #IfStm(3) |
+    (<WHILE> <OPEN_PAREN>Expression<CLOSE_PAREN> LoopBody) #WhileStm(2) |
     IDStatement <EOE>;
+
+LoopBody: Statement;
 
 IDStatement #void:  ((ArrOrVar) (AssignmentStatement | DotExpressionCalls)) | (Expression); // Statements starting with an ID
 
