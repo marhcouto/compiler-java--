@@ -58,6 +58,25 @@ public class JasminGenerator implements JasminBackend {
         return jasminHeader + jasminFields + jasminMethods;
     }
 
+    public String createField(Field field)
+    {
+        String fieldStr = ".field ";
+
+        String accModifiers = field.getFieldAccessModifier().name();
+        createAccessSpecsStr(accModifiers, field.isStaticField(), field.isFinalField());
+
+        fieldStr += field.getFieldName() + " ";
+
+        //TODO - convertFieldTypeToPrimitiveJasmin();
+        if(field.getFieldType().toString() == "INT32")
+            fieldStr += "I ";
+        if(field.isInitialized())
+            fieldStr += "=" + field.getInitialValue();
+
+        return fieldStr;
+    }
+
+
     //TODO 1 - go through all fields
     public String createJasminFields(ArrayList<Field> fields){
 
@@ -66,40 +85,48 @@ public class JasminGenerator implements JasminBackend {
 
         for (Field field : fields)
         {
-            fieldsStr += ".field ";
-            String accModifiers = field.getFieldAccessModifier().name();
-
-            Boolean isStatic = field.isStaticField();
-            Boolean isFinal = field.isFinalField();
-
-            if(accModifiers != "DEFAULT")
-            {
-                fieldsStr += accModifiers.toLowerCase() + " ";
-            }
-            if(isStatic)
-            {
-                fieldsStr += "static ";
-            }
-            if(isFinal)
-            {
-                fieldsStr += "final ";
-            }
-
-            System.out.println(accModifiers);
-
-            System.out.println(field.getFieldName());
-
-            fieldsStr += field.getFieldName() + " ";
-            //TODO - convertFieldTypeToPrimitiveJasmin();
-            if(field.getFieldType().toString() == "INT32")
-                fieldsStr += "I ";
-            if(field.isInitialized())
-                fieldsStr += "=" + field.getInitialValue();
+            String fieldStr = createField(field);
+            fieldsStr += fieldStr;
         }
 
         fieldsStr += "\n";
         System.out.println(fieldsStr);
         return fieldsStr;
+    }
+
+    public String createMethod(Method method) {
+
+        String methodStr = ".method ";
+        System.out.println(method.getMethodName());
+        //TODO - createStatements();
+        String accessSpec = method.getMethodAccessModifier().name();
+
+        if(method.isStaticMethod())
+            methodStr += "static ";
+
+        if(method.isFinalMethod())
+            methodStr += "final ";
+
+        methodStr += method.getMethodName() + "\n";
+
+        /*if(method.iscreateMethod())
+        {
+            methodStr += "<init>()" + method.getReturnType() + "\n";
+
+            methodStr += "aload 0 \n";
+            methodStr += "invokenonvirtual " + method.getInstr(0).toString();
+            methodStr += "return \n";
+
+        }*/
+
+
+        String x = method.getInstructions().toString();
+        System.out.println(x);
+        methodStr += ".end method";
+
+
+        return methodStr;
+
     }
 
     //TODO 2 - go through methods
@@ -108,56 +135,31 @@ public class JasminGenerator implements JasminBackend {
         //.method <access-spec> <method-name><method-signature>
         //<statements>
         //.end method
-        String methodStr = "";
+
+        String methodsStr = "";
         System.out.println("Printing "+ methods.size() + " Methods");
 
         for (Method method : methods)
         {
-            methodStr += ".method ";
-            System.out.println(method.getMethodName());
-            //TODO - createStatements();
-            String accessSpec = method.getMethodAccessModifier().name();
-
-            if(method.isStaticMethod())
-                methodStr += "static ";
-
-            if(method.isFinalMethod())
-                methodStr += "final ";
-
-            methodStr += method.getMethodName() + "\n";
-
-            if(method.iscreateMethod())
-            {
-                methodStr += "<init>()" + method.getReturnType() + "\n";
-
-                methodStr += "aload 0 \n";
-                methodStr += "invokenonvirtual " + method.getInstr(0).toString();
-                methodStr += "return \n";
-
-            }
-
-
-            String x = method.getInstructions().toString();
-            System.out.println(x);
-            methodStr += ".end method";
+            String fieldStr = createMethod(method);
+            methodsStr += fieldStr;
             break;
         }
 
-
-        System.out.println("here: " + methodStr);
-        return methodStr;
+        System.out.println("here: " + methodsStr);
+        return methodsStr;
     }
 
-    public String createAccessSpecsStr(ClassUnit ollirClass)
+    public String createAccessSpecsStr(String classType, Boolean isStatic, Boolean isFinal)
     {
-        String classType = ollirClass.getClassAccessModifier().name();
         String accessSpecsStr = "";
 
         if(classType != "DEFAULT")
-            accessSpecsStr += classType;
-        if(ollirClass.isStaticClass())
+
+            accessSpecsStr += classType.toLowerCase() + " ";
+        if(isStatic)
             accessSpecsStr += "static ";
-        if(ollirClass.isFinalClass())
+        if(isFinal)
             accessSpecsStr += "final ";
 
         return accessSpecsStr;
@@ -166,7 +168,8 @@ public class JasminGenerator implements JasminBackend {
 
     public String createClassDirective(ClassUnit ollirClass){
 
-        String accessSpecsStr = createAccessSpecsStr(ollirClass);
+        String classType = ollirClass.getClassAccessModifier().name();
+        String accessSpecsStr = createAccessSpecsStr(classType, ollirClass.isStaticClass(), ollirClass.isFinalClass());
         String className = ollirClass.getClassName();
         String packageName = ollirClass.getPackage();
 
