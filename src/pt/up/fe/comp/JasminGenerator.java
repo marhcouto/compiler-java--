@@ -19,19 +19,16 @@ public class JasminGenerator implements JasminBackend {
     @Override
     public JasminResult toJasmin(OllirResult ollirResult) {
 
+
         ollirResult.getOllirClass().show();
 
         ClassUnit ollirClass = ollirResult.getOllirClass();
-        String jasminHeader = this.constructJasminHeader(ollirResult);
-        String jasminFields = this.constructJasminFields(ollirClass.getFields());
-        String jasminMethods = this.constructJasminMethods(ollirClass.getMethods());
+        String jasminStr = constructJasminStr(ollirClass);
+        showJasmin(jasminStr);
 
         //(String className, String jasminCode, List< Report > reports, Map<String, String> config)
 
-        System.out.println(jasminHeader + "\n" +jasminFields + "\n" + jasminMethods);
-
-
-        var jasminResult = new JasminResult(jasminHeader + "\n" + jasminFields + "\n" + jasminMethods + "\n");
+        var jasminResult = new JasminResult(jasminStr);
 
         System.out.println("1");
         File outputDir = new File("test/fixtures/public/testing");
@@ -47,10 +44,22 @@ public class JasminGenerator implements JasminBackend {
     //TODO - Criar um ficheiro com fields com todos os tipos
     //TODO - Criar metodos e testar cada hipotese
 
+    public void showJasmin(String jasminStr)
+    {
+        System.out.println(jasminStr);
+    }
+
+    public String constructJasminStr(ClassUnit ollirClass){
+
+        String jasminHeader = this.constructJasminHeader(ollirClass);
+        String jasminFields = this.constructJasminFields(ollirClass.getFields());
+        String jasminMethods = this.constructJasminMethods(ollirClass.getMethods());
+
+        return jasminHeader + jasminFields + jasminMethods;
+    }
+
     //TODO 1 - go through all fields
     public String constructJasminFields(ArrayList<Field> fields){
-
-
 
         System.out.println("Printing "+ fields.size() + " Fields");
         String fieldsStr = "";
@@ -116,6 +125,18 @@ public class JasminGenerator implements JasminBackend {
                 methodStr += "final ";
 
             methodStr += method.getMethodName() + "\n";
+
+            if(method.isConstructMethod())
+            {
+                methodStr += "<init>()" + method.getReturnType() + "\n";
+
+                methodStr += "aload 0 \n";
+                methodStr += "invokenonvirtual " + method.getInstr(0).toString();
+                methodStr += "return \n";
+
+            }
+
+
             String x = method.getInstructions().toString();
             System.out.println(x);
             methodStr += ".end method";
@@ -128,20 +149,19 @@ public class JasminGenerator implements JasminBackend {
     }
 
 
-    public String constructJasminHeader(OllirResult ollirResult)
+    public String constructJasminHeader(ClassUnit ollirClass)
     {
-        String className = ollirResult.getOllirClass().getClassName();
-        String packageName = ollirResult.getOllirClass().getPackage();
-        String classType = ollirResult.getOllirClass().getClassAccessModifier().name();
-        System.out.println(classType);
-        String superClassName = ollirResult.getOllirClass().getSuperClass();
+        String className = ollirClass.getClassName();
+        String packageName = ollirClass.getPackage();
+        String classType = ollirClass.getClassAccessModifier().name();
+        String superClassName = ollirClass.getSuperClass();
         String classDirective = ".class ";
 
         if(classType != "DEFAULT")
             classDirective += classType;
-        if(ollirResult.getOllirClass().isStaticClass())
+        if(ollirClass.isStaticClass())
             classDirective += "static ";
-        if(ollirResult.getOllirClass().isFinalClass())
+        if(ollirClass.isFinalClass())
             classDirective += "final ";
 
         if(packageName != null)
