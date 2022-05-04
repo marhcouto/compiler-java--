@@ -28,7 +28,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         addVisit("False", this::visitSingleBoolLiteral);
         addVisit("This", this::visitThis);
         addVisit("IntegerLiteral", this::visitIntegerLiteral);
-        addVisit("UnaryOp", this::visitUnaryOp);
+        //addVisit("UnaryOp", this::visitUnaryOp);
         addVisit("WhileStm", this::visitLoop);
         addVisit("IfStm", this::visitLoop);
         addVisit("FnCallOp", this::visitFnCallOp);
@@ -115,14 +115,14 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
             ));
             throw new AnalysisException();
         }
-        switch (node.get("op")) {
+        /*switch (node.get("op")) {
             case "ADD", "MUL", "DIV", "SUB" -> node.put("type", "int");
             case "LT", "AND" -> node.put("type", "bool");
-        }
+        }*/
         return null;
     }
 
-    private Object visitUnaryOp(JmmNode node, Object dummy) {
+    /*private Object visitUnaryOp(JmmNode node, Object dummy) {
         String expectedType = null;
         switch (node.get("op")) {
             case "NOT" -> expectedType = "bool";
@@ -141,7 +141,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         }
         node.put("type", expectedType);
         return null;
-    }
+    }*/
 
     private Object visitLoop(JmmNode node, Object dummy) {
         JmmNode stopCondition = node.getJmmChild(0);
