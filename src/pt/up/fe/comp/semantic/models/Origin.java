@@ -1,3 +1,3 @@
-package pt.up.fe.comp.semantic;
+package pt.up.fe.comp.semantic.models;
 
 public enum Origin { PARAMS, LOCAL };

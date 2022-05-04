@@ -3,7 +3,7 @@ package pt.up.fe.comp.semantic.symbol_table;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.semantic.Method;
+import pt.up.fe.comp.semantic.models.Method;
 
 import java.util.LinkedList;
 import java.util.List;

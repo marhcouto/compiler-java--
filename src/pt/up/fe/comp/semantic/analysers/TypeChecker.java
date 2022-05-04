@@ -8,7 +8,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp.semantic.Constants;
-import pt.up.fe.comp.semantic.Method;
+import pt.up.fe.comp.semantic.models.Method;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
 import java.util.ArrayList;
@@ -237,7 +237,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
     private Object visitAsmOp(JmmNode node, Object scope) {
         JmmNode dest = node.getJmmChild(0);
         JmmNode orig = node.getJmmChild(1);
-        if (matchExpectedType(dest, orig.get("type"), orig.getAttributes().contains("arr"))) {
+        if (matchExpectedType(orig, dest.get("type"), dest.getAttributes().contains("arr"))) {
             return null;
         }
         reports.add(new Report(

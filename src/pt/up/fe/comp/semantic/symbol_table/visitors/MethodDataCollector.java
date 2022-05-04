@@ -7,9 +7,9 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
-import pt.up.fe.comp.semantic.Method;
-import pt.up.fe.comp.semantic.OSymbol;
-import pt.up.fe.comp.semantic.Origin;
+import pt.up.fe.comp.semantic.models.Method;
+import pt.up.fe.comp.semantic.models.OSymbol;
+import pt.up.fe.comp.semantic.models.Origin;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +36,6 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
     }
 
     public Symbol visitStart(JmmNode node, Object dummy) {
-        System.out.println("Visited Start");
         for (JmmNode child: node.getChildren()) {
             visit(child);
         }
