@@ -21,10 +21,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
 
     private final Map<String, Method> methods = new HashMap<>();
 
-    private final Map<String, Symbol> parentScope;
-
-    public MethodDataCollector(Map<String, Symbol> parentScope, List<Report> reportList) {
-        this.parentScope = parentScope;
+    public MethodDataCollector(List<Report> reportList) {
         this.reportList = reportList;
 
         addVisit("Start", this::visitStart);
@@ -61,7 +58,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
             return null;
         }
         List<JmmNode> methodChildren = node.getChildren();
-        Method newMethod = new Method("main", new Type("void", false), parentScope);
+        Method newMethod = new Method("main", new Type("void", false));
 
         // Argument
         newMethod.addVariable(new OSymbol(
@@ -103,7 +100,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
 
         // Method return type
         Type type = new Type(node.getChildren().get(0).get("image"), isArray);
-        Method newMethod = new Method(methodName, type, this.parentScope);
+        Method newMethod = new Method(methodName, type);
 
         // Arguments
         for (var childDecl: node.getChildren().get(2).getChildren()) {

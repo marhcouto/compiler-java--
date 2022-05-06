@@ -5,6 +5,7 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.semantic.models.Method;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,10 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
         this.fields = fields;
         this.methods = methods;
         this.reports = reports;
+    }
+
+    public SymbolTable(String superName, String className, List<String> imports, Map<String, Symbol> fields, Map<String, Method> methods) {
+        this(superName, className, imports, fields, methods, Collections.emptyList());
     }
 
     @Override

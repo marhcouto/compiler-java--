@@ -9,21 +9,19 @@ import java.util.Map;
 public class Method {
     private String name;
     private Type returnType;
-    private Map<String, Symbol> parentTable;
     private Map<String, OSymbol> variables;
 
     public Method() {
-        this(null, null, new HashMap<>(), new HashMap<>());
+        this(null, null, new HashMap<>());
     }
 
-    public Method(String name, Type returnType, Map<String, Symbol> parentTable) {
-        this(name, returnType, parentTable, new HashMap<>());
+    public Method(String name, Type returnType) {
+        this(name, returnType, new HashMap<>());
     }
 
-    public Method(String name, Type returnType, Map<String, Symbol> parentTable, Map<String, OSymbol> variables) {
+    public Method(String name, Type returnType, Map<String, OSymbol> variables) {
         this.name = name;
         this.returnType = returnType;
-        this.parentTable = parentTable;
         this.variables = variables;
     }
 

@@ -4,8 +4,11 @@ import java.io.File;
 import java.util.*;
 
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.ollir.JmmOptimization;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.ollir.JmmOptimizer;
 import pt.up.fe.comp.semantic.JmmAnalyser;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
@@ -53,6 +56,16 @@ public class Launcher {
         // Check if there are semantic errors
         // TestUtils.noErrors(analysisResult.getReports());
         for (Report r : analysisResult.getReports()) {
+            System.out.println(r.toString());
+        }
+
+        // SEMANTIC ANALYSIS STAGE
+        JmmOptimization optimizer = new JmmOptimizer();
+        OllirResult optimizationResults = optimizer.toOllir(analysisResult);
+
+        // Check if there are semantic errors
+        // TestUtils.noErrors(analysisResult.getReports());
+        for (Report r : optimizationResults.getReports()) {
             System.out.println(r.toString());
         }
 
