@@ -1,4 +1,4 @@
-package pt.up.fe.comp.semantic;
+package pt.up.fe.comp.semantic.models;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;

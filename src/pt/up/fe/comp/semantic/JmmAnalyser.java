@@ -4,10 +4,7 @@ import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.semantic.analysers.AnalysisException;
-import pt.up.fe.comp.semantic.analysers.CheckValidSymbolAccess;
-import pt.up.fe.comp.semantic.analysers.ScopeAnnotator;
-import pt.up.fe.comp.semantic.analysers.TypeChecker;
+import pt.up.fe.comp.semantic.analysers.*;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTableFactory;
 
@@ -27,6 +24,7 @@ public class JmmAnalyser implements JmmAnalysis {
                 new TypeChecker(symbolTable, reports).visit(parserResult.getRootNode());
             } catch (AnalysisException e) { /* Errors are already handled somewhere*/ }
         }
+        new CheckVarInit(symbolTable, reports).visit(parserResult.getRootNode());
         return new JmmSemanticsResult(parserResult, symbolTable, reports);
     }
 }

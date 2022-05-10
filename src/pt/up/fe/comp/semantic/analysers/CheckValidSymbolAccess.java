@@ -14,6 +14,7 @@ public class CheckValidSymbolAccess extends TopDownScopeAnalyser {
     public CheckValidSymbolAccess(SymbolTable symbolTable, List<Report> reports) {
         super(symbolTable, reports);
         addVisit("VarName", this::visitVarName);
+        addVisit("Variable", this::visitVariable);
         addVisit("ArrAccess", this::visitArrayAccess);
     }
 
@@ -34,6 +35,21 @@ public class CheckValidSymbolAccess extends TopDownScopeAnalyser {
         return false;
     }
 
+    private Boolean visitVariable(JmmNode node, String scope) {
+        String varType = node.getJmmChild(0).get("image");
+        if (Constants.primitives.contains(varType) || varType.equals(symbolTable.getClassName()) || symbolTable.hasSymbolInImportPath(varType)) {
+            return true;
+        }
+        reports.add(new Report(
+                ReportType.ERROR,
+                Stage.SEMANTIC,
+                Integer.parseInt(node.get("line")),
+                Integer.parseInt(node.get("column")),
+                String.format("Type '%s' not defined", varType)
+        ));
+        return false;
+    }
+
     private Boolean visitVarName(JmmNode node, String scope) {
         if (!symbolTable.hasSymbol(scope, node.get("image"))) {
             reports.add(new Report(
@@ -46,10 +62,5 @@ public class CheckValidSymbolAccess extends TopDownScopeAnalyser {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public List<Report> getReports() {
-        return reports;
     }
 }

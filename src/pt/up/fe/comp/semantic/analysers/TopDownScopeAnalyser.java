@@ -7,7 +7,7 @@ import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
 import java.util.List;
 
-public abstract class TopDownScopeAnalyser extends AJmmVisitor<String, Boolean> implements SemanticRuleAnalyser {
+public abstract class TopDownScopeAnalyser extends AJmmVisitor<String, Boolean> {
     protected SymbolTable symbolTable;
     protected List<Report> reports;
 
@@ -18,7 +18,6 @@ public abstract class TopDownScopeAnalyser extends AJmmVisitor<String, Boolean> 
         addVisit("ClassDeclaration", this::visitClassDeclaration);
         addVisit("MainMethodDeclaration", this::visitMainMethodDecl);
         addVisit("MethodDeclaration", this::visitMethodDecl);
-        addVisit("Variable", (node, method) -> false);
         setDefaultVisit(this::defaultVisitor);
     }
 
@@ -54,10 +53,5 @@ public abstract class TopDownScopeAnalyser extends AJmmVisitor<String, Boolean> 
     private Boolean visitMethodDecl(JmmNode node, String dummy) {
         visit(node.getJmmChild(3), node.getJmmChild(1).get("image"));
         return true;
-    }
-
-    @Override
-    public List<Report> getReports() {
-        return reports;
     }
 }

@@ -8,7 +8,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp.semantic.Constants;
-import pt.up.fe.comp.semantic.Method;
+import pt.up.fe.comp.semantic.models.Method;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         addVisit("False", this::visitSingleBoolLiteral);
         addVisit("This", this::visitThis);
         addVisit("IntegerLiteral", this::visitIntegerLiteral);
-        //addVisit("UnaryOp", this::visitUnaryOp);
+        addVisit("UnaryOp", this::visitUnaryOp);
         addVisit("WhileStm", this::visitLoop);
         addVisit("IfStm", this::visitLoop);
         addVisit("FnCallOp", this::visitFnCallOp);
@@ -115,14 +115,14 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
             ));
             throw new AnalysisException();
         }
-        /*switch (node.get("op")) {
+        switch (node.get("op")) {
             case "ADD", "MUL", "DIV", "SUB" -> node.put("type", "int");
             case "LT", "AND" -> node.put("type", "bool");
-        }*/
+        }
         return null;
     }
 
-    /*private Object visitUnaryOp(JmmNode node, Object dummy) {
+    private Object visitUnaryOp(JmmNode node, Object dummy) {
         String expectedType = null;
         switch (node.get("op")) {
             case "NOT" -> expectedType = "bool";
@@ -141,7 +141,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         }
         node.put("type", expectedType);
         return null;
-    }*/
+    }
 
     private Object visitLoop(JmmNode node, Object dummy) {
         JmmNode stopCondition = node.getJmmChild(0);
@@ -237,7 +237,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
     private Object visitAsmOp(JmmNode node, Object scope) {
         JmmNode dest = node.getJmmChild(0);
         JmmNode orig = node.getJmmChild(1);
-        if (matchExpectedType(dest, orig.get("type"), orig.getAttributes().contains("arr"))) {
+        if (matchExpectedType(orig, dest.get("type"), dest.getAttributes().contains("arr"))) {
             return null;
         }
         reports.add(new Report(
