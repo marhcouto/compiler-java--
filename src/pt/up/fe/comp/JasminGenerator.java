@@ -148,6 +148,7 @@ public class JasminGenerator implements JasminBackend {
 
                     CallInstruction ins = (CallInstruction) instruction;
                     CallType invocationType = ins.getInvocationType();
+
                     Element e1 = ins.getFirstArg();
                     Element secondArg = ins.getSecondArg();
                     Integer numOperands = ins.getNumOperands();

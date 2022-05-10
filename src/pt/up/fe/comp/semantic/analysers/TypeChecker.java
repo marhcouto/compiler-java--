@@ -115,18 +115,18 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
             ));
             throw new AnalysisException();
         }
-        switch (node.get("op")) {
+        /*switch (node.get("op")) {
             case "ADD", "MUL", "DIV", "SUB" -> node.put("type", "int");
             case "LT", "AND" -> node.put("type", "bool");
-        }
+        }*/
         return null;
     }
 
     private Object visitUnaryOp(JmmNode node, Object dummy) {
         String expectedType = null;
         switch (node.get("op")) {
-            case "NOT" -> expectedType = "bool";
-            case "SIM" -> expectedType = "int";
+            /*case "NOT" -> expectedType = "bool";
+            case "SIM" -> expectedType = "int";*/
         }
         JmmNode child = node.getJmmChild(0);
         if (!matchExpectedType(child, expectedType, false)) {
