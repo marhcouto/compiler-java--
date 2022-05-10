@@ -3,8 +3,6 @@ package pt.up.fe.comp.ollir;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
-
 import java.util.List;
 
 public class OllirUtils {
@@ -35,19 +33,13 @@ public class OllirUtils {
         return ollirType;
     }
 
-    public static String defaultConstructor(String className) {
-        return String.format(".construct %s().V {\n" +
-                "invokespecial(this, \"<init>\").V;\n" +
-                "}\n", className);
-    }
-
     public static boolean isStatic(JmmNode annotatedNode) {
         return annotatedNode.getKind().equals("VarName") && annotatedNode.get("image").equals(annotatedNode.get("type"));
     }
 
-    public static boolean canInline (JmmNode node) {
-        //Can inline if function is called over a variable/class
-        return node.getKind().equals("VarName");
+    public static boolean needToPlaceVariable (JmmNode node) {
+        //Can inline if function child is a variable name
+        return node.getJmmParent().getKind().equals("FnCallOp");
     }
 
     public static String generateFields(List<Symbol> fields) {

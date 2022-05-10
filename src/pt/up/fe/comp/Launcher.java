@@ -63,14 +63,14 @@ public class Launcher {
         JmmOptimization optimizer = new JmmOptimizer();
         OllirResult optimizationResults = optimizer.toOllir(analysisResult);
 
+        //Tree printer
+        System.out.println(parserResult.getRootNode().toTree());
+
         // Check if there are semantic errors
         // TestUtils.noErrors(analysisResult.getReports());
         for (Report r : optimizationResults.getReports()) {
             System.out.println(r.toString());
         }
-
-        //Tree Printer
-        System.out.println(parserResult.getRootNode().toTree());
 
         // HOLY TABLE PRINTER
         System.out.println(analysisResult.getSymbolTable().print());

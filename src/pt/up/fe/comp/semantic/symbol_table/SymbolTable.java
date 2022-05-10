@@ -4,6 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.semantic.models.Method;
+import pt.up.fe.comp.semantic.models.Origin;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -102,6 +103,23 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
             );
         }
         return null;
+    }
+
+    public Origin getSymbolOrigin(String methodScope, String symbolName) {
+        if (this.getMethodScope(methodScope).getVariables() .containsKey(symbolName)) {
+            return Origin.LOCAL;
+        } else if (this.getMethodScope(methodScope).getParameters().containsKey(symbolName)) {
+            return Origin.PARAMS;
+        } else if (this.fields.containsKey(symbolName)) {
+            return Origin.CLASS_FIELD;
+        } else if (this.hasSymbolInImportPath(symbolName)) {
+            return Origin.IMPORT_PATH;
+        }
+        throw new RuntimeException("Should not have reached here with missing symbols");
+    }
+
+    public int getParamIndex(String methodScope, String paramName) {
+        return this.getMethodScope(methodScope).getParameters().get(paramName).getIndex();
     }
 
     @Override

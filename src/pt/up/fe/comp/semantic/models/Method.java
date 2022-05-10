@@ -9,7 +9,7 @@ import java.util.Map;
 public class Method {
     private String name;
     private Type returnType;
-    private Map<String, OSymbol> variables;
+    private Map<String, ExtendedSymbol> variables;
 
     public Method() {
         this(null, null, new HashMap<>());
@@ -19,7 +19,7 @@ public class Method {
         this(name, returnType, new HashMap<>());
     }
 
-    public Method(String name, Type returnType, Map<String, OSymbol> variables) {
+    public Method(String name, Type returnType, Map<String, ExtendedSymbol> variables) {
         this.name = name;
         this.returnType = returnType;
         this.variables = variables;
@@ -37,9 +37,9 @@ public class Method {
         return returnType;
     }
 
-    public Map<String, Symbol> getParameters() {
-        Map<String, Symbol> parameters = new HashMap<>();
-        for (OSymbol variable: variables.values()) {
+    public Map<String, ExtendedSymbol> getParameters() {
+        Map<String, ExtendedSymbol> parameters = new HashMap<>();
+        for (ExtendedSymbol variable: variables.values()) {
             if (variable.getOrigin() == Origin.PARAMS) {
                 parameters.put(variable.getName(), variable);
             }
@@ -49,7 +49,7 @@ public class Method {
 
     public Map<String, Symbol> getLocalVars() {
         Map<String, Symbol> parameters = new HashMap<>();
-        for (OSymbol variable: variables.values()) {
+        for (ExtendedSymbol variable: variables.values()) {
             if (variable.getOrigin() == Origin.LOCAL) {
                 parameters.put(variable.getName(), variable);
             }
@@ -57,11 +57,11 @@ public class Method {
         return parameters;
     }
 
-    public Map<String, OSymbol> getVariables() {
+    public Map<String, ExtendedSymbol> getVariables() {
         return variables;
     }
 
-    public void addVariable(OSymbol variable) {
+    public void addVariable(ExtendedSymbol variable) {
         this.variables.put(variable.getName(), variable);
     }
 }
