@@ -136,22 +136,85 @@ public class JasminGenerator implements JasminBackend {
 
     public String createStatements(ArrayList<Instruction> instructions)
     {
+        String instrStr = "";
         for (Instruction instruction : instructions) {
             instruction.show();
             InstructionType instrType = instruction.getInstType();
-            System.out.println("tipo de instrução" + instruction + "\n");
+            instrStr += "\t";
 
-            String instrStr = "";
             switch (instrType.toString())
             {
                 case "CALL":
-                    instrStr += "invokespecial(";
+
+                    CallInstruction ins = (CallInstruction) instruction;
+                    CallType invocationType = ins.getInvocationType();
+                    Element e1 = ins.getFirstArg();
+                    Element secondArg = ins.getSecondArg();
+                    Integer numOperands = ins.getNumOperands();
+                    ArrayList<Element> listOfOperands = ins.getListOfOperands();
+                    String signature = "";
+                    System.out.println("num of operands" + numOperands);
+
+                    if (e1.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                        System.out.print("Literal: " + ((LiteralElement) e1).getLiteral());
+                        signature += ((LiteralElement) e1).getLiteral();
+                    } else {
+                        Operand o1 = (Operand) e1;
+                        System.out.print("Operand: " + o1.getName() + " " + o1.getType());
+                        //instrStr += sout    instruction.getClass().getClass().getSuperclass();
+                        signature += instruction.getClass().getClass().getSuperclass().getName().replace('.', '/');
+
+                    }
+
+                    if (numOperands > 1) {
+
+                        if (invocationType != CallType.NEW) { // only new type instructions do not have a field with second arg
+                            e1 = secondArg;
+                            if (e1.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                                System.out.print(", Literal: " + ((LiteralElement) e1).getLiteral());
+                                signature += "/" + ((LiteralElement) e1).getLiteral().replace("\"", "");
+                            } else {
+                                Operand o1 = (Operand) e1;
+                                System.out.print(", Operand: " + o1.getName() + " " + o1.getType());
+                            }
+                        }
+                        ArrayList<Element> otherArgs = listOfOperands;
+                        for (Element arg : otherArgs) {
+                            System.out.println("here");
+                            if (arg.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                                System.out.print(", Literal: " + ((LiteralElement) arg).getLiteral());
+                            } else {
+                                Operand o1 = (Operand) arg;
+                                System.out.print(", Operand: " + o1.getName() + " " + o1.getType());
+                            }
+                        }
+                    }
+
+                    Type returnType = ins.getReturnType();
+                    String returnTypeStr = getReturnValueJasmin(returnType);
+
+                    System.out.println("ins: "+ins.getInvocationType() +" " + secondArg + returnTypeStr + "()" + returnType);
+
+
+                    /*for (CallType callType : CallType.values()) {
+
+                        System.out.println(instrType.getClass());
+
+                        if(instrType.getClass()== callType.ordinal())
+                        {
+                            System.out.println(callType);
+                            System.out.println("igual");
+                        }
+                    }*/
+
+                    instrStr += invocationType + " " + signature + "()" + returnTypeStr ;
                 default:
                     instrStr += "";
             }
+            break;
 
         }
-        return "";
+        return instrStr;
     }
 
 
@@ -161,7 +224,6 @@ public class JasminGenerator implements JasminBackend {
         String methodStr = ".method ";
         System.out.println(method.getMethodName());
         String accessSpecs = "";
-        //TODO - createStatements();
 
         Type returnType = method.getReturnType();
         ArrayList<Element> params = method.getParams();
@@ -192,25 +254,11 @@ public class JasminGenerator implements JasminBackend {
             methodStr += accessSpecs + method.getMethodName();
         }
 
-
-
-        /*if(method.iscreateMethod())
-        {
-            methodStr += "<init>()" + method.getReturnType() + "\n";
-
-            methodStr += "aload 0 \n";
-            methodStr += "invokenonvirtual " + method.getInstr(0).toString();
-            methodStr += "return \n";
-
-        }*/
-
-
-        //String x = method.getInstructions().toString();
-
-        createStatements(method.getInstructions());
+        String statements = createStatements(method.getInstructions());
 
         System.out.println("Labels: " + method.getLabels());
 
+        methodStr += statements + "\n";
         methodStr += ".end method";
 
 
@@ -234,7 +282,7 @@ public class JasminGenerator implements JasminBackend {
             break;
         }
 
-        System.out.println("here: " + methodsStr);
+
         return methodsStr;
     }
 
@@ -251,7 +299,6 @@ public class JasminGenerator implements JasminBackend {
 
         return accessSpecsStr;
     }
-
 
     public String createClassDirective(ClassUnit ollirClass){
 
@@ -271,7 +318,6 @@ public class JasminGenerator implements JasminBackend {
 
         String superClassName = ollirClass.getSuperClass();
 
-        //Assume-se isto?
         if(superClassName == null ) {
             superClassName = "java/lang/Object";
         }
