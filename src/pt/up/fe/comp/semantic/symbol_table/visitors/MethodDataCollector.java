@@ -8,7 +8,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp.semantic.models.Method;
-import pt.up.fe.comp.semantic.models.OSymbol;
+import pt.up.fe.comp.semantic.models.ExtendedSymbol;
 import pt.up.fe.comp.semantic.models.Origin;
 
 import java.util.HashMap;
@@ -21,10 +21,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
 
     private final Map<String, Method> methods = new HashMap<>();
 
-    private final Map<String, Symbol> parentScope;
-
-    public MethodDataCollector(Map<String, Symbol> parentScope, List<Report> reportList) {
-        this.parentScope = parentScope;
+    public MethodDataCollector(List<Report> reportList) {
         this.reportList = reportList;
 
         addVisit("Start", this::visitStart);
@@ -61,12 +58,13 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
             return null;
         }
         List<JmmNode> methodChildren = node.getChildren();
-        Method newMethod = new Method("main", new Type("void", false), parentScope);
+        Method newMethod = new Method("main", new Type("void", false));
 
         // Argument
-        newMethod.addVariable(new OSymbol(
+        newMethod.addVariable(new ExtendedSymbol(
             new Type("String", true),
             methodChildren.get(0).get("image"),
+            1,
             Origin.PARAMS
         ));
 
@@ -74,7 +72,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
         for (var childDecl: methodChildren.get(1).getChildren()) {
             Symbol visitResult = visit(childDecl);
             if (visitResult != null) {
-                newMethod.addVariable(OSymbol.fromSymbol(visitResult, Origin.LOCAL));
+                newMethod.addVariable(ExtendedSymbol.fromSymbol(visitResult, Origin.LOCAL));
             }
         }
 
@@ -103,13 +101,14 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
 
         // Method return type
         Type type = new Type(node.getChildren().get(0).get("image"), isArray);
-        Method newMethod = new Method(methodName, type, this.parentScope);
+        Method newMethod = new Method(methodName, type);
 
         // Arguments
+        int idx = 1;
         for (var childDecl: node.getChildren().get(2).getChildren()) {
             Symbol visitResult = visit(childDecl);
             if (visitResult != null) {
-                newMethod.addVariable(OSymbol.fromSymbol(visitResult, Origin.PARAMS));
+                newMethod.addVariable(ExtendedSymbol.fromSymbol(visitResult, idx, Origin.PARAMS));
             }
         }
 
@@ -117,7 +116,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
         for (var childDecl: node.getChildren().get(3).getChildren()) {
             Symbol visitResult = visit(childDecl);
             if (visitResult != null) {
-                newMethod.addVariable(OSymbol.fromSymbol(visitResult, Origin.LOCAL));
+                newMethod.addVariable(ExtendedSymbol.fromSymbol(visitResult, Origin.LOCAL));
             }
         }
 
@@ -131,7 +130,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
         if (node.getJmmChild(0).getAttributes().contains("arr")) {
             isArray = true;
         }
-        return new OSymbol(new Type(node.getChildren().get(0).get("image"), isArray),
+        return new ExtendedSymbol(new Type(node.getChildren().get(0).get("image"), isArray),
                 node.getChildren().get(1).get("image"),
                 Origin.LOCAL
         );
