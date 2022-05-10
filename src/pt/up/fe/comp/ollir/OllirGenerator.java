@@ -85,15 +85,29 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         String lhs = visit(node.getJmmChild(0), scope);
         String rhs = visit(node.getJmmChild(1), scope);
         String tempVar = generateTempVar();
-        String operator = switch (node.get("op")) {
-            case "ADD" -> "+";
-            case "MUL" -> "*";
-            case "DIV" -> "/";
-            case "LT" -> "<";
-            case "SUB" -> "-";
-            case "AND" -> "&&";
-            default -> throw new RuntimeException("To make the compiler calm");
-        };
+        String operator;
+        switch (node.get("op")) {
+            case "ADD":
+                operator = "+";
+                break;
+            case "MUL":
+                operator = "*";
+                break;
+            case "DIV":
+                operator = "/";
+                break;
+            case "LT":
+                operator = "<";
+                break;
+            case "SUB":
+                operator = "-";
+                break;
+            case "AND":
+                operator = "&&";
+                break;
+            default:
+                throw new RuntimeException("To make the compiler calm");
+        }
         code.append(String.format("%s.%s :=.%s %s.%s %s.%s %s.%s;\n",
                 tempVar,
                 OllirUtils.toOllir(node),

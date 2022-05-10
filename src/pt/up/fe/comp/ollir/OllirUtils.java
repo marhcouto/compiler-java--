@@ -25,10 +25,16 @@ public class OllirUtils {
         if (isArray) {
             ollirType += "array.";
         }
-        ollirType += switch (typeStr) {
-            case "int" -> "i32";
-            case "void", ".Any" -> "V";
-            default -> typeStr;
+        switch (typeStr) {
+            case "int":
+                ollirType += "i32";
+                break;
+            case "void", ".Any":
+                ollirType += "V";
+                break;
+            default:
+                ollirType += typeStr;
+                break;
         };
         return ollirType;
     }

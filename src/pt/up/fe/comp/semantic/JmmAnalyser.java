@@ -24,7 +24,9 @@ public class JmmAnalyser implements JmmAnalysis {
                 new TypeChecker(symbolTable, reports).visit(parserResult.getRootNode());
             } catch (AnalysisException e) { /* Errors are already handled somewhere*/ }
         }
-        new CheckVarInit(symbolTable, reports).visit(parserResult.getRootNode());
+        if (reports.isEmpty()) {
+            new CheckVarInit(symbolTable, reports).visit(parserResult.getRootNode());
+        }
         return new JmmSemanticsResult(parserResult, symbolTable, reports);
     }
 }
