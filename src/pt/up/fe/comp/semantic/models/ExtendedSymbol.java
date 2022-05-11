@@ -5,7 +5,7 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 
 public class ExtendedSymbol extends pt.up.fe.comp.jmm.analysis.table.Symbol {
     private final Origin origin;
-    private final int index;
+    private int index;
 
     public static ExtendedSymbol fromSymbol(Symbol symbol, Origin origin) {
         return new ExtendedSymbol(symbol.getType(), symbol.getName(), -1, origin);
@@ -33,5 +33,9 @@ public class ExtendedSymbol extends pt.up.fe.comp.jmm.analysis.table.Symbol {
 
     public int getIndex() {
         return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

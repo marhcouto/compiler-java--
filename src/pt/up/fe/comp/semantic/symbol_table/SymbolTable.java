@@ -106,10 +106,8 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
     }
 
     public Origin getSymbolOrigin(String methodScope, String symbolName) {
-        if (this.getMethodScope(methodScope).getVariables() .containsKey(symbolName)) {
-            return Origin.LOCAL;
-        } else if (this.getMethodScope(methodScope).getParameters().containsKey(symbolName)) {
-            return Origin.PARAMS;
+        if (this.getMethodScope(methodScope).getVariables().containsKey(symbolName)) {
+            return this.getMethodScope(methodScope).getVariables().get(symbolName).getOrigin();
         } else if (this.fields.containsKey(symbolName)) {
             return Origin.CLASS_FIELD;
         } else if (this.hasSymbolInImportPath(symbolName)) {

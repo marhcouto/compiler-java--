@@ -59,12 +59,12 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
+        //Tree printer
+        System.out.println(parserResult.getRootNode().toTree());
+
         // SEMANTIC ANALYSIS STAGE
         JmmOptimization optimizer = new JmmOptimizer();
         OllirResult optimizationResults = optimizer.toOllir(analysisResult);
-
-        //Tree printer
-        System.out.println(parserResult.getRootNode().toTree());
 
         // Check if there are semantic errors
         // TestUtils.noErrors(analysisResult.getReports());

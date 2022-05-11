@@ -1,14 +1,14 @@
 import io.ioPlus;
 class HelloWorld {
-    int a;
 	public static void main(String[] args) {
-		a = 2;
-		int b;
-        b = 1 + a;
+	    int[] b;
+	    b = new int[3];
+	    this.teste(b);
 		ioPlus.printHelloWorld();
 	}
 
-	public int teste() {
-	    return true;
+	public int teste(int[] arr) {
+	    arr[0] = 1;
+	    return arr[0];
 	}
 }

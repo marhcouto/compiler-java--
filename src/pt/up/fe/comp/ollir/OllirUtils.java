@@ -45,7 +45,18 @@ public class OllirUtils {
 
     public static boolean needToPlaceVariable (JmmNode node) {
         //Can inline if function child is a variable name
-        return node.getJmmParent().getKind().equals("FnCallOp");
+        return !node.getJmmParent().getKind().equals("MethodBody");
+    }
+
+    public static int findParamIdx(JmmNode methodArgsList, String paramName) {
+        List<JmmNode> params = methodArgsList.getChildren();
+        for (int i = 0; i < params.size(); i++) {
+            JmmNode param = params.get(i);
+            if (param.getJmmChild(1).get("image").equals(paramName)) {
+                return i + 1;
+            }
+        }
+        throw new RuntimeException("Should not get here with invalid paramName");
     }
 
     public static String generateFields(List<Symbol> fields) {

@@ -10,7 +10,7 @@ import java.util.Collections;
 public class JmmOptimizer implements JmmOptimization {
     @Override
     public OllirResult toOllir(JmmSemanticsResult semanticsResult) {
-        var ollirGenerator = new OllirGenerator(SymbolTableFactory.fromJmmSymbolTable(semanticsResult.getSymbolTable()));
+        var ollirGenerator = new OllirGenerator(SymbolTableFactory.fromJmmSymbolTable(semanticsResult.getSymbolTable(), semanticsResult.getRootNode()));
         ollirGenerator.visit(semanticsResult.getRootNode());
 
         var ollirCode = ollirGenerator.getCode();
