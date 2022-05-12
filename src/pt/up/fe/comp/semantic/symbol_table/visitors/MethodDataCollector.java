@@ -109,6 +109,7 @@ public class MethodDataCollector extends AJmmVisitor<Object, Symbol> {
             Symbol visitResult = visit(childDecl);
             if (visitResult != null) {
                 newMethod.addVariable(ExtendedSymbol.fromSymbol(visitResult, idx, Origin.PARAMS));
+                idx += 1;
             }
         }
 

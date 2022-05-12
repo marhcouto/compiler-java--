@@ -8,6 +8,7 @@ import pt.up.fe.comp.semantic.models.ExtendedSymbol;
 import pt.up.fe.comp.semantic.models.Origin;
 import pt.up.fe.comp.semantic.symbol_table.visitors.ClassDataCollector;
 import pt.up.fe.comp.semantic.symbol_table.visitors.ImportCollector;
+import pt.up.fe.comp.semantic.symbol_table.visitors.IndexAdd;
 import pt.up.fe.comp.semantic.symbol_table.visitors.MethodDataCollector;
 
 import java.util.*;
@@ -32,14 +33,16 @@ public class SymbolTableFactory {
         );
     }
 
-    public static SymbolTable fromJmmSymbolTable(pt.up.fe.comp.jmm.analysis.table.SymbolTable symbolTable) {
-        return new SymbolTable(
+    public static SymbolTable fromJmmSymbolTable(pt.up.fe.comp.jmm.analysis.table.SymbolTable symbolTable, JmmNode root) {
+        SymbolTable newSymbolTable = new SymbolTable(
             symbolTable.getSuper(),
             symbolTable.getClassName(),
             symbolTable.getImports(),
             buildFieldsFromList(symbolTable.getFields()),
             buildMethodsFromList(symbolTable)
         );
+        new IndexAdd(newSymbolTable).visit(root);
+        return newSymbolTable;
     }
 
     private static Map<String, Symbol> buildFieldsFromList(List<Symbol> fields) {
