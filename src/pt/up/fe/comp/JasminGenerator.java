@@ -116,6 +116,8 @@ public class JasminGenerator implements JasminBackend {
         {
             case "VOID":
                 return "V";
+            case "INT32":
+                return "I";
             default:
                 return "";
         }
@@ -138,8 +140,10 @@ public class JasminGenerator implements JasminBackend {
     {
         String instrStr = "";
         for (Instruction instruction : instructions) {
+            System.out.println("here");
             instruction.show();
             InstructionType instrType = instruction.getInstType();
+            System.out.println(instrType);
             instrStr += "\t";
 
             switch (instrType.toString())
@@ -197,22 +201,62 @@ public class JasminGenerator implements JasminBackend {
                     System.out.println("ins: "+ins.getInvocationType() +" " + secondArg + returnTypeStr + "()" + returnType);
 
 
-                    /*for (CallType callType : CallType.values()) {
-
-                        System.out.println(instrType.getClass());
-
-                        if(instrType.getClass()== callType.ordinal())
-                        {
-                            System.out.println(callType);
-                            System.out.println("igual");
-                        }
-                    }*/
-
                     instrStr += invocationType + " " + signature + "()" + returnTypeStr ;
+                    break;
+                case "PUTFIELD":
+                    //putfield  <field-spec> <signature>
+                    System.out.println("putfield instruction");
+                    PutFieldInstruction putFieldInstruction = (PutFieldInstruction) instruction;
+                    String ldcInstr = "iload ";
+                    String putFieldInstr = "putfield ";
+
+                    Element thirdOperand = putFieldInstruction.getThirdOperand();
+                    Element secondOperand = putFieldInstruction.getSecondOperand();
+                    Element e = putFieldInstruction.getFirstOperand();
+
+
+
+                    if (e.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                        System.out.print("Literal: " + ((LiteralElement) e).getLiteral());
+                    } else {
+                        Operand o1 = (Operand) e;
+                        System.out.print("Operand: " + o1.getName() + " " + o1.getType());
+                        putFieldInstr += instruction.getClass().getClass().getSuperclass().getName().replace('.', '/') + "/";
+                    }
+
+                    e = secondOperand;
+                    if (e.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                        System.out.print("Literal: " + ((LiteralElement) e).getLiteral());
+                    } else {
+                        Operand o1 = (Operand) e;
+                        System.out.print("Operand: " + o1.getName() + " " + o1.getType());
+                        putFieldInstr += o1.getName() + " ";
+                        String typeJasmin = getReturnValueJasmin(o1.getType());
+                        putFieldInstr += typeJasmin + "\n";
+                    }
+
+                    e = thirdOperand;
+                    if (e.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                        System.out.print("Literal: " + ((LiteralElement) e).getLiteral());
+                    } else {
+                        Operand o1 = (Operand) e;
+                        System.out.print("Operand: " + o1.getName() + " " + o1.getType());
+
+                        ldcInstr += o1.getParamId() + "\n\t";
+                    }
+                    System.out.println();
+
+                    //por na stack
+                    //putfield myClass/a I
+                    instrStr += ldcInstr + putFieldInstr;
+
+                    break;
                 default:
                     instrStr += "";
+                    break;
+
             }
-            break;
+            instrStr += "\n";
 
         }
         return instrStr;
@@ -259,7 +303,8 @@ public class JasminGenerator implements JasminBackend {
 
         System.out.println("Labels: " + method.getLabels());
 
-        methodStr += statements + "\n";
+        methodStr += statements;
+        methodStr += "\treturn \n";
         methodStr += ".end method";
 
 
@@ -281,6 +326,7 @@ public class JasminGenerator implements JasminBackend {
             String fieldStr = createMethod(method);
             methodsStr += fieldStr;
             break;
+
         }
 
 
