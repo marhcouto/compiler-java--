@@ -2,6 +2,7 @@ package pt.up.fe.comp.semantic.symbol_table.visitors;
 
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
+import pt.up.fe.comp.semantic.models.ExtendedSymbol;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
 import java.util.LinkedList;
@@ -29,7 +30,10 @@ public class IndexAdd extends PreorderJmmVisitor<Object, Object> {
             return null;
         }
         String scope = node.getJmmParent().getJmmParent().getJmmChild(1).get("image");
-        symbolTable.getMethodScope(scope).getParameters().get(node.getJmmChild(1).get("image")).setIndex(idx++);
+        ExtendedSymbol parameter = symbolTable.getMethodScope(scope).getParameters().get(node.getJmmChild(1).get("image"));
+        if (parameter != null) {
+            parameter.setIndex(idx++);
+        }
         return null;
     }
 }
