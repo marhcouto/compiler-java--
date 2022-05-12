@@ -33,6 +33,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         addVisit("IfStm", this::visitLoop);
         addVisit("FnCallOp", this::visitFnCallOp);
         addVisit("AsmOp", this::visitAsmOp);
+        addVisit("ReturnStatement", this::visitReturnStatement);
         addVisit("ArrAccess", this::visitArrAccess);
         addVisit("CreateArrObj", this::visitCreateArrObj);
         addVisit("CreateObj", this::visitCreateObj);
@@ -74,6 +75,17 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
             return null;
         }
         String nodeScope = node.get("scope");
+        System.out.println(node);
+        if (symbolTable.getSymbol(nodeScope, node.get("image")) == null) {
+            reports.add(new Report(
+                    ReportType.ERROR,
+                    Stage.SEMANTIC,
+                    Integer.parseInt(node.get("line")),
+                    Integer.parseInt(node.get("column")),
+                    String.format("'%s' not defined in scope '%s'", node.get("image"), node.get("scope"))
+            ));
+            throw new AnalysisException();
+        }
         Type nodeType = symbolTable.getSymbol(nodeScope, node.get("image")).getType();
         node.put("type", nodeType.getName());
         if (nodeType.isArray()){
@@ -85,7 +97,9 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
     private boolean matchExpectedType(JmmNode node, String expectedType, boolean expectsArray) {
         String nodeType = node.get("type");
         boolean nodeIsArray = node.getAttributes().contains("arr");
-        return (nodeType.equals(expectedType) && (expectsArray == nodeIsArray)) || nodeType.equals(Constants.ANY_TYPE);
+        return (nodeType.equals(expectedType) && (expectsArray == nodeIsArray)) || nodeType.equals(Constants.ANY_TYPE) ||
+            (symbolTable.hasSymbolInImportPath(expectedType) && symbolTable.hasSymbolInImportPath(nodeType)) ||
+            (nodeType.equals(symbolTable.getClassName()) && symbolTable.getSuper().equals(expectedType));
     }
 
     private Object visitBinOp(JmmNode node, Object dummy) {
@@ -115,18 +129,26 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
             ));
             throw new AnalysisException();
         }
-        /*switch (node.get("op")) {
-            case "ADD", "MUL", "DIV", "SUB" -> node.put("type", "int");
-            case "LT", "AND" -> node.put("type", "bool");
-        }*/
+        switch (node.get("op")) {
+            case "ADD", "MUL", "DIV", "SUB":
+                node.put("type", "int");
+                break;
+            case "LT", "AND":
+                node.put("type", "bool");
+                break;
+        }
         return null;
     }
 
     private Object visitUnaryOp(JmmNode node, Object dummy) {
         String expectedType = null;
         switch (node.get("op")) {
-            /*case "NOT" -> expectedType = "bool";
-            case "SIM" -> expectedType = "int";*/
+            case "NOT":
+                expectedType = "bool";
+                break;
+            case "SIM":
+                expectedType = "int";
+                break;
         }
         JmmNode child = node.getJmmChild(0);
         if (!matchExpectedType(child, expectedType, false)) {
@@ -253,6 +275,15 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
     private Object visitArrAccess(JmmNode node, Object scope) {
         JmmNode underlyingVar = node.getJmmChild(0);
         Symbol symbol = symbolTable.getSymbol(underlyingVar.get("scope"), underlyingVar.get("image"));
+        if (!symbol.getType().isArray()) {
+            reports.add(new Report(
+                    ReportType.ERROR,
+                    Stage.SEMANTIC,
+                    Integer.parseInt(node.get("line")),
+                    Integer.parseInt(node.get("column")),
+                    String.format("Tried to access '%s' as array", symbol.getType()))
+            );
+        }
         if (!matchExpectedType(node.getJmmChild(1), "int", false)) {
             reports.add(new Report(
                     ReportType.ERROR,
@@ -283,8 +314,26 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         return null;
     }
 
-    private Object visitCreateObj(JmmNode node, Object scope) {
+    private Object visitCreateObj(JmmNode node, Object dummy) {
         node.put("type", node.getJmmChild(0).get("image"));
+        return null;
+    }
+
+    private Object visitReturnStatement(JmmNode node, Object dummy) {
+        String scope = node.getJmmParent().getJmmChild(1).get("image");
+        Type returnType = symbolTable.getReturnType(scope);
+        if (!matchExpectedType(node.getJmmChild(0), returnType.getName(), returnType.isArray())) {
+            reports.add(new Report(
+                    ReportType.ERROR,
+                    Stage.SEMANTIC,
+                    Integer.parseInt(node.get("line")),
+                    Integer.parseInt(node.get("column")),
+                    String.format("Return expects '%s' but it's returning '%s' instead",
+                            returnType,
+                            Utils.prettyNodeTypeToString(node.getJmmChild(0))
+                    )
+            ));
+        }
         return null;
     }
 }
