@@ -3,6 +3,7 @@ package pt.up.fe.comp;
 import java.io.File;
 import java.util.*;
 
+import pt.up.fe.comp.jasmin.JasminEmitter;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
@@ -74,6 +75,18 @@ public class Launcher {
 
         // HOLY TABLE PRINTER
         System.out.println(analysisResult.getSymbolTable().print());
+
+        // TODO - JUNTAR COM O RESTO DAS FASES
+        /* Descomentar quando se adicionar o resto
+        // Instantiate JasminBackend
+        var jasminEmitter = new JasminEmitter();
+
+        //Jasmin stage
+        var jasminResult = jasminEmitter.toJasmin(ollirResult);
+        TestUtils.noErrors(jasminResult);
+        */
+
+
     }
 
 }
