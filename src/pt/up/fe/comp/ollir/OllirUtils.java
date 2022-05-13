@@ -59,6 +59,9 @@ public class OllirUtils {
         throw new RuntimeException("Should not get here with invalid paramName");
     }
 
+    public static boolean isVariableOrLiteral(String id){
+        return id.matches("(((_|[a-zA-z])(_|\\d|[a-zA-Z])*)\\.(([a-zA-z])(\\d|[a-zA-Z])*))|\\d|true|false|this");
+    }
     public static String generateFields(List<Symbol> fields) {
         StringBuilder fieldCode = new StringBuilder();
         for (var field: fields) {
