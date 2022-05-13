@@ -1,6 +1,7 @@
 import org.junit.Test;
 import pt.up.fe.comp.JasminGenerator;
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jasmin.JasminEmitter;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.SpecsIo;
 
@@ -9,11 +10,12 @@ import java.util.Collections;
 public class JasminTest {
 
     @Test
-    public void testHelloWorld() {
+    public void testFac() {
 
         OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/Fac.ollir"), Collections.emptyMap());
-        var jasminGen = new JasminGenerator();
+        var jasminGen = new JasminEmitter();
         var jasminResult = jasminGen.toJasmin(ollirResult);
+
 
     }
 
@@ -23,7 +25,7 @@ public class JasminTest {
         //TestUtils.noErrors(ollirResult.getReports());
 
         OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/myclass2.ollir"), Collections.emptyMap());
-        var jasminGen = new JasminGenerator();
+        var jasminGen = new JasminEmitter();
         var jasminResult = jasminGen.toJasmin(ollirResult);
 
     }
@@ -34,7 +36,7 @@ public class JasminTest {
         //TestUtils.noErrors(ollirResult.getReports());
 
         OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/myclass3.ollir"), Collections.emptyMap());
-        var jasminGen = new JasminGenerator();
+        var jasminGen = new JasminEmitter();
         var jasminResult = jasminGen.toJasmin(ollirResult);
 
     }
@@ -45,7 +47,7 @@ public class JasminTest {
         //TestUtils.noErrors(ollirResult.getReports());
 
         OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/myclass4.ollir"), Collections.emptyMap());
-        var jasminGen = new JasminGenerator();
+        var jasminGen = new JasminEmitter();
         var jasminResult = jasminGen.toJasmin(ollirResult);
 
     }

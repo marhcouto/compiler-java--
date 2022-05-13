@@ -58,17 +58,6 @@ public class JasminGenerator implements JasminBackend {
         return jasminHeader + "\n" + jasminFields + "\n" + jasminMethods + "\n";
     }
 
-    public String convertFieldTypeToPrimitiveJasmin(Type type){
-
-        //TODO - Add other types
-        switch (type.toString())
-        {
-            case ("INT32"):
-                return "I";
-        }
-
-        return "";
-    }
 
     public String createField(Field field)
     {
@@ -78,7 +67,7 @@ public class JasminGenerator implements JasminBackend {
         String accessModifiers = createAccessSpecsStr(accModifiers, field.isStaticField(), field.isFinalField());
 
         fieldStr += accessModifiers + field.getFieldName() + " " ;
-        String fieldType = convertFieldTypeToPrimitiveJasmin(field.getFieldType());
+        String fieldType = getReturnValueJasmin(field.getFieldType());
 
         if(field.isInitialized())
             fieldType += "=" + field.getInitialValue();
@@ -425,7 +414,7 @@ public class JasminGenerator implements JasminBackend {
 
             for (Element param : params)
             {
-                paramStr += convertFieldTypeToPrimitiveJasmin(param.getType());
+                paramStr += getReturnValueJasmin(param.getType());
             }
 
 
@@ -454,10 +443,6 @@ public class JasminGenerator implements JasminBackend {
 
     public String createJasminMethods(ArrayList<Method> methods ){
 
-        //.method <access-spec> <method-name><method-signature>
-        //<statements>
-        //.end method
-
         String methodsStr = "";
         System.out.println("Printing "+ methods.size() + " Methods");
 
@@ -468,7 +453,6 @@ public class JasminGenerator implements JasminBackend {
             break;
 
         }
-
 
         return methodsStr;
     }

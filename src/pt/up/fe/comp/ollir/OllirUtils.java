@@ -25,7 +25,7 @@ public class OllirUtils {
         if (isArray) {
             ollirType += "array.";
         }
-        switch (typeStr) {
+        /*switch (typeStr) {
             case "int":
                 ollirType += "i32";
                 break;
@@ -35,7 +35,7 @@ public class OllirUtils {
             default:
                 ollirType += typeStr;
                 break;
-        };
+        };*/
         return ollirType;
     }
 
