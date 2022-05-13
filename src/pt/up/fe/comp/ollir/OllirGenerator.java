@@ -14,6 +14,7 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
     private final SymbolTable symbolTable;
 
     private int numTempVars = 0;
+    private int labels = 0;
 
     OllirGenerator(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -36,6 +37,9 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         addVisit("ReturnStatement", this::visitReturnStatement);
         addVisit("MethodArgsList", this::visitMethodArgsList);
         addVisit("AsmOp", this::visitAsmOp);
+        addVisit("WhileStm", this::visitWhile);
+        addVisit("IfStm", this::visitIfStm);
+        addVisit("Length", this::visitLength);
         setDefaultVisit((node, dummy) -> null);
     }
 
@@ -129,13 +133,21 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         String called = null;
         String curVar = null;
         List<String> args = runArgExpressions(node.getJmmChild(2), scope);
+        args = args.stream().map((varName) -> {
+            if (varName.contains("[")) {
+                String tempVar = generateTempVar() + ".i32";
+                code.append(String.format("%s :=.i32 %s;\n", tempVar, varName));
+                return tempVar;
+            }
+            return varName;
+        }).toList();
         if (OllirUtils.needToPlaceVariable(node.getJmmChild(0))) {
             called = visit(node.getJmmChild(0), scope);
         }
         if (OllirUtils.needToPlaceVariable(node)) {
             String type = OllirUtils.toOllir(node);
-            curVar = generateTempVar();
-            code.append(String.format("%s.%s:=.%s ", curVar, type, type));
+            curVar = String.format("%s.%s", generateTempVar(), type);
+            code.append(String.format("%s :=.%s ", curVar, type));
         }
         if (node.getJmmChild(0).getKind().equals("VarName")){
             called = node.getJmmChild(0).get("image");
@@ -149,7 +161,7 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         String type = OllirUtils.toOllir(node);
         code.append(String.format("%s.%s :=.%s new(%s).%s;\n", tempVar, type, type, type, type));
         code.append(String.format("invokespecial(%s.%s, \"<init>\").V;\n", tempVar, type));
-        return tempVar;
+        return String.format("%s.%s", tempVar, type);
     }
 
     private String visitCreateArrObj(JmmNode node, String scope) {
@@ -172,11 +184,8 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
             }
         }
         if (!args.isEmpty()) {
-            for (int i = 0; i < args.size(); i++) {
-                code.append(String.format(", %s.%s",
-                    args.get(i),
-                    OllirUtils.toOllir(node.getJmmChild(2).getJmmChild(i))
-                ));
+            for (String arg : args) {
+                code.append(String.format(", %s", arg));
             }
         }
         code.append(String.format(").%s;\n", OllirUtils.toOllir(node)));
@@ -253,15 +262,18 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
             case "ArrAccess": {
                 String arrName = node.getJmmChild(0).getJmmChild(0).get("image");
                 String accessedIndex = visit(node.getJmmChild(0).getJmmChild(1), scope);
-                String arrAccess = buildArrAccess(node.getJmmChild(0), accessedIndex, scope);
+                String arrAccess;
                 if (symbolTable.getSymbolOrigin(scope, arrName).equals(Origin.CLASS_FIELD)) {
-                    code.append(String.format("putfield(this, %s, %s).i32;\n", arrAccess, expr));
+                    String fetchedField = generateTempVar();
+                    code.append(String.format("%s.array.i32 :=.array.i32 getfield(this, %s.array.i32).array.i32;\n", fetchedField, arrName));
+                    arrAccess = buildArrAccess(fetchedField, Origin.CLASS_FIELD, accessedIndex, null);
                 } else {
-                    code.append(String.format("%s :=.i32 %s;\n",
-                            arrAccess,
-                            expr
-                    ));
+                    arrAccess = buildArrAccess(node.getJmmChild(0), accessedIndex, scope);
                 }
+                code.append(String.format("%s :=.i32 %s;\n",
+                        arrAccess,
+                        expr
+                ));
             }
         }
         return null;
@@ -315,6 +327,47 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         return generatedCode;
     }
 
+    public String visitWhile(JmmNode node, String scope) {
+        int labelIdx = labels++;
+        code.append(String.format("Loop%d: \n", labelIdx));
+        String condition = visit(node.getJmmChild(0), scope);
+        code.append(String.format("if (%s) goto Body%d;\n", condition, labelIdx));
+        code.append(String.format("goto EndLoop%d;\n", labelIdx));
+        code.append(String.format("Body%d:\n", labelIdx));
+        for (var child: node.getJmmChild(1).getChildren()) {
+            visit(child, scope);
+        }
+        code.append(String.format("goto Loop%d;\n", labelIdx));
+        List<JmmNode> siblings = node.getJmmParent().getChildren();
+        if (!siblings.get(siblings.size() - 1).equals(node)) {
+            code.append(String.format("EndLoop%d: \n", labelIdx));
+        }
+        return null;
+    }
+
+    private String visitIfStm(JmmNode node, String scope) {
+        int labelIdx = labels++;
+        String condition = visit(node.getJmmChild(0), scope);
+        code.append(String.format("if (%s) goto Then%d;\n", condition, labelIdx));
+        code.append(String.format("goto Else%d; \n", labelIdx));
+        code.append(String.format("Then%d: \n", labelIdx));
+        for (var child: node.getJmmChild(1).getChildren()) {
+            visit(child, scope);
+        }
+        code.append(String.format("Else%d: \n", labelIdx));
+        for (var child: node.getJmmChild(2).getChildren()) {
+            visit(child, scope);
+        }
+        return null;
+    }
+
+    private String visitLength(JmmNode node, String scope) {
+        String arrAccess = visit(node.getJmmChild(0), scope);
+        String tempVar = generateTempVar() + ".i32";
+        code.append(String.format("%s :=.i32 arraylength(%s).i32;\n", tempVar, arrAccess));
+        return tempVar;
+    }
+
     private void injectImports() {
         for (var importStm: symbolTable.getImports()) {
             code.append(String.format("import %s;\n", importStm));
@@ -328,9 +381,16 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
 
     private String buildArrAccess(JmmNode arrAccess, String arrIdx, String scope) {
         String arrName = arrAccess.getJmmChild(0).get("image");
-        String fixedArrIdx = generateTempVar() + ".i32";
-        code.append(String.format("%s.i32 :=.i32 %s.%s;\n", fixedArrIdx, arrIdx, "i32"));
-        switch (symbolTable.getSymbolOrigin(scope, arrName)) {
+        return buildArrAccess(arrName, symbolTable.getSymbolOrigin(scope, arrName), arrIdx, scope);
+    }
+
+    private String buildArrAccess(String arrName, Origin arrOrigin, String arrIdx, String scope) {
+        String fixedArrIdx = arrIdx;
+        if (!OllirUtils.isVariableOrLiteral(arrIdx)) {
+            fixedArrIdx = generateTempVar() + ".i32";
+            code.append(String.format("%s :=.i32 %s;\n", fixedArrIdx, arrIdx));
+        }
+        switch (arrOrigin) {
             case IMPORT_PATH:
                 throw new RuntimeException("Class cannot be accessed as an array");
             case PARAMS: {

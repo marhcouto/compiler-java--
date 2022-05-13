@@ -75,7 +75,6 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
             return null;
         }
         String nodeScope = node.get("scope");
-        System.out.println(node);
         if (symbolTable.getSymbol(nodeScope, node.get("image")) == null) {
             reports.add(new Report(
                     ReportType.ERROR,
