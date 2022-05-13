@@ -36,11 +36,33 @@ public class OptimizeTest {
     }
 
     @Test
+    public void testMyClass2() {
+        //var ollirResult = TestUtils.optimize(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
+        //TestUtils.noErrors(ollirResult.getReports());
+
+        OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/myclass2.ollir"), Collections.emptyMap());
+        var jasminGen = new JasminGenerator();
+        var jasminResult = jasminGen.toJasmin(ollirResult);
+
+    }
+
+    @Test
     public void testMyClass3() {
         //var ollirResult = TestUtils.optimize(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
         //TestUtils.noErrors(ollirResult.getReports());
 
         OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/myclass3.ollir"), Collections.emptyMap());
+        var jasminGen = new JasminGenerator();
+        var jasminResult = jasminGen.toJasmin(ollirResult);
+
+    }
+
+    @Test
+    public void testMyClass4() {
+        //var ollirResult = TestUtils.optimize(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
+        //TestUtils.noErrors(ollirResult.getReports());
+
+        OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/myclass4.ollir"), Collections.emptyMap());
         var jasminGen = new JasminGenerator();
         var jasminResult = jasminGen.toJasmin(ollirResult);
 

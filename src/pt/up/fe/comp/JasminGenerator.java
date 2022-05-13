@@ -1,6 +1,7 @@
 package pt.up.fe.comp;
 
-import org.specs.comp.ollir.*;
+import
+        org.specs.comp.ollir.*;
 import org.specs.comp.ollir.Type;
 import pt.up.fe.comp.jmm.jasmin.JasminBackend;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
@@ -116,6 +117,8 @@ public class JasminGenerator implements JasminBackend {
         {
             case "VOID":
                 return "V";
+            case "INT32":
+                return "I";
             default:
                 return "";
         }
@@ -138,12 +141,14 @@ public class JasminGenerator implements JasminBackend {
     {
         String instrStr = "";
         for (Instruction instruction : instructions) {
+            System.out.println("here");
             instruction.show();
+
             InstructionType instrType = instruction.getInstType();
+            System.out.println(instrType);
             instrStr += "\t";
 
-            switch (instrType.toString())
-            {
+            switch (instrType.toString()) {
                 case "CALL":
 
                     CallInstruction ins = (CallInstruction) instruction;
@@ -164,60 +169,239 @@ public class JasminGenerator implements JasminBackend {
                         System.out.print("Operand: " + o1.getName() + " " + o1.getType());
                         //instrStr += sout    instruction.getClass().getClass().getSuperclass();
                         signature += instruction.getClass().getClass().getSuperclass().getName().replace('.', '/');
-
                     }
-
-                    if (numOperands > 1) {
-
-                        if (invocationType != CallType.NEW) { // only new type instructions do not have a field with second arg
-                            e1 = secondArg;
-                            if (e1.isLiteral()) { // if the e1 is not a literal, then it is a variable
-                                System.out.print(", Literal: " + ((LiteralElement) e1).getLiteral());
-                                signature += "/" + ((LiteralElement) e1).getLiteral().replace("\"", "");
-                            } else {
-                                Operand o1 = (Operand) e1;
-                                System.out.print(", Operand: " + o1.getName() + " " + o1.getType());
-                            }
-                        }
-                        ArrayList<Element> otherArgs = listOfOperands;
-                        for (Element arg : otherArgs) {
-                            System.out.println("here");
-                            if (arg.isLiteral()) { // if the e1 is not a literal, then it is a variable
-                                System.out.print(", Literal: " + ((LiteralElement) arg).getLiteral());
-                            } else {
-                                Operand o1 = (Operand) arg;
-                                System.out.print(", Operand: " + o1.getName() + " " + o1.getType());
-                            }
-                        }
-                    }
-
-                    Type returnType = ins.getReturnType();
-                    String returnTypeStr = getReturnValueJasmin(returnType);
-
-                    System.out.println("ins: "+ins.getInvocationType() +" " + secondArg + returnTypeStr + "()" + returnType);
-
-
-                    /*for (CallType callType : CallType.values()) {
-
-                        System.out.println(instrType.getClass());
-
-                        if(instrType.getClass()== callType.ordinal())
-                        {
-                            System.out.println(callType);
-                            System.out.println("igual");
-                        }
-                    }*/
-
-                    instrStr += invocationType + " " + signature + "()" + returnTypeStr ;
-                default:
-                    instrStr += "";
+                    instrStr += createInstruction(instruction);
+                    break;
             }
-            break;
 
         }
         return instrStr;
     }
 
+    public String createInstruction(Instruction instruction){
+        InstructionType instrType = instruction.getInstType();
+        String instrStr = "\t";
+        Operand o1;
+        switch (instrType)
+        {
+            case ASSIGN:
+                AssignInstruction assign = (AssignInstruction) instruction;
+                System.out.print("\t" + assign.getInstType() + " ");
+
+                o1 = (Operand) assign.getDest();
+                System.out.print("Operand: " + o1.getName() + " " + o1.getType());
+
+                instrStr += createInstruction(assign.getRhs());
+                instrStr += "putfield ";
+                if(o1.isParameter()){
+                    instrStr += o1.getParamId();
+                } else {
+                    //TODO maybe: Classname/Varname
+                    instrStr += o1.getClass().getName()+ "/" + o1.getName() + " ";
+                }
+                instrStr += o1.getType().getTypeOfElement(); //TODO verify
+                instrStr += "\n\t";
+                System.out.print(" = ");
+
+                break;
+            case CALL:
+
+                CallInstruction ins = (CallInstruction) instruction;
+                CallType invocationType = ins.getInvocationType();
+
+                Element e1 = ins.getFirstArg();
+                Element secondArg = ins.getSecondArg();
+                Integer numOperands = ins.getNumOperands();
+                ArrayList<Element> listOfOperands = ins.getListOfOperands();
+                String signature = "";
+                System.out.println("num of operands" + numOperands);
+
+                if (e1.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                    System.out.print("Literal: " + ((LiteralElement) e1).getLiteral());
+                    signature += ((LiteralElement) e1).getLiteral();
+                } else {
+                    o1 = (Operand) e1;
+                    System.out.print("Operand: " + o1.getName() + " " + o1.getType());
+                    //instrStr += sout    instruction.getClass().getClass().getSuperclass();
+                    signature += instruction.getClass().getClass().getSuperclass().getName().replace('.', '/');
+
+                }
+
+                if (numOperands > 1) {
+
+                    if (invocationType != CallType.NEW) { // only new type instructions do not have a field with second arg
+                        e1 = secondArg;
+                        if (e1.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                            System.out.print(", Literal: " + ((LiteralElement) e1).getLiteral());
+                            signature += "/" + ((LiteralElement) e1).getLiteral().replace("\"", "");
+                        } else {
+                            o1 = (Operand) e1;
+                            System.out.print(", Operand: " + o1.getName() + " " + o1.getType());
+                        }
+                    }
+                    ArrayList<Element> otherArgs = listOfOperands;
+                    for (Element arg : otherArgs) {
+                        System.out.println("here");
+                        if (arg.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                            System.out.print(", Literal: " + ((LiteralElement) arg).getLiteral());
+                        } else {
+                            o1 = (Operand) arg;
+                            System.out.print(", Operand: " + o1.getName() + " " + o1.getType());
+                        }
+                    }
+                }
+
+                Type returnType = ins.getReturnType();
+                String returnTypeStr = getReturnValueJasmin(returnType);
+
+                System.out.println("ins: "+ins.getInvocationType() +" " + secondArg + returnTypeStr + "()" + returnType);
+
+
+                instrStr += invocationType + " " + signature + "()" + returnTypeStr ;
+                break;
+            case PUTFIELD:
+                //putfield  <field-spec> <signature>
+                System.out.println("putfield instruction");
+                PutFieldInstruction putFieldInstruction = (PutFieldInstruction) instruction;
+                String ldcInstr = "iload ";
+                String putFieldInstr = "putfield ";
+
+                Element thirdOperand = putFieldInstruction.getThirdOperand();
+                Element secondOperand = putFieldInstruction.getSecondOperand();
+                Element e = putFieldInstruction.getFirstOperand();
+
+
+                if (e.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                    System.out.print("Literal: " + ((LiteralElement) e).getLiteral());
+                } else {
+                    Operand o = (Operand) e;
+                    System.out.print("Operand: " + o.getName() + " " + o.getType());
+                    putFieldInstr += instruction.getClass().getClass().getSuperclass().getName().replace('.', '/') + "/";
+                }
+
+                e = secondOperand;
+                if (e.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                    System.out.print("Literal: " + ((LiteralElement) e).getLiteral());
+                } else {
+                    Operand o2 = (Operand) e;
+                    System.out.print("Operand: " + o2.getName() + " " + o2.getType());
+                    putFieldInstr += o2.getName() + " ";
+                    String typeJasmin = getReturnValueJasmin(o2.getType());
+                    putFieldInstr += typeJasmin + "\n";
+                }
+
+                e = thirdOperand;
+                if (e.isLiteral()) { // if the e1 is not a literal, then it is a variable
+                    System.out.print("Literal: " + ((LiteralElement) e).getLiteral());
+                } else {
+                    Operand o3 = (Operand) e;
+                    System.out.print("Operand: " + o3.getName() + " " + o3.getType());
+
+                    ldcInstr += o3.getParamId() + "\n\t";
+                }
+                System.out.println();
+
+                //por na stack
+                //putfield myClass/a I
+                instrStr += ldcInstr + putFieldInstr;
+
+                break;
+            case BRANCH:
+                CondBranchInstruction branchInstruction = (CondBranchInstruction) instruction;
+                OpInstruction cond = (OpInstruction) branchInstruction.getCondition();
+                for(Element elem : branchInstruction.getOperands()){
+                    instrStr += loadElement(elem);
+                }
+                instrStr += getConditional(cond.getOperation().getOpType());
+                instrStr += " " + branchInstruction.getLabel() + "\n";
+                break;
+            case GOTO:
+                GotoInstruction gotoInstruction = (GotoInstruction) instruction;
+                instrStr += "goto " + gotoInstruction.getLabel() + "\n";
+                break;
+            default:
+                instrStr += "";
+        }
+        return instrStr;
+    }
+
+    private String getConditional(OperationType type){
+        switch(type){
+            case GTEI32:
+            case GTE:
+                return "if_icmpge";
+            case GTH:
+                return "if_icmpgt";
+            case LTE:
+                return "if_icmple";
+            case LTH:
+                return "if_icmplt";
+            case EQ:
+                return "if_acmpeq";
+            case NEQ:
+                return "if_acmpne";
+            case EQI32:
+                return "if_icmpeq";
+            case NEQI32:
+                return "if_icmpne";
+            case NOT:
+                return "ifne";
+            case XOR:
+            case XORI32:
+                return "ixor";
+            case NOTB:
+                return "";
+
+            default:
+                return "ola";
+
+        }
+    }
+
+    private String loadElement(Element element){
+        String instrStr ="";
+        if(element.isLiteral()){
+            LiteralElement lit = (LiteralElement) element;
+            instrStr = "ldc " + lit.getLiteral() + " \n";
+        } else{
+            Operand operand = (Operand) element;
+            ElementType elemType = operand.getType().getTypeOfElement();
+            if(operand.isParameter()) {
+                switch (elemType) {
+                    case INT32:
+                        instrStr = "iload " + operand.getParamId();
+                        break;
+                    case BOOLEAN:
+                        instrStr = "iload " + operand.getParamId();
+                        break;
+                    case ARRAYREF:
+                        instrStr = "aload " + operand.getParamId();
+                        break;
+                    case OBJECTREF:
+                        instrStr = "aload " + operand.getParamId();
+                        break;
+                    case CLASS:
+                        instrStr = "aload " + operand.getParamId();
+                        break;
+                    case THIS:
+                        instrStr = "aload " + operand.getParamId();
+                        break;
+                    case STRING:
+                        instrStr = "aload " + operand.getParamId();
+                        break;
+                    case VOID:
+                        break;
+                }
+            }
+            else{
+                instrStr += "aload 0\n";
+                instrStr += "getfield " + element.getClass().getName()+"/"+operand.getName() + " ";
+
+            }
+            instrStr += "\n";
+        }
+        return instrStr;
+    }
 
     //TODO - Refactoring
     public String createMethod(Method method) {
@@ -259,7 +443,8 @@ public class JasminGenerator implements JasminBackend {
 
         System.out.println("Labels: " + method.getLabels());
 
-        methodStr += statements + "\n";
+        methodStr += statements;
+        methodStr += "\treturn \n";
         methodStr += ".end method";
 
 
@@ -281,6 +466,7 @@ public class JasminGenerator implements JasminBackend {
             String fieldStr = createMethod(method);
             methodsStr += fieldStr;
             break;
+
         }
 
 
