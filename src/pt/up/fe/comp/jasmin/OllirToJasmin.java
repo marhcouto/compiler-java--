@@ -1,13 +1,13 @@
 package pt.up.fe.comp.jasmin;
 
-import org.specs.comp.ollir.ClassUnit;
-import org.specs.comp.ollir.Element;
-import org.specs.comp.ollir.Method;
-import org.specs.comp.ollir.Type;
+import org.specs.comp.ollir.*;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.SpecsIo;
+import pt.up.fe.specs.util.classmap.FunctionClassMap;
+import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class OllirToJasmin {
 
@@ -122,30 +122,84 @@ public class OllirToJasmin {
         return methodsStr;
     }
 
-    public String getReturnValueJasmin(Type returnValue)
+    public String getJasminType(Type type)
     {
-        switch (returnValue.getTypeOfElement())
+        if(type instanceof ArrayType)
+        {
+            return "[" + getJasminType(((ArrayType) type).getArrayType());
+        }
+        else if(type instanceof ClassType)
+            return "L" + type.getClass() + ";";
+        else if(type instanceof Type)
+            return getJasminType(type.getTypeOfElement());
+        else{
+            throw new NotImplementedException(type.getTypeOfElement());
+        }
+
+    }
+
+    public String getJasminType(ElementType type)
+    {
+        System.out.println(type);
+        switch (type)
         {
             case INT32:
                 return "I";
             case BOOLEAN:
                 return "Z";
+            /*TODO
             case ARRAYREF:
+                //return "[" + ((ArrayType) typeOllir).getTypeOfElement();
                 return "[";
             case OBJECTREF:
-                return "L" ;
+                //return "L" + getFullyQualifiedName(classUnit.getSuperClass()) + ";";
+                return "";
             case CLASS:
                 return "[" + classUnit.getClassName() + ";";
             case THIS:
-                return getFullyQualifiedName(classUnit.getSuperClass());
+                return getFullyQualifiedName(classUnit.getSuperClass());*/
             case STRING:
-                return "[Ljava/lang/String;" +  returnValue.getClass();
+                return "Ljava/lang/String;";
             case VOID:
                 return "V";
             default:
-                return "";
+                throw new NotImplementedException(type);
         }
 
+    }
+
+    public String createMethodBody(Method method){
+        var code = new StringBuilder();
+
+        String accessSpecs = createAccessSpecsStr(method.getMethodAccessModifier().name(), method.isStaticMethod(), method.isFinalMethod());
+        code.append(accessSpecs + method.getMethodName() + '(');
+
+        var paramsTypes = method.getParams().stream()
+                .map(element -> getJasminType(element.getType()))
+                .collect(Collectors.joining());
+        code.append(paramsTypes).append(")").append(getJasminType(method.getReturnType()) + '\n');
+
+        code.append("\t.limit stack 99\n");
+        code.append("\t.limit locals 99\n");
+
+        /*for(var instruction : method.getInstructions())
+        {
+            code.append(getCode(instruction));
+        }*/
+
+        return code.toString();
+    }
+
+    public String createNonConstructMethod(Method method){
+
+        var code = new StringBuilder();
+
+        code.append(".method ");
+        code.append(createMethodBody(method));
+        code.append("\treturn \n");
+        code.append(".end method\n");
+
+        return code.toString();
     }
 
     public String getCode(Method method){
@@ -158,31 +212,51 @@ public class OllirToJasmin {
         }
         else
         {
-            code.append(".method ");
-            String accessSpecs = createAccessSpecsStr(method.getMethodAccessModifier().name(), method.isStaticMethod(), method.isFinalMethod());
-            code.append(accessSpecs + method.getMethodName() + '(');
-            //code.append(accessSpecs + method.getMethodName() + '\n');
-            ArrayList<Element> params = method.getParams();
-
-            for(var param : params) {
-                var typeJasmin = getReturnValueJasmin(param.getType());
-                param.show();
-                System.out.println(param + "->" + typeJasmin);
-                code.append(typeJasmin);
-            }
-
-            code.append(")\n");
-
-
-            /*String statements = createStatements(method.getInstructions());
-            methodStr += statements;*/
-
-            code.append("\treturn \n");
-            code.append(".end method\n");
+            code.append(createNonConstructMethod(method));
         }
 
         return code.toString();
 
+    }
+
+    public String getCode(Instruction instruction){
+        FunctionClassMap<Instruction, String> instructionMap = new FunctionClassMap<>();
+
+        instructionMap.put(CallInstruction.class, this::getCode);
+        instructionMap.apply(instruction);
+
+        throw new NotImplementedException(instruction.getInstType());
+    }
+
+    private String getCodeInvokeStatic(CallInstruction instruction)
+    {
+        var code = new StringBuilder();
+        var methodClass = ((Operand) instruction.getFirstArg()).getName();
+        var methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral().replace("\"", "");;
+
+        code.append("invokestatic " + getFullyQualifiedName(methodClass));
+        code.append("/" + methodName + "(");
+
+        //TODO-Exemplo
+        var operandsTypes = instruction.getListOfOperands().stream()
+                .map(element -> getJasminType(element.getType()))
+                .collect(Collectors.joining());
+        code.append(operandsTypes).append(")").append(getJasminType(instruction.getReturnType()) + '\n');
+
+        return code.toString();
+
+    }
+
+    public String getCode(CallInstruction instruction) {
+
+
+        switch(instruction.getInvocationType()){
+            case invokestatic:
+                return getCodeInvokeStatic(instruction);
+        }
+
+
+        throw new NotImplementedException(instruction.getInstType());
     }
 
 
