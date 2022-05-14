@@ -10,7 +10,6 @@ import java.util.Collections;
 
 public class JasminEmitter implements JasminBackend {
 
-
     @Override
     public JasminResult toJasmin(OllirResult ollirResult) {
         String jasminCode = new OllirToJasmin(ollirResult.getOllirClass()).getCode();
@@ -19,11 +18,12 @@ public class JasminEmitter implements JasminBackend {
 
         var jasminResult = new JasminResult(ollirResult, jasminCode, Collections.emptyList());
 
-
+        System.out.println("1");
         File outputDir = new File("test/fixtures/public/testing");
-
+        System.out.println("2");
         jasminResult.compile(outputDir);
-
+        System.out.println("3");
+        jasminResult.run();
 
         return jasminResult;
 

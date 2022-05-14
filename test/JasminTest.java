@@ -20,6 +20,17 @@ public class JasminTest {
     }
 
     @Test
+    public void testMyClass1() {
+        //var ollirResult = TestUtils.optimize(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
+        //TestUtils.noErrors(ollirResult.getReports());
+
+        OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/myclass1.ollir"), Collections.emptyMap());
+        var jasminGen = new JasminEmitter();
+        var jasminResult = jasminGen.toJasmin(ollirResult);
+
+    }
+
+    @Test
     public void testMyClass2() {
         //var ollirResult = TestUtils.optimize(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
         //TestUtils.noErrors(ollirResult.getReports());
@@ -53,10 +64,16 @@ public class JasminTest {
     }
 
     @Test
+    public void test2() {
+        OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/teste.ollir"), Collections.emptyMap());
+        var jasminGen = new JasminEmitter();
+        var jasminResult = jasminGen.toJasmin(ollirResult);
+    }
+
+    @Test
     public void test() {
         var jasminResult = TestUtils.backend(SpecsIo.getResource("fixtures/public/testing/Example.jmm"));
         TestUtils.noErrors(jasminResult);
-
 
     }
 
