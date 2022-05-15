@@ -54,6 +54,7 @@ public class JasminInstruction {
         instructionMap.put(GetFieldInstruction.class, this::getCode);
         instructionMap.put(AssignInstruction.class, this::getCode);
         instructionMap.put(ReturnInstruction.class, this::getCode);
+        instructionMap.put(SingleOpInstruction.class, this::getCode);
         return instructionMap.apply(instruction);
 
         //throw new NotImplementedException(instruction.getInstType());
@@ -218,8 +219,22 @@ public class JasminInstruction {
         System.out.println("TYPE OF ASSIGN: " + instruction.getTypeOfAssign());
 
         code.append(getCode(instruction.getRhs()));
+
+        //code.append("\t"+ this.jasminUtils.storeElement(instruction.getDest(), this.varTable, this.lastreg));
         //code.append("aload_0");
         //code.append(this.jasminUtils.storeElement(instruction.getRhs(), this.varTable, this.lastreg))
+
+        return code.toString();
+    }
+
+    //TODO - Ver a questão dos registos
+    public String getCode(SingleOpInstruction instruction)
+    {
+        var code = new StringBuilder();
+        instruction.show();
+
+        code.append("\t"+this.jasminUtils.loadElement(instruction.getSingleOperand(), this.varTable));
+        code.append("\t" +this.jasminUtils.storeElement(instruction.getSingleOperand(), this.varTable, this.lastreg));
 
         return code.toString();
     }
