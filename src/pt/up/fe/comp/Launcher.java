@@ -66,6 +66,7 @@ public class Launcher {
         // SEMANTIC ANALYSIS STAGE
         JmmOptimization optimizer = new JmmOptimizer();
         OllirResult optimizationResults = optimizer.toOllir(analysisResult);
+        System.out.println(optimizationResults.getOllirCode());
 
         // Check if there are semantic errors
         // TestUtils.noErrors(analysisResult.getReports());
@@ -76,17 +77,12 @@ public class Launcher {
         // HOLY TABLE PRINTER
         System.out.println(analysisResult.getSymbolTable().print());
 
-        // TODO - JUNTAR COM O RESTO DAS FASES
-        /* Descomentar quando se adicionar o resto
-        // Instantiate JasminBackend
         var jasminEmitter = new JasminEmitter();
 
         //Jasmin stage
-        var jasminResult = jasminEmitter.toJasmin(ollirResult);
-        TestUtils.noErrors(jasminResult);
-        */
-
-
+        var jasminResult = jasminEmitter.toJasmin(optimizationResults);
+        //TestUtils.noErrors(jasminResult);
+        System.out.println(jasminResult.getJasminCode());
     }
 
 }

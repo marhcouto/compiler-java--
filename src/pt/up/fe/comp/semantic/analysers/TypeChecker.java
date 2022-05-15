@@ -128,14 +128,14 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
             ));
             throw new AnalysisException();
         }
-        /*switch (node.get("op")) {
+        switch (node.get("op")) {
             case "ADD", "MUL", "DIV", "SUB":
                 node.put("type", "int");
                 break;
             case "LT", "AND":
                 node.put("type", "bool");
                 break;
-        }*/
+        }
         return null;
     }
 

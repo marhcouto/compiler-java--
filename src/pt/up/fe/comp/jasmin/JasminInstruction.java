@@ -36,7 +36,6 @@ public class JasminInstruction {
             Map.Entry<String, Descriptor> entry = (Map.Entry)var2.next();
             String key = (String)entry.getKey();
             Descriptor d1 = (Descriptor)entry.getValue();
-            System.out.println("\t\tVar name: " + key + " scope: " + d1.getScope() + " virtual register: " + d1.getVirtualReg());
             allRegs.add(d1.getVirtualReg());
         }
         sort(allRegs);
@@ -131,7 +130,6 @@ public class JasminInstruction {
         var firstArg = ((Operand) instruction.getFirstArg());
         var methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral().replace("\"", "");;
 
-        System.out.println("VALORES " + this.varTable);
         code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
         for(Element element : instruction.getListOfOperands()){
             code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
@@ -236,7 +234,6 @@ public class JasminInstruction {
     {
         var code = new StringBuilder();
         var o1 = (Operand) instruction.getDest();
-        System.out.println("TYPE OF ASSIGN: " + instruction.getTypeOfAssign());
         code.append(getCode(instruction.getRhs()));
         this.lastreg++;
         code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable, this.lastreg));
@@ -292,9 +289,7 @@ public class JasminInstruction {
 
     public String getCode(BinaryOpInstruction instruction){
         StringBuilder code = new StringBuilder();
-        instruction.show();
         Operation op = instruction.getOperation();
-        System.out.println("========== BinaryOperation = " + op.getOpType());
         code.append("\t" + this.jasminUtils.loadElement(instruction.getLeftOperand(), this.varTable));
         code.append("\t" + this.jasminUtils.loadElement(instruction.getRightOperand(), this.varTable));
         code.append("\t");
