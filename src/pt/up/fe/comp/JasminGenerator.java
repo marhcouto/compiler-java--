@@ -249,52 +249,7 @@ public class JasminGenerator implements JasminBackend {
                 instrStr += invocationType + " " + signature + "()" + returnTypeStr ;
                 break;
             case PUTFIELD:
-                //putfield  <field-spec> <signature>
-                System.out.println("putfield instruction");
-                PutFieldInstruction putFieldInstruction = (PutFieldInstruction) instruction;
-                String ldcInstr = "iload ";
-                String putFieldInstr = "putfield ";
-
-                Element thirdOperand = putFieldInstruction.getThirdOperand();
-                Element secondOperand = putFieldInstruction.getSecondOperand();
-                Element e = putFieldInstruction.getFirstOperand();
-
-
-                if (e.isLiteral()) { // if the e1 is not a literal, then it is a variable
-                    System.out.print("Literal: " + ((LiteralElement) e).getLiteral());
-                } else {
-                    Operand o = (Operand) e;
-                    System.out.print("Operand: " + o.getName() + " " + o.getType());
-                    putFieldInstr += instruction.getClass().getClass().getSuperclass().getName().replace('.', '/') + "/";
-                }
-
-                e = secondOperand;
-                if (e.isLiteral()) { // if the e1 is not a literal, then it is a variable
-                    System.out.print("Literal: " + ((LiteralElement) e).getLiteral());
-                } else {
-                    Operand o2 = (Operand) e;
-                    System.out.print("Operand: " + o2.getName() + " " + o2.getType());
-                    putFieldInstr += o2.getName() + " ";
-                    String typeJasmin = getReturnValueJasmin(o2.getType());
-                    putFieldInstr += typeJasmin + "\n";
-                }
-
-                e = thirdOperand;
-                if (e.isLiteral()) { // if the e1 is not a literal, then it is a variable
-                    System.out.print("Literal: " + ((LiteralElement) e).getLiteral());
-                } else {
-                    Operand o3 = (Operand) e;
-                    System.out.print("Operand: " + o3.getName() + " " + o3.getType());
-
-                    ldcInstr += o3.getParamId() + "\n\t";
-                }
-                System.out.println();
-
-                //por na stack
-                //putfield myClass/a I
-                instrStr += ldcInstr + putFieldInstr;
-
-                break;
+                      break;
             case BRANCH:
                 CondBranchInstruction branchInstruction = (CondBranchInstruction) instruction;
                 OpInstruction cond = (OpInstruction) branchInstruction.getCondition();

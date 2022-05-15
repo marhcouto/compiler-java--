@@ -1,20 +1,21 @@
-myClass {
-	.field private a.i32;
+Test {
 
-	.construct myClass().V {
-    		invokespecial(this, "<init>").V;
-    }
+	.field intField.i32;
 
-    .method public put(n.i32).V {
-    		putfield(this, a.i32, $1.n.i32).V;
-    }
+	.construct Test().V {
+		invokespecial(this, "<init>").V;
+	}
 
-    .method public static main(args.array.String).V {
-
-    	A.myClass :=.myClass new(myClass).myClass;
-        invokespecial(A.myClass,"<init>").V;
-        invokevirtual(A.myClass,"put", 2.i32).V;
-    }
+	.method public static main(args.array.String).V {
+		ret.V;
+	}
 
 
-    }
+	.method public foo().V {
+
+		putfield(this, intField.i32, 10.i32).V;
+		a.i32 :=.i32 getfield(this, intField.i32).i32;
+
+		ret.V;
+	}
+}
