@@ -5,6 +5,7 @@ import java.util.*;
 
 import pt.up.fe.comp.jasmin.JasminEmitter;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
@@ -39,10 +40,10 @@ public class Launcher {
         config.put("registerAllocation", "-1");
         config.put("debug", "false");
 
+
         // PARSING STAGE
         SimpleParser parser = new SimpleParser();
         JmmParserResult parserResult = parser.parse(input, config);
-
         // Check if there are parsing errors
         // TestUtils.noErrors(parserResult.getReports());
         for (Report r : parserResult.getReports()) {
@@ -53,35 +54,46 @@ public class Launcher {
         // SEMANTIC ANALYSIS STAGE
         JmmAnalyser analyser = new JmmAnalyser();
         JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
-
         // Check if there are semantic errors
         // TestUtils.noErrors(analysisResult.getReports());
         for (Report r : analysisResult.getReports()) {
             System.out.println(r.toString());
         }
 
-        //Tree printer
-        System.out.println(parserResult.getRootNode().toTree());
 
-        // SEMANTIC ANALYSIS STAGE
+        // OPTIMIZATION/OLLIR STAGE
         JmmOptimization optimizer = new JmmOptimizer();
-        OllirResult optimizationResults = optimizer.toOllir(analysisResult);
-        System.out.println(optimizationResults.getOllirCode());
-
-        // Check if there are semantic errors
-        // TestUtils.noErrors(analysisResult.getReports());
-        for (Report r : optimizationResults.getReports()) {
+        OllirResult optimizationResult = optimizer.toOllir(analysisResult);
+        // Optimization reports
+        // TestUtils.noErrors(optimizationResult.getReports());
+        for (Report r : optimizationResult.getReports()) {
             System.out.println(r.toString());
         }
 
-        // HOLY TABLE PRINTER
+        // JASMIN STAGE
+        JasminEmitter jasminEmitter = new JasminEmitter();
+        JasminResult jasminResult = jasminEmitter.toJasmin(optimizationResult);
+        // Jasmin reports
+        // TestUtils.noErrors(jasminResult.getReports());
+        for (Report r : jasminResult.getReports()) {
+            System.out.println(r.toString());
+        }
+
+
+        // TREE PRINT
+        System.out.println("\n\nTREE:\n");
+        System.out.println(parserResult.getRootNode().toTree());
+
+        // TABLE PRINT
+        System.out.println("\n\nTABLE:\n");
         System.out.println(analysisResult.getSymbolTable().print());
 
-        var jasminEmitter = new JasminEmitter();
+        // OLLIR CODE PRINT
+        System.out.println("\n\nOLLIR:\n");
+        System.out.println(optimizationResult.getOllirCode());
 
-        //Jasmin stage
-        var jasminResult = jasminEmitter.toJasmin(optimizationResults);
-        //TestUtils.noErrors(jasminResult);
+        // JASMIN CODE PRINT
+        System.out.println("\n\nJASMIN:\n");
         System.out.println(jasminResult.getJasminCode());
     }
 
