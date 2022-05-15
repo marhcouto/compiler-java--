@@ -71,6 +71,35 @@ public class JasminTest {
     }
 
     @Test
+    public void testArith() {
+        OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/cp2/OllirToJasminArithmetics.ollir"), Collections.emptyMap());
+        var jasminGen = new JasminEmitter();
+        var jasminResult = jasminGen.toJasmin(ollirResult);
+    }
+
+    @Test
+    public void testBasic() {
+        OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/cp2/OllirToJasminBasic.ollir"), Collections.emptyMap());
+        var jasminGen = new JasminEmitter();
+        var jasminResult = jasminGen.toJasmin(ollirResult);
+    }
+
+    @Test
+    public void testFields() {
+        OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/cp2/OllirToJasminFields.ollir"), Collections.emptyMap());
+        var jasminGen = new JasminEmitter();
+        var jasminResult = jasminGen.toJasmin(ollirResult);
+    }
+
+    @Test
+    public void testInvoke() {
+        OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/cp2/OllirToJasminInvoke.ollir"), Collections.emptyMap());
+        var jasminGen = new JasminEmitter();
+        var jasminResult = jasminGen.toJasmin(ollirResult);
+    }
+
+
+    @Test
     public void test() {
         var jasminResult = TestUtils.backend(SpecsIo.getResource("fixtures/public/testing/Example.jmm"));
         TestUtils.noErrors(jasminResult);

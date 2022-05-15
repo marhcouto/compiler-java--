@@ -130,8 +130,9 @@ public class OllirToJasmin {
 
 
     public String createMethodBody(Method method) {
+        method.show();
         var code = new StringBuilder();
-        int varId = 0;
+        //int varId = method.getParams().size() + 1;
 
         String accessSpecs = createAccessSpecsStr(method.getMethodAccessModifier().name(), method.isStaticMethod(), method.isFinalMethod());
         code.append(accessSpecs + method.getMethodName() + '(');
@@ -143,12 +144,10 @@ public class OllirToJasmin {
 
         code.append("\t.limit stack 99\n");
         code.append("\t.limit locals 99\n");
-
         for (var instruction : method.getInstructions()) {
-            method.addToVartable(instruction, varId);
+            //varId = method.addToVartable(instruction, varId);
             var jasminInstruction = new JasminInstruction(classUnit, method);
             code.append(jasminInstruction.getCode(instruction));
-            varId++;
         }
 
         return code.toString();

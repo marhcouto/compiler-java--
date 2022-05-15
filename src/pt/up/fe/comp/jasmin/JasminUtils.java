@@ -87,10 +87,10 @@ public class JasminUtils {
             switch (lit.getType().getTypeOfElement())
             {
                 case INT32:
-                    instrStr = getIStore(Integer.parseInt(lit.getLiteral()));
+                    instrStr += getIStore(Integer.parseInt(lit.getLiteral()));
                     break;
                 default:
-                    instrStr = "store " + lit.getLiteral();
+                    instrStr += "store " + lit.getLiteral();
                     break;
             }
 
@@ -100,25 +100,25 @@ public class JasminUtils {
             if (operand.isParameter()) {
                 switch (elemType) {
                     case INT32:
-                        instrStr = getIStore(operand.getParamId());
+                        instrStr += getIStore(operand.getParamId());
                         break;
                     case BOOLEAN:
-                        instrStr = getIStore(operand.getParamId());
+                        instrStr += getIStore(operand.getParamId());
                         break;
                     case ARRAYREF:
-                        instrStr = "aastore " + operand.getParamId();
+                        instrStr += "aastore " + operand.getParamId();
                         break;
                     case OBJECTREF:
-                        instrStr = "astore " + operand.getParamId();
+                        instrStr += "astore " + operand.getParamId();
                         break;
                     case CLASS:
-                        instrStr = "astore " + operand.getParamId();
+                        instrStr += "astore " + operand.getParamId();
                         break;
                     case THIS:
-                        instrStr = "astore_0";
+                        instrStr += "astore_0";
                         break;
                     case STRING:
-                        instrStr = "astore " + operand.getParamId();
+                        instrStr += "astore " + operand.getParamId();
                         break;
                     case VOID:
                         break;
@@ -129,25 +129,25 @@ public class JasminUtils {
                 if (virtualReg != -1) {
                     switch (elemType) {
                         case INT32:
-                            instrStr = getIStore(virtualReg);
+                            instrStr += getIStore(virtualReg);
                             break;
                         case BOOLEAN:
-                            instrStr = getIStore(virtualReg);
+                            instrStr += getIStore(virtualReg);
                             break;
                         case ARRAYREF:
-                            instrStr = "aastore " + virtualReg;
+                            instrStr += "aastore " + virtualReg;
                             break;
                         case OBJECTREF:
-                            instrStr = "astore " + virtualReg;
+                            instrStr += "astore " + virtualReg;
                             break;
                         case CLASS:
-                            instrStr = "astore " + virtualReg;
+                            instrStr += "astore " + virtualReg;
                             break;
                         case THIS:
-                            instrStr = "astore_0";
+                            instrStr += "astore_0";
                             break;
                         case STRING:
-                            instrStr = "astore " + virtualReg;
+                            instrStr += "astore " + virtualReg;
                             break;
                         case VOID:
                             break;
@@ -161,6 +161,22 @@ public class JasminUtils {
         instrStr += "\n";
 
         return instrStr;
+    }
+
+    public String getJasminReturnType(ElementType type){
+        switch (type)
+        {
+            case INT32:
+                return "i";
+            case BOOLEAN:
+                return "i";
+            case STRING:
+                return "Ljava/lang/String;";
+            case VOID:
+                return "";
+            default:
+                throw new NotImplementedException(type);
+        }
     }
 
     public String loadElement(Element element, HashMap<String, Descriptor> varTable){
@@ -222,19 +238,19 @@ public class JasminUtils {
                             instrStr = getIload(virtualReg);
                             break;
                         case ARRAYREF:
-                            instrStr = "aaload " + operand.getParamId();
+                            instrStr = "aaload " + virtualReg;
                             break;
                         case OBJECTREF:
-                            instrStr = "aload " + operand.getParamId();
+                            instrStr = "aload " + virtualReg;
                             break;
                         case CLASS:
-                            instrStr = "aload " + operand.getParamId();
+                            instrStr = "aload " + virtualReg;
                             break;
                         case THIS:
                             instrStr = "aload_0";
                             break;
                         case STRING:
-                            instrStr = "aload " + operand.getParamId();
+                            instrStr = "aload " + virtualReg;
                             break;
                         case VOID:
                             break;

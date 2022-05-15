@@ -1,3 +1,4 @@
+import io;
 myClass {
 	.field private a.i32;
 	

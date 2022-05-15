@@ -36,12 +36,12 @@ public class JasminInstruction {
             Map.Entry<String, Descriptor> entry = (Map.Entry)var2.next();
             String key = (String)entry.getKey();
             Descriptor d1 = (Descriptor)entry.getValue();
-            //System.out.println("\t\tVar name: " + key + " scope: " + d1.getScope() + " virtual register: " + d1.getVirtualReg());
+            System.out.println("\t\tVar name: " + key + " scope: " + d1.getScope() + " virtual register: " + d1.getVirtualReg());
             allRegs.add(d1.getVirtualReg());
         }
         sort(allRegs);
 
-        return allRegs.get(allRegs.size()-1);
+        return allRegs.size() == 0 ? 0 : allRegs.get(allRegs.size()-1);
     }
 
 
@@ -55,6 +55,8 @@ public class JasminInstruction {
         instructionMap.put(AssignInstruction.class, this::getCode);
         instructionMap.put(ReturnInstruction.class, this::getCode);
         instructionMap.put(SingleOpInstruction.class, this::getCode);
+        instructionMap.put(UnaryOpInstruction.class, this::getCode);
+        instructionMap.put(BinaryOpInstruction.class, this::getCode);
         return instructionMap.apply(instruction);
 
         //throw new NotImplementedException(instruction.getInstType());
@@ -67,7 +69,10 @@ public class JasminInstruction {
         var methodClass = ((Operand) instruction.getFirstArg()).getName();
         var methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral().replace("\"", "");;
 
-        code.append("invokestatic " +this.jasminUtils.getFullyQualifiedName(methodClass));
+        for(Element element : instruction.getListOfOperands()){
+            code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
+        }
+        code.append("\tinvokestatic " +this.jasminUtils.getFullyQualifiedName(methodClass));
         code.append("/" + methodName + "(");
 
         //TODO-Exemplo
@@ -92,7 +97,6 @@ public class JasminInstruction {
 
         for(Element element : instruction.getListOfOperands()){
             code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
-
         }
 
         code.append("\tinvokevirtual " +this.jasminUtils. getJasminType(firstArg.getType()) +  "/" + secondArg + "(");
@@ -127,6 +131,12 @@ public class JasminInstruction {
         var firstArg = ((Operand) instruction.getFirstArg());
         var methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral().replace("\"", "");;
 
+        System.out.println("VALORES " + this.varTable);
+        code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
+        for(Element element : instruction.getListOfOperands()){
+            code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
+        }
+
         code.append("\tinvokespecial " +this.jasminUtils.getJasminType(firstArg.getType()));
         code.append("/" + methodName + "(");
 
@@ -136,13 +146,22 @@ public class JasminInstruction {
                 .collect(Collectors.joining());
 
         code.append(operandsTypes).append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + '\n');
-        code.append("\t" +this.jasminUtils.storeElement(firstArg, this.varTable, this.lastreg));
+
+        //this.lastreg++;
+        //code.append("\t" +this.jasminUtils.storeElement(firstArg, this.varTable, this.lastreg));
 
         return code.toString();
 
 
     }
 
+    private String getCodeLdc(CallInstruction instruction){
+
+        StringBuilder code = new StringBuilder();
+        code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable ));
+        return code.toString();
+
+    }
 
     public String getCode(PutFieldInstruction instruction) {
 
@@ -205,23 +224,22 @@ public class JasminInstruction {
         if(!instruction.hasReturnValue())
             return "";
 
-        code.append("\t" + this.jasminUtils.getJasminType(instruction.getOperand().getType()).toLowerCase());
+        code.append("\t" + this.jasminUtils.loadElement(instruction.getOperand(), this.varTable));
+        code.append("\t" + this.jasminUtils.getJasminReturnType(instruction.getOperand().getType().getTypeOfElement()));
         code.append("return\n");
 
         return code.toString();
     }
 
+
     public String getCode(AssignInstruction instruction)
     {
         var code = new StringBuilder();
         var o1 = (Operand) instruction.getDest();
-
         System.out.println("TYPE OF ASSIGN: " + instruction.getTypeOfAssign());
-
         code.append(getCode(instruction.getRhs()));
-
-        //code.append("\t"+ this.jasminUtils.storeElement(instruction.getDest(), this.varTable, this.lastreg));
-        //code.append("aload_0");
+        this.lastreg++;
+        code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable, this.lastreg));
         //code.append(this.jasminUtils.storeElement(instruction.getRhs(), this.varTable, this.lastreg))
 
         return code.toString();
@@ -232,9 +250,7 @@ public class JasminInstruction {
     {
         var code = new StringBuilder();
         instruction.show();
-
         code.append("\t"+this.jasminUtils.loadElement(instruction.getSingleOperand(), this.varTable));
-        code.append("\t" +this.jasminUtils.storeElement(instruction.getSingleOperand(), this.varTable, this.lastreg));
 
         return code.toString();
     }
@@ -251,8 +267,88 @@ public class JasminInstruction {
                 return getCodeNewInstr(instruction);
             case invokespecial:
                 return getCodeInvokeSpecial(instruction);
+            case ldc:
+                return getCodeLdc(instruction);
+
         }
 
-        throw new NotImplementedException(instruction.getInstType());
+        throw new NotImplementedException(instruction.getInvocationType());
+    }
+
+    public String getCode(UnaryOpInstruction instruction){
+        StringBuilder code = new StringBuilder();
+        instruction.show();
+        Operation op = instruction.getOperation();
+        switch(op.getOpType()){
+            case NOT:
+                code.append("\t"+this.jasminUtils.loadElement(instruction.getOperand(), varTable));
+                code.append("\tineg\n");
+                break;
+            default:
+                throw new NotImplementedException(op.getOpType());
+        }
+        return code.toString();
+    }
+
+    public String getCode(BinaryOpInstruction instruction){
+        StringBuilder code = new StringBuilder();
+        instruction.show();
+        Operation op = instruction.getOperation();
+        System.out.println("========== BinaryOperation = " + op.getOpType());
+        code.append("\t" + this.jasminUtils.loadElement(instruction.getLeftOperand(), this.varTable));
+        code.append("\t" + this.jasminUtils.loadElement(instruction.getRightOperand(), this.varTable));
+        code.append("\t");
+        switch(op.getOpType()){
+            case DIVI32:
+            case DIV:
+                code.append("idiv");
+                break;
+            case MULI32:
+            case MUL:
+                code.append("imul");
+                break;
+            case SUBI32:
+            case SUB:
+                code.append("isub");
+                break;
+            case ADDI32:
+            case ADD:
+                code.append("iadd");
+                break;
+            case EQ:
+
+                break;
+            case NEQ:
+                break;
+            case GTH:
+                break;
+            case LTH:
+                break;
+            case ANDI32:
+                code.append("iand");
+            case AND:
+                break;
+            case ANDB:
+                break;
+            case ORI32:
+                code.append("ior");
+                break;
+            case OR:
+                break;
+            case ORB:
+                break;
+
+            case LTE:
+                break;
+            case GTE:
+                break;
+            case XOR:
+                code.append("ixor");
+                break;
+            default:
+                throw new NotImplementedException(op.getOpType());
+        }
+        code.append("\n");
+        return code.toString();
     }
 }
