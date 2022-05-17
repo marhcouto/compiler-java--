@@ -21,10 +21,12 @@ public class JasminInstruction {
     {
         this.classUnit = classUnit;
         this.method = method;
+
         method.buildVarTable();
         this.varTable = method.getVarTable();
         this.lastreg = this.getLastReg();
         this.jasminUtils = new JasminUtils(this.classUnit);
+        System.out.println("Labels: " + method.getLabels());
     }
 
     public int getLastReg() {
@@ -147,8 +149,6 @@ public class JasminInstruction {
 
         code.append(operandsTypes).append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + '\n');
 
-        //this.lastreg++;
-        //code.append("\t" +this.jasminUtils.storeElement(firstArg, this.varTable, this.lastreg));
 
         return code.toString();
 
@@ -238,9 +238,7 @@ public class JasminInstruction {
         var o1 = (Operand) instruction.getDest();
         System.out.println("TYPE OF ASSIGN: " + instruction.getTypeOfAssign());
         code.append(getCode(instruction.getRhs()));
-        this.lastreg++;
-        code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable, this.lastreg));
-        //code.append(this.jasminUtils.storeElement(instruction.getRhs(), this.varTable, this.lastreg))
+        code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable));
 
         return code.toString();
     }
@@ -316,13 +314,16 @@ public class JasminInstruction {
                 code.append("iadd");
                 break;
             case EQ:
-
+                // boolean a = 1 < 2 && 2 < 3
                 break;
             case NEQ:
                 break;
             case GTH:
                 break;
             case LTH:
+                code.append("if_icmpge \n");
+                code.append("\ticonst_1\n");
+                code.append("\ticonst_0");
                 break;
             case ANDI32:
                 code.append("iand");
