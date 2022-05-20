@@ -8,6 +8,7 @@ import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 import java.io.IOError;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 public class OllirToJasmin {
@@ -15,36 +16,40 @@ public class OllirToJasmin {
     private final ClassUnit classUnit;
     private final JasminUtils jasminUtils;
 
-    public OllirToJasmin(ClassUnit classUnit) {
+    public OllirToJasmin(ClassUnit classUnit)
+    {
         this.classUnit = classUnit;
         this.jasminUtils = new JasminUtils(this.classUnit);
     }
 
-    public String getCode() {
+    public String getCode()
+    {
         var code = new StringBuilder();
 
         code.append(createJasminHeader());
         code.append(createJasminFields());
-        code.append(createMethods());
+        code.append(createJasminMethods());
 
         return code.toString();
     }
 
 
-    public String createAccessSpecsStr(String classType, Boolean isStatic, Boolean isFinal) {
-        String accessSpecsStr = "";
+    public String createAccessSpecsStr(String classType, Boolean isStatic, Boolean isFinal)
+    {
+        var code = new StringBuilder();
 
         if (classType != "DEFAULT")
-            accessSpecsStr += classType.toLowerCase() + " ";
+            code.append(classType.toLowerCase() + " ");
         if (isStatic)
-            accessSpecsStr += "static ";
+            code.append("static ");
         if (isFinal)
-            accessSpecsStr += "final ";
+            code.append("final ");
 
-        return accessSpecsStr;
+        return code.toString();
     }
 
-    public String createClassDirective() {
+    public String createClassDirective()
+    {
 
         String classType = classUnit.getClassAccessModifier().name();
         String accessSpecsStr = createAccessSpecsStr(classType, classUnit.isStaticClass(), classUnit.isFinalClass());
@@ -58,25 +63,25 @@ public class OllirToJasmin {
         return ".class " + accessSpecsStr + className + '\n';
     }
 
-    public String createSuperDirective() {
-
+    public String createSuperDirective()
+    {
         String superClassName = classUnit.getSuperClass();
         String qualifiedSuperClassName = jasminUtils.getFullyQualifiedName(superClassName);
 
         return ".super " + qualifiedSuperClassName + '\n';
     }
 
-    public String createJasminHeader() {
+    public String createJasminHeader()
+    {
         String classDirective = createClassDirective();
         String superDirective = createSuperDirective();
 
         return classDirective + superDirective + "\n";
     }
 
-    public String createJasminFields() {
-
+    public String createJasminFields()
+    {
         ArrayList<Field> fields = classUnit.getFields();
-
         var code = new StringBuilder();
 
         for (Field field : fields) {
@@ -87,7 +92,8 @@ public class OllirToJasmin {
         return code.toString();
     }
 
-    public String createField(Field field) {
+    public String createField(Field field)
+    {
         var code = new StringBuilder();
 
         code.append(".field ");
@@ -106,33 +112,28 @@ public class OllirToJasmin {
         return code.toString();
     }
 
-    public String createConstructMethod(String superClassName) {
-
-        String constructStr = SpecsIo.getResource("fixtures/public/jasmin/jasminConstructor.template").replace("$<SUPERCLASS_NAME>", superClassName);
-
-        return constructStr;
-
+    public String createConstructMethod(String superClassName)
+    {
+        return SpecsIo.getResource("fixtures/public/jasmin/jasminConstructor.template").replace("$<SUPERCLASS_NAME>", superClassName);
     }
 
-    public String createMethods() {
+    public String createJasminMethods()
+    {
 
-        String methodsStr = "";
+        var code = new StringBuilder();
         ArrayList<Method> methods = classUnit.getMethods();
 
         for (Method method : methods) {
-            String fieldStr = getCode(method);
-            methodsStr += fieldStr;
-
+            code.append(getCode(method));
         }
 
-        return methodsStr;
+        return code.toString();
     }
 
 
-    public String createMethodBody(Method method) {
-        method.show();
+    public String createMethodBody(Method method)
+    {
         var code = new StringBuilder();
-        //int varId = method.getParams().size() + 1;
 
         String accessSpecs = createAccessSpecsStr(method.getMethodAccessModifier().name(), method.isStaticMethod(), method.isFinalMethod());
         code.append(accessSpecs + method.getMethodName() + '(');
@@ -144,8 +145,8 @@ public class OllirToJasmin {
 
         code.append("\t.limit stack 99\n");
         code.append("\t.limit locals 99\n");
+
         for (var instruction : method.getInstructions()) {
-            //varId = method.addToVartable(instruction, varId);
             var jasminInstruction = new JasminInstruction(classUnit, method);
             code.append(jasminInstruction.getCode(instruction));
         }
@@ -171,6 +172,11 @@ public class OllirToJasmin {
         code.append(".method ");
         code.append(createMethodBody(method));
         code.append(createReturnStatment(method.getReturnType()));
+
+        HashMap<String, Instruction> labels = method.getLabels();
+        for (String key : labels.keySet()) {
+            code.append(key + ":\n" + new JasminInstruction(this.classUnit, method).getCode(labels.get(key)));
+        }
         code.append(".end method\n");
 
         return code.toString();
