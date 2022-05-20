@@ -29,7 +29,8 @@ public class OllirUtils {
             case "int":
                 ollirType += "i32";
                 break;
-            case "void", ".Any":
+            case "void":
+            case ".Any":
                 ollirType += "V";
                 break;
             default:

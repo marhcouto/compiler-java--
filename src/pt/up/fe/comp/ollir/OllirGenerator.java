@@ -8,6 +8,7 @@ import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OllirGenerator extends AJmmVisitor<String, String> {
     private final StringBuilder code = new StringBuilder();
@@ -140,7 +141,7 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
                 return tempVar;
             }
             return varName;
-        }).toList();
+        }).collect(Collectors.toList());
         if (OllirUtils.needToPlaceVariable(node.getJmmChild(0))) {
             called = visit(node.getJmmChild(0), scope);
         }
