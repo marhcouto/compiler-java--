@@ -8,6 +8,7 @@ import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OllirGenerator extends AJmmVisitor<String, String> {
     private final StringBuilder code = new StringBuilder();
@@ -133,14 +134,14 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         String called = null;
         String curVar = null;
         List<String> args = runArgExpressions(node.getJmmChild(2), scope);
-        /*args = args.stream().map((varName) -> {
+        args = args.stream().map((varName) -> {
             if (varName.contains("[")) {
                 String tempVar = generateTempVar() + ".i32";
                 code.append(String.format("%s :=.i32 %s;\n", tempVar, varName));
                 return tempVar;
             }
             return varName;
-        }).toList();*/
+        }).collect(Collectors.toList());
         if (OllirUtils.needToPlaceVariable(node.getJmmChild(0))) {
             called = visit(node.getJmmChild(0), scope);
         }

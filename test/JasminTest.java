@@ -1,5 +1,4 @@
 import org.junit.Test;
-import pt.up.fe.comp.JasminGenerator;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jasmin.JasminEmitter;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
@@ -49,7 +48,7 @@ public class JasminTest {
         OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/myclass3.ollir"), Collections.emptyMap());
         var jasminGen = new JasminEmitter();
         var jasminResult = jasminGen.toJasmin(ollirResult);
-
+        System.out.println(jasminResult.getJasminCode());
     }
 
     @Test
@@ -68,6 +67,7 @@ public class JasminTest {
         OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/teste.ollir"), Collections.emptyMap());
         var jasminGen = new JasminEmitter();
         var jasminResult = jasminGen.toJasmin(ollirResult);
+        System.out.println(jasminResult.getJasminCode());
     }
 
     @Test

@@ -187,8 +187,8 @@ public class JasminUtils {
             switch (lit.getType().getTypeOfElement())
             {
                 case INT32:
-                    //instrStr = getIConst(lit.getLiteral());
-                    instrStr = "ldc " + lit.getLiteral();
+                    instrStr = getIConst(lit.getLiteral());
+                    //instrStr = "ldc " + lit.getLiteral();
                     break;
                 default:
                     instrStr = "ldc " + lit.getLiteral();
