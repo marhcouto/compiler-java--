@@ -69,6 +69,7 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         String mainArgsName = node.getJmmChild(0).get("image");
         code.append(String.format(".method public static main(%s.array.String).V{\n", mainArgsName));
         visit(node.getJmmChild(1), "main");
+        code.append("ret.V;\n");
         code.append("}\n");
         return null;
     }
@@ -332,33 +333,28 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         int labelIdx = labels++;
         code.append(String.format("Loop%d: \n", labelIdx));
         String condition = visit(node.getJmmChild(0), scope);
-        code.append(String.format("if (%s) goto Body%d;\n", condition, labelIdx));
-        code.append(String.format("goto EndLoop%d;\n", labelIdx));
-        code.append(String.format("Body%d:\n", labelIdx));
+        code.append(String.format("if (!.bool %s) goto EndLoop%d;\n", condition, labelIdx));
         for (var child: node.getJmmChild(1).getChildren()) {
             visit(child, scope);
         }
         code.append(String.format("goto Loop%d;\n", labelIdx));
-        List<JmmNode> siblings = node.getJmmParent().getChildren();
-        if (!siblings.get(siblings.size() - 1).equals(node)) {
-            code.append(String.format("EndLoop%d: \n", labelIdx));
-        }
+        code.append(String.format("EndLoop%d: \n", labelIdx));
         return null;
     }
 
     private String visitIfStm(JmmNode node, String scope) {
         int labelIdx = labels++;
         String condition = visit(node.getJmmChild(0), scope);
-        code.append(String.format("if (%s) goto Then%d;\n", condition, labelIdx));
-        code.append(String.format("goto Else%d; \n", labelIdx));
-        code.append(String.format("Then%d: \n", labelIdx));
+        code.append(String.format("if (!.bool %s) goto Else%d;\n", condition, labelIdx));
         for (var child: node.getJmmChild(1).getChildren()) {
             visit(child, scope);
         }
+        code.append(String.format("goto EndIf%d;\n", labelIdx));
         code.append(String.format("Else%d: \n", labelIdx));
         for (var child: node.getJmmChild(2).getChildren()) {
             visit(child, scope);
         }
+        code.append(String.format("EndIf%d: \n", labelIdx));
         return null;
     }
 
