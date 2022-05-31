@@ -98,7 +98,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         boolean nodeIsArray = node.getAttributes().contains("arr");
         return (nodeType.equals(expectedType) && (expectsArray == nodeIsArray)) || nodeType.equals(Constants.ANY_TYPE) ||
             (symbolTable.hasSymbolInImportPath(expectedType) && symbolTable.hasSymbolInImportPath(nodeType)) ||
-            (nodeType.equals(symbolTable.getClassName()) && symbolTable.getSuper().equals(expectedType));
+            (nodeType.equals(symbolTable.getClassName()) && symbolTable.getSuper() != null && symbolTable.getSuper().equals(expectedType));
     }
 
     private Object visitBinOp(JmmNode node, Object dummy) {
