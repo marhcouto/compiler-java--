@@ -78,7 +78,7 @@ public class JasminUtils {
         return code.toString();
     }
 
-    public String storeElement(Element element, HashMap<String, Descriptor> varTable, int lastReg)
+    public String storeElement(Element element, HashMap<String, Descriptor> varTable)
     {
         String instrStr ="";
         if(element.isLiteral()){

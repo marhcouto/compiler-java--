@@ -7,8 +7,6 @@ Test {
 	.method public static main(args.array.String).V {
 		ret.V;
 	}
-
-
 	.method public foo().bool {
 		a.i32 :=.i32 5.i32;
 		b.i32 :=.i32 6.i32;
