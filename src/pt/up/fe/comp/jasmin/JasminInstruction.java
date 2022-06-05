@@ -19,11 +19,13 @@ public class JasminInstruction {
     {
         this.classUnit = classUnit;
         this.method = method;
+
         method.buildVarTable();
         method.getLabels();
         this.varTable = method.getVarTable();
         this.lastreg = this.getLastReg();
         this.jasminUtils = new JasminUtils(this.classUnit);
+        System.out.println("Labels: " + method.getLabels());
     }
 
     public int getLastReg() {
@@ -219,7 +221,7 @@ public class JasminInstruction {
         var o1 = (Operand) instruction.getDest();
 
         code.append(getCode(instruction.getRhs()));
-        code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable, this.lastreg));
+        code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable));
 
         return code.toString();
     }
