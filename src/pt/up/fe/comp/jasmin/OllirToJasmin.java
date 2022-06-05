@@ -1,12 +1,7 @@
 package pt.up.fe.comp.jasmin;
 
 import org.specs.comp.ollir.*;
-import pt.up.fe.comp.jmm.ollir.OllirResult;
-import pt.up.fe.specs.util.SpecsIo;
-import pt.up.fe.specs.util.classmap.FunctionClassMap;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
-import java.io.IOError;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Collectors;
@@ -114,7 +109,11 @@ public class OllirToJasmin {
 
     public String createConstructMethod(String superClassName)
     {
-        return SpecsIo.getResource("fixtures/public/jasmin/jasminConstructor.template").replace("$<SUPERCLASS_NAME>", superClassName);
+        return ".method public <init>()V\n" +
+                "   aload_0\n" +
+                "   invokenonvirtual $<SUPERCLASS_NAME>/<init>()V\n" +
+                "   return\n" +
+                ".end method\n".replace("$<SUPERCLASS_NAME>", superClassName);
     }
 
     public String createJasminMethods()
@@ -134,21 +133,27 @@ public class OllirToJasmin {
     public String createMethodBody(Method method)
     {
         var code = new StringBuilder();
-
+        var bodyCode = new StringBuilder();
         String accessSpecs = createAccessSpecsStr(method.getMethodAccessModifier().name(), method.isStaticMethod(), method.isFinalMethod());
         code.append(accessSpecs + method.getMethodName() + '(');
 
         var paramsTypes = method.getParams().stream()
                 .map(element -> jasminUtils.getJasminType(element.getType()))
                 .collect(Collectors.joining());
+
         code.append(paramsTypes).append(")").append(jasminUtils.getJasminType(method.getReturnType()) + '\n');
 
         code.append("\t.limit stack 99\n");
-        code.append("\t.limit locals 99\n");
+        code.append(String.format("\t.limit locals %d\n", JasminUtils.getLocalVariableCount(method)));
 
+        int maxEverStackSize = Integer.MIN_VALUE;
+        int curStackSize = 0;
         for (var instruction : method.getInstructions()) {
             var jasminInstruction = new JasminInstruction(classUnit, method);
-            code.append(jasminInstruction.getCode(instruction));
+            String jasminInstructionCode = jasminInstruction.getCode(instruction);
+
+            bodyCode.append(jasminInstructionCode);
+
         }
 
         return code.toString();
