@@ -5,6 +5,7 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.semantic.analysers.*;
+import pt.up.fe.comp.semantic.analysers.utils.FindMainBody;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTableFactory;
 
@@ -26,6 +27,13 @@ public class JmmAnalyser implements JmmAnalysis {
         }
         if (reports.isEmpty()) {
             new CheckVarInit(symbolTable, reports).visit(parserResult.getRootNode());
+        }
+        if (reports.isEmpty()) {
+            FindMainBody mainBodyFinder = new FindMainBody();
+            mainBodyFinder.visit(parserResult.getRootNode());
+            if (mainBodyFinder.getMainMethodBody() != null) {
+                new CheckThisInMain(reports).visit(mainBodyFinder.getMainMethodBody());
+            }
         }
         return new JmmSemanticsResult(parserResult, symbolTable, reports);
     }

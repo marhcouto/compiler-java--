@@ -86,7 +86,7 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
     }
 
     public Boolean hasSymbol(String methodName, String symbolName) {
-        return methods.get(methodName).getVariables().containsKey(symbolName) || fields.containsKey(symbolName) || hasSymbolInImportPath(symbolName);
+        return methods.get(methodName).getVariables().containsKey(symbolName) || (fields.containsKey(symbolName) && !methodName.equals("main")) || hasSymbolInImportPath(symbolName);
     }
 
     public Symbol getSymbol(String methodName, String symbolName) {

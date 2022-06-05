@@ -8,6 +8,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp.semantic.Constants;
+import pt.up.fe.comp.semantic.analysers.utils.Utils;
 import pt.up.fe.comp.semantic.models.Method;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
@@ -40,7 +41,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
     }
 
     private Object visitSingleBoolLiteral(JmmNode node, Object dummy) {
-        node.put("type", "bool");
+        node.put("type", "boolean");
         return null;
     }
 
@@ -104,7 +105,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
     private Object visitBinOp(JmmNode node, Object dummy) {
         String expectedType = "int";
         if (node.get("op").equals("AND")) {
-            expectedType = "bool";
+            expectedType = "boolean";
         }
         JmmNode leftChild = node.getJmmChild(0);
         JmmNode rightChild = node.getJmmChild(1);
@@ -137,7 +138,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
                 break;
             case "LT":
             case "AND":
-                node.put("type", "bool");
+                node.put("type", "boolean");
                 break;
         }
         return null;
@@ -147,7 +148,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         String expectedType = null;
         switch (node.get("op")) {
             case "NOT":
-                expectedType = "bool";
+                expectedType = "boolean";
                 break;
             case "SIM":
                 expectedType = "int";
@@ -170,8 +171,8 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
 
     private Object visitLoop(JmmNode node, Object dummy) {
         JmmNode stopCondition = node.getJmmChild(0);
-        if (matchExpectedType(stopCondition, "bool", false)) {
-            node.put("type", "bool");
+        if (matchExpectedType(stopCondition, "boolean", false)) {
+            node.put("type", "boolean");
             return null;
         }
         reports.add(new Report(
@@ -179,7 +180,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
                 Stage.SEMANTIC,
                 Integer.parseInt(node.get("line")),
                 Integer.parseInt(node.get("column")),
-                Utils.buildTypeAnnotatedError(stopCondition, "bool", false)
+                Utils.buildTypeAnnotatedError(stopCondition, "boolean", false)
         ));
         throw new AnalysisException();
     }

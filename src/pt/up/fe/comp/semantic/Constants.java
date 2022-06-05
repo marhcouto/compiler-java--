@@ -9,5 +9,5 @@ public final class Constants {
 
     //Chosen because types starting with . are invalid
     public static final String ANY_TYPE = ".Any";
-    public static final Set<String> primitives = new HashSet<>(Arrays.asList("int", "bool", "String"));
+    public static final Set<String> primitives = new HashSet<>(Arrays.asList("int", "boolean", "String"));
 }

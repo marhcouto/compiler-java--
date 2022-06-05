@@ -71,13 +71,13 @@ public class Launcher {
         }
 
         // JASMIN STAGE
-        /*JasminEmitter jasminEmitter = new JasminEmitter();
-        JasminResult jasminResult = jasminEmitter.toJasmin(optimizationResult);*/
+        JasminEmitter jasminEmitter = new JasminEmitter();
+        JasminResult jasminResult = jasminEmitter.toJasmin(optimizationResult);
         // Jasmin reports
         // TestUtils.noErrors(jasminResult.getReports());
-        /*for (Report r : jasminResult.getReports()) {
+        for (Report r : jasminResult.getReports()) {
             System.out.println(r.toString());
-        }*/
+        }
 
 
         // TREE PRINT
@@ -93,8 +93,8 @@ public class Launcher {
         System.out.println(optimizationResult.getOllirCode());
 
         // JASMIN CODE PRINT
-        /*System.out.println("\n\nJASMIN:\n");
-        System.out.println(jasminResult.getJasminCode());*/
+        System.out.println("\n\nJASMIN:\n");
+        System.out.println(jasminResult.getJasminCode());
     }
 
 }

@@ -109,11 +109,11 @@ public class OllirToJasmin {
 
     public String createConstructMethod(String superClassName)
     {
-        return ".method public <init>()V\n" +
+        return String.format(".method public <init>()V\n" +
                 "   aload_0\n" +
-                "   invokenonvirtual $<SUPERCLASS_NAME>/<init>()V\n" +
+                "   invokenonvirtual %s/<init>()V\n" +
                 "   return\n" +
-                ".end method\n".replace("$<SUPERCLASS_NAME>", superClassName);
+                ".end method\n", superClassName);
     }
 
     public String createJasminMethods()

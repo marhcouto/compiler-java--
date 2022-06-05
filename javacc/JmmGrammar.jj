@@ -105,7 +105,7 @@ VarDeclaration #void: Variable <EOE>;
 VarName: <ID> { jjtThis.put("image", lastConsumedToken.getImage()); };
 
 Type: (<INT> (<OPEN_RECT_PAREN> <CLOSE_RECT_PAREN> { jjtThis.put("arr", "true"); })? { jjtThis.put("image", "int"); }) |
-    (<BOOLEAN> { jjtThis.put("image", "bool"); }) |
+    (<BOOLEAN> { jjtThis.put("image", "boolean"); }) |
     (<STRING> { jjtThis.put("image", "String"); }) |
     (<ID> { jjtThis.put("image", lastConsumedToken.getImage()); })
 ;

@@ -344,9 +344,4 @@ public class JasminUtils {
         methodVarTableNames.removeIf(varName -> varName.equals("this") || fields.contains(varName));
         return methodVarTableNames.size() + 1;
     }
-
-    static int getMaxStackSizeNeeded(String codeFragment) {
-        BufferedReader reader = new BufferedReader(new StringReader(codeFragment));
-        reader.readLine();
-    }
 }
