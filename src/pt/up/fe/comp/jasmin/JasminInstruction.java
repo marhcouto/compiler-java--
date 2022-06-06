@@ -349,19 +349,15 @@ public class JasminInstruction {
         var rightOperand= instruction.getRightOperand();
 
         switch(op.getOpType()){
-            case DIVI32:
             case DIV:
                 createArithmeticCode("idiv", leftOperand, rightOperand);
                 break;
-            case MULI32:
             case MUL:
                 createArithmeticCode("imul", leftOperand, rightOperand);
                 break;
-            case SUBI32:
             case SUB:
                 createArithmeticCode("isub", leftOperand, rightOperand);
                 break;
-            case ADDI32:
             case ADD:
                 createArithmeticCode("iadd", leftOperand, rightOperand);
                 break;
@@ -378,18 +374,15 @@ public class JasminInstruction {
                 System.out.println("------HERE");
                 code.append(createBranchCode("lt", leftOperand, rightOperand));
                 break;
-            case ANDI32:
-                code.append("\tiand\n");
             case AND:
+                code.append("\tiand\n");
                 break;
             case ANDB:
                 code.append(createLogicOpCode("and",leftOperand,rightOperand));
                 code.append("\t" + "ifeq ");
                 break;
-            case ORI32:
-                code.append("ior\n");
-                break;
             case OR:
+                code.append("ior\n");
                 break;
             case ORB:
                 code.append(createLogicOpCode("or", leftOperand, rightOperand));
