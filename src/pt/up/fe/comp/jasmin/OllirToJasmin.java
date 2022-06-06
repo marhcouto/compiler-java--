@@ -1,7 +1,12 @@
 package pt.up.fe.comp.jasmin;
 
 import org.specs.comp.ollir.*;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.specs.util.SpecsIo;
+import pt.up.fe.specs.util.classmap.FunctionClassMap;
+import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
+import java.io.IOError;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Collectors;
@@ -20,6 +25,8 @@ public class OllirToJasmin {
     public String getCode()
     {
         var code = new StringBuilder();
+
+        this.classUnit.show();
 
         code.append(createJasminHeader());
         code.append(createJasminFields());
@@ -109,11 +116,7 @@ public class OllirToJasmin {
 
     public String createConstructMethod(String superClassName)
     {
-        return String.format(".method public <init>()V\n" +
-                "   aload_0\n" +
-                "   invokenonvirtual %s/<init>()V\n" +
-                "   return\n" +
-                ".end method\n", superClassName);
+        return SpecsIo.getResource("fixtures/public/jasmin/jasminConstructor.template").replace("$<SUPERCLASS_NAME>", superClassName);
     }
 
     public String createJasminMethods()
@@ -133,27 +136,22 @@ public class OllirToJasmin {
     public String createMethodBody(Method method)
     {
         var code = new StringBuilder();
-        var bodyCode = new StringBuilder();
+
         String accessSpecs = createAccessSpecsStr(method.getMethodAccessModifier().name(), method.isStaticMethod(), method.isFinalMethod());
         code.append(accessSpecs + method.getMethodName() + '(');
 
         var paramsTypes = method.getParams().stream()
                 .map(element -> jasminUtils.getJasminType(element.getType()))
                 .collect(Collectors.joining());
-
         code.append(paramsTypes).append(")").append(jasminUtils.getJasminType(method.getReturnType()) + '\n');
 
         code.append("\t.limit stack 99\n");
-        code.append(String.format("\t.limit locals %d\n", JasminUtils.getLocalVariableCount(method)));
+        code.append("\t.limit locals 99\n");
 
-        int maxEverStackSize = Integer.MIN_VALUE;
-        int curStackSize = 0;
         for (var instruction : method.getInstructions()) {
+            System.out.println("instruction: " + instruction.getInstType() + " - labels : " + method.getLabels(instruction));
             var jasminInstruction = new JasminInstruction(classUnit, method);
-            String jasminInstructionCode = jasminInstruction.getCode(instruction);
-
-            bodyCode.append(jasminInstructionCode);
-
+            code.append(jasminInstruction.getCode(instruction));
         }
 
         return code.toString();
@@ -179,9 +177,6 @@ public class OllirToJasmin {
         code.append(createReturnStatment(method.getReturnType()));
 
         HashMap<String, Instruction> labels = method.getLabels();
-        for (String key : labels.keySet()) {
-            code.append(key + ":\n" + new JasminInstruction(this.classUnit, method).getCode(labels.get(key)));
-        }
         code.append(".end method\n");
 
         return code.toString();

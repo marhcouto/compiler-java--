@@ -3,11 +3,7 @@ package pt.up.fe.comp.jasmin;
 import org.specs.comp.ollir.*;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
-import java.io.BufferedReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
 
 public class JasminUtils {
     ClassUnit classUnit;
@@ -236,7 +232,7 @@ public class JasminUtils {
                 {
                     switch (elemType) {
                         case INT32:
-                                instrStr = getIload(virtualReg);
+                            instrStr = getIload(virtualReg);
                             break;
                         case BOOLEAN:
                             instrStr = getIload(virtualReg);
@@ -332,16 +328,5 @@ public class JasminUtils {
         }
 
         return code.toString();
-    }
-
-    static int getLocalVariableCount(Method method) {
-        //Has all the used fields, local, params and this
-        Set<String> methodVarTableNames = method.getVarTable().keySet();
-        List<String> fields = method.getOllirClass().getFields().stream()
-                .map(field -> field.getFieldName())
-                .collect(Collectors.toList());
-        //removes this and all the fields
-        methodVarTableNames.removeIf(varName -> varName.equals("this") || fields.contains(varName));
-        return methodVarTableNames.size() + 1;
     }
 }
