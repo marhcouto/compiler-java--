@@ -64,17 +64,10 @@ public class JasminInstruction {
         instructionMap.put(OpCondInstruction.class, this::getCode);
 
         var labels = method.getLabels(instruction);
-<<<<<<< HEAD
 
         if(labels.size() != 0)
             code.append(labels.get(0) + ":\n");
 
-=======
-
-        if(labels.size() != 0)
-            code.append(labels.get(0) + ":\n");
-
->>>>>>> feature/jasmin-development
         code.append(instructionMap.apply(instruction));
 
         return code.toString();
@@ -415,10 +408,6 @@ public class JasminInstruction {
                 code.append("iconst_0\n");
                 code.append("\tixor\n");
                 break;
-            case NOTB:
-                code.append("iconst_0\n");
-                code.append("\tixor");
-                break;
             default:
                 throw new NotImplementedException(op.getOpType());
         }
@@ -430,8 +419,6 @@ public class JasminInstruction {
     {
         return "\tgoto " + instruction.getLabel() + "\n";
     }
-<<<<<<< HEAD
-=======
 
     public String getCode(SingleOpCondInstruction instruction) {
         var code = new StringBuilder();
@@ -459,40 +446,6 @@ public class JasminInstruction {
         System.out.println("OP COND INSTRUCTION\n");
         System.out.println("CONDITION : " + instruction.getCondition());
         System.out.println("CODE: " + getCode(instruction.getCondition()));
-        System.out.println("LABEL : " + instruction.getLabel());
-        System.out.println("OPERANDS : " + instruction.getOperands());
-
-        return code.toString();
-    }
-}
->>>>>>> feature/jasmin-development
-
-    public String getCode(SingleOpCondInstruction instruction) {
-        var code = new StringBuilder();
-
-        code.append(getCode(instruction.getCondition()));
-        code.append("\tifne " + instruction.getLabel() + "\n");
-
-
-
-        System.out.println("CONDITION : " + instruction.getCondition());
-        System.out.println(getCode(instruction.getCondition()));
-        System.out.println("LABEL : " + instruction.getLabel());
-        System.out.println("OPERANDS : " + instruction.getOperands());
-
-        return code.toString();
-    }
-
-    public String getCode(OpCondInstruction instruction) {
-        var code = new StringBuilder();
-
-        code.append(getCode(instruction.getCondition()));
-        code.append("\tifne " + instruction.getLabel() + "\n");
-
-
-
-        System.out.println("CONDITION : " + instruction.getCondition());
-        //System.out.println(getCode(instruction.getCondition()));
         System.out.println("LABEL : " + instruction.getLabel());
         System.out.println("OPERANDS : " + instruction.getOperands());
 
