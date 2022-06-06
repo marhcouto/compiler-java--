@@ -169,7 +169,7 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
     private String visitCreateArrObj(JmmNode node, String scope) {
         String size = visit(node.getJmmChild(0), scope);
         String tempVar = generateTempVar();
-        code.append(String.format("%s.array :=.array new(array, %s).array;\n", tempVar, size));
+        code.append(String.format("%s.array.i32 :=.array.i32 new(array, %s).array.i32;\n", tempVar, size));
         return tempVar + ".array.i32";
     }
 
