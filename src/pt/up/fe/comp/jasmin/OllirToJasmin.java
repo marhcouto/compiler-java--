@@ -26,6 +26,8 @@ public class OllirToJasmin {
     {
         var code = new StringBuilder();
 
+        this.classUnit.show();
+
         code.append(createJasminHeader());
         code.append(createJasminFields());
         code.append(createJasminMethods());
@@ -147,6 +149,7 @@ public class OllirToJasmin {
         code.append("\t.limit locals 99\n");
 
         for (var instruction : method.getInstructions()) {
+            System.out.println("instruction: " + instruction.getInstType() + " - labels : " + method.getLabels(instruction));
             var jasminInstruction = new JasminInstruction(classUnit, method);
             code.append(jasminInstruction.getCode(instruction));
         }
@@ -174,9 +177,6 @@ public class OllirToJasmin {
         code.append(createReturnStatment(method.getReturnType()));
 
         HashMap<String, Instruction> labels = method.getLabels();
-        for (String key : labels.keySet()) {
-            code.append(key + ":\n" + new JasminInstruction(this.classUnit, method).getCode(labels.get(key)));
-        }
         code.append(".end method\n");
 
         return code.toString();

@@ -1,4 +1,5 @@
 package pt.up.fe.comp.jasmin;
+import org.eclipse.jgit.util.io.IsolatedOutputStream;
 import org.specs.comp.ollir.*;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.sort;
 
 public class JasminInstruction {
+    private final HashMap<String, Instruction> labels;
     private HashMap<String, Descriptor> varTable;
     private Method method;
     private ClassUnit classUnit;
@@ -21,11 +23,11 @@ public class JasminInstruction {
         this.method = method;
 
         method.buildVarTable();
-        method.getLabels();
+        this.labels = method.getLabels();
         this.varTable = method.getVarTable();
         this.lastreg = this.getLastReg();
         this.jasminUtils = new JasminUtils(this.classUnit);
-        System.out.println("Labels: " + method.getLabels());
+
     }
 
     public int getLastReg() {
@@ -45,6 +47,7 @@ public class JasminInstruction {
     }
 
     public String getCode(Instruction instruction){
+        var code = new StringBuilder();
 
         FunctionClassMap<Instruction, String> instructionMap = new FunctionClassMap<>();
 
@@ -57,8 +60,17 @@ public class JasminInstruction {
         instructionMap.put(UnaryOpInstruction.class, this::getCode);
         instructionMap.put(BinaryOpInstruction.class, this::getCode);
         instructionMap.put(GotoInstruction.class, this::getCode);
+        instructionMap.put(SingleOpCondInstruction.class, this::getCode);
+        instructionMap.put(OpCondInstruction.class, this::getCode);
 
-        return instructionMap.apply(instruction);
+        var labels = method.getLabels(instruction);
+
+        if(labels.size() != 0)
+            code.append(labels.get(0) + ":\n");
+
+        code.append(instructionMap.apply(instruction));
+
+        return code.toString();
     }
 
     private String getCodeInvokeStatic(CallInstruction instruction)
@@ -255,10 +267,13 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         Operation op = instruction.getOperation();
+        code.append("\t"+this.jasminUtils.loadElement(instruction.getOperand(), varTable));
         switch(op.getOpType()){
             case NOT:
-                code.append("\t"+this.jasminUtils.loadElement(instruction.getOperand(), varTable));
-                code.append("\tineg\n");
+            case NOTB:
+                /*code.append("\t"+this.jasminUtils.loadElement(instruction.getOperand(), varTable));
+                code.append("\ticonst_0\n");
+                code.append("\tixor\n");*/
                 break;
             default:
                 throw new NotImplementedException(op.getOpType());
@@ -353,6 +368,10 @@ public class JasminInstruction {
             case XOR:
                 code.append("ixor");
                 break;
+            case NOTB:
+                code.append("iconst_0\n");
+                code.append("\tixor");
+                break;
             default:
                 throw new NotImplementedException(op.getOpType());
         }
@@ -363,6 +382,38 @@ public class JasminInstruction {
     public String getCode(GotoInstruction instruction)
     {
         return "\tgoto " + instruction.getLabel() + "\n";
+    }
+
+    public String getCode(SingleOpCondInstruction instruction) {
+        var code = new StringBuilder();
+
+        code.append(getCode(instruction.getCondition()));
+        code.append("\tifne " + instruction.getLabel() + "\n");
+
+
+
+        System.out.println("CONDITION : " + instruction.getCondition());
+        System.out.println(getCode(instruction.getCondition()));
+        System.out.println("LABEL : " + instruction.getLabel());
+        System.out.println("OPERANDS : " + instruction.getOperands());
+
+        return code.toString();
+    }
+
+    public String getCode(OpCondInstruction instruction) {
+        var code = new StringBuilder();
+
+        code.append(getCode(instruction.getCondition()));
+        code.append("\tifne " + instruction.getLabel() + "\n");
+
+
+
+        System.out.println("CONDITION : " + instruction.getCondition());
+        //System.out.println(getCode(instruction.getCondition()));
+        System.out.println("LABEL : " + instruction.getLabel());
+        System.out.println("OPERANDS : " + instruction.getOperands());
+
+        return code.toString();
     }
 }
 
