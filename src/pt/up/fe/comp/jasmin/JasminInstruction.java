@@ -285,54 +285,85 @@ public class JasminInstruction {
     {
         var code = new StringBuilder();
 
-        code.append("if_icmp" + operation + " COND_TRUE_" + this.atLeastOneCond+ "\n");
+        code.append("if_icmp" + operation + " ");
+        /*code.append("if_icmp" + operation + " " + labelTrue + this.atLeastOneCond+ "\n");
         code.append("\ticonst_0\n");
-        code.append("\tgoto CONTINUE_" + this.atLeastOneCond+ "\n");
-        code.append("COND_TRUE_" + this.atLeastOneCond + ":\n");
+        code.append("\tgoto " + labelFalse + this.atLeastOneCond+ "\n");
+        code.append(labelTrue + this.atLeastOneCond + ":\n");
         code.append("\ticonst_1\n");
-        code.append("CONTINUE_" + this.atLeastOneCond +":");
+        code.append(labelFalse + this.atLeastOneCond +":");*/
+
 
         return code.toString();
     }
 
-    public String createLogicOpCode(String operation, Element op)
+    private String createLogicOpCode(String operation, Element leftOperand, Element rightOperand)
     {
-        if(op.isLiteral())
+        var code = new StringBuilder();
+        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
+        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+
+        if(leftOperand.isLiteral())
         {
-            var leftLiteral = (LiteralElement) op;
-            return (leftLiteral.getLiteral().equals("0")) ? "pop" : "i" + operation;
+            var leftLiteral = (LiteralElement) leftOperand;
+            code.append("\t" + ((leftLiteral.getLiteral().equals("0")) ? "pop" : "i") + operation + "\n");
         }
         else
         {
-            return "i" + operation;
+            code.append("\ti" + operation + "\n");
         }
+        return code.toString();
     }
+
+    private String createArithmeticCode(String operation, Element leftOperand, Element rightOperand)
+    {
+        var code = new StringBuilder();
+        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
+        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+        code.append("\t" + operation + "\n");
+        return code.toString();
+    }
+
+    private String createBranchCode(String operation, Element leftOperand, Element rightOperand)
+    {
+        var code = new StringBuilder();
+
+        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
+        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+        code.append("\t" + "if_icmp" + operation + " ");
+
+        return code.toString();
+    }
+
+    //TODO: Acabar os whiles
+    //TODO: Arrays
+    //TODO: Limit stack
+    //TODO: Limit locals
 
     public String getCode(BinaryOpInstruction instruction)
     {
         var code = new StringBuilder();
         Operation op = instruction.getOperation();
 
-        code.append("\t" + this.jasminUtils.loadElement(instruction.getLeftOperand(), this.varTable));
-        code.append("\t" + this.jasminUtils.loadElement(instruction.getRightOperand(), this.varTable));
-        code.append("\t");
+        var leftOperand = instruction.getLeftOperand();
+        var rightOperand= instruction.getRightOperand();
 
         switch(op.getOpType()){
             case DIVI32:
             case DIV:
-                code.append("idiv");
+                createArithmeticCode("idiv", leftOperand, rightOperand);
                 break;
             case MULI32:
             case MUL:
-                code.append("imul");
+                createArithmeticCode("imul", leftOperand, rightOperand);
                 break;
             case SUBI32:
             case SUB:
-                code.append("isub");
+                createArithmeticCode("isub", leftOperand, rightOperand);
                 break;
             case ADDI32:
             case ADD:
-                code.append("iadd");
+                createArithmeticCode("iadd", leftOperand, rightOperand);
                 break;
             case EQ:
                 break;
@@ -340,42 +371,47 @@ public class JasminInstruction {
                 break;
             case GTH:
                 this.atLeastOneCond++;
-                code.append(createCmpCode("gt"));
+                code.append(createBranchCode("gt", leftOperand, rightOperand));
                 break;
             case LTH:
                 this.atLeastOneCond++;
-                code.append(createCmpCode("lt"));
+                System.out.println("------HERE");
+                code.append(createBranchCode("lt", leftOperand, rightOperand));
                 break;
             case ANDI32:
-                code.append("iand");
+                code.append("\tiand\n");
             case AND:
                 break;
             case ANDB:
-                code.append(createLogicOpCode("and", instruction.getLeftOperand()));
+                code.append(createLogicOpCode("and",leftOperand,rightOperand));
+                code.append("\t" + "ifeq ");
                 break;
             case ORI32:
-                code.append("ior");
+                code.append("ior\n");
                 break;
             case OR:
                 break;
             case ORB:
-                code.append(createLogicOpCode("or", instruction.getLeftOperand()));
+                code.append(createLogicOpCode("or", leftOperand, rightOperand));
+                code.append("\t" + "ifeq ");
                 break;
             case LTE:
+                code.append(createBranchCode("le", leftOperand, rightOperand));
                 break;
             case GTE:
+                code.append(createBranchCode("ge", leftOperand, rightOperand));
                 break;
             case XOR:
-                code.append("ixor");
+                code.append("ixor\n");
                 break;
             case NOTB:
                 code.append("iconst_0\n");
-                code.append("\tixor");
+                code.append("\tixor\n");
                 break;
             default:
                 throw new NotImplementedException(op.getOpType());
         }
-        code.append("\n");
+
         return code.toString();
     }
 
@@ -388,12 +424,12 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         code.append(getCode(instruction.getCondition()));
-        code.append("\tifne " + instruction.getLabel() + "\n");
+        code.append("\tifeq " + instruction.getLabel() + "\n");
 
 
 
         System.out.println("CONDITION : " + instruction.getCondition());
-        System.out.println(getCode(instruction.getCondition()));
+        System.out.println("CODE :" + getCode(instruction.getCondition()));
         System.out.println("LABEL : " + instruction.getLabel());
         System.out.println("OPERANDS : " + instruction.getOperands());
 
@@ -404,12 +440,12 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         code.append(getCode(instruction.getCondition()));
-        code.append("\tifne " + instruction.getLabel() + "\n");
+        //code.append("\tifne " + instruction.getLabel() + "\n");
 
-
-
+        code.append(instruction.getLabel() + "\n");
+        System.out.println("OP COND INSTRUCTION\n");
         System.out.println("CONDITION : " + instruction.getCondition());
-        //System.out.println(getCode(instruction.getCondition()));
+        System.out.println("CODE: " + getCode(instruction.getCondition()));
         System.out.println("LABEL : " + instruction.getLabel());
         System.out.println("OPERANDS : " + instruction.getOperands());
 
