@@ -3,7 +3,10 @@ package pt.up.fe.comp.jasmin;
 import org.specs.comp.ollir.*;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class JasminUtils {
     ClassUnit classUnit;
@@ -135,7 +138,7 @@ public class JasminUtils {
                             instrStr += getIStore(virtualReg);
                             break;
                         case ARRAYREF:
-
+                            instrStr += this.loadElement(getArrayIndex(operand), varTable) + "\n\t";
                             instrStr += "iastore";
                             break;
                         case OBJECTREF:
@@ -228,7 +231,6 @@ public class JasminUtils {
             }
             else{
                 int virtualReg = varTable.get(operand.getName()).getVirtualReg();
-
                 if(virtualReg != -1)
                 {
                     switch (elemType) {
@@ -330,5 +332,22 @@ public class JasminUtils {
         }
 
         return code.toString();
+    }
+
+    /**
+     * Return operand
+     * @param operand
+     * @return
+     */
+    private Element getArrayIndex(Operand operand){
+        if(operand instanceof ArrayOperand) {
+            ArrayOperand arrOperand = (ArrayOperand)  operand;
+            ArrayList<Element> indexes = arrOperand.getIndexOperands();
+            if (!indexes.isEmpty()) {
+
+                return  indexes.get(0);
+            }
+        }
+        return null;
     }
 }
