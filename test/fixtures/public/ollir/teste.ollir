@@ -8,8 +8,8 @@ Test {
 		ret.V;
 	}
 	.method public foo().bool {
-        c.bool :=.bool 0.bool;
-        d.bool :=.bool 1.bool;
+        c.bool :=.bool false.bool;
+        d.bool :=.bool true.bool;
         a.i32 :=.i32 1.i32;
         b.i32 :=.i32 4.i32;
 

@@ -6,13 +6,15 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.specs.util.SpecsIo;
 
+import static org.junit.Assert.assertEquals;
+
 public class Semantic {
     static JasminResult getJasminResult(String filename) {
-        return TestUtils.backend(SpecsIo.getResource("fixtures/public/cpf/2_semantic_analysis/" + filename));
+        return TestUtils.backend(SpecsIo.getResource("fixtures/public/cpf/extra/" + filename));
     }
 
     static JmmSemanticsResult getSemanticsResult(String filename) {
-        return TestUtils.analyse(SpecsIo.getResource("fixtures/public/cpf/2_semantic_analysis/" + filename));
+        return TestUtils.analyse(SpecsIo.getResource("fixtures/public/cpf/extra/" + filename));
     }
 
     static JmmSemanticsResult test(String filename, boolean fail) {
@@ -27,6 +29,12 @@ public class Semantic {
 
     @Test
     public void testAssignedBeforeUsed() {
-        test("fixtures/public/fail/semantic/extra/varNotInit.jmm", true);
+        JmmSemanticsResult result = TestUtils.analyse(SpecsIo.getResource("fixtures/public/fail/semantic/varNotInit.jmm"));
+        assertEquals(1, result.getReports().size());
+    }
+
+    @Test
+    public void aDoesNotExtendB() {
+        test("cp2_error.jmm", true);
     }
 }

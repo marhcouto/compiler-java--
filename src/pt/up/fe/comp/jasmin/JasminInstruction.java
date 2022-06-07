@@ -258,6 +258,7 @@ public class JasminInstruction {
         code.append(getCode(instruction.getRhs()));
         switch (instruction.getRhs().getInstType())
         {
+
             case CALL:
                 switch (instruction.getTypeOfAssign().getTypeOfElement())
                 {
@@ -268,11 +269,11 @@ public class JasminInstruction {
                 code.append("\tastore_1\n");
                 break;
             default:
-                if(!this.pendingArray)
+                //if(!this.pendingArray)
                     code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable));
                 break;
         }
-        if(this.pendingArray)
+        /*if(this.pendingArray)
         {
             this.numArgs++;
         }
@@ -281,7 +282,7 @@ public class JasminInstruction {
             code.append("\tiastore\n");
             this.pendingArray = false;
             this.numArgs = 0;
-        }
+        }*/
 
 
         return code.toString();
@@ -429,7 +430,7 @@ public class JasminInstruction {
                 break;
             case ANDB:
                 code.append(createLogicOpCode("and",leftOperand,rightOperand));
-                code.append("\t" + "ifeq ");
+                code.append("\t" + "ifeq " );
                 break;
             case OR:
                 code.append("ior\n");

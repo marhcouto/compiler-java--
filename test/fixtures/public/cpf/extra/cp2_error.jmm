@@ -1,0 +1,17 @@
+import B;
+
+class A{
+
+public int foo() {
+A a;
+B b;
+
+a = new A();
+b = new B();
+
+// A does not extend B
+b = a;
+return 0;
+}
+
+}
