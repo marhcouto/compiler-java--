@@ -135,7 +135,8 @@ public class JasminUtils {
                             instrStr += getIStore(virtualReg);
                             break;
                         case ARRAYREF:
-                            instrStr += "aastore " + virtualReg;
+
+                            instrStr += "iastore";
                             break;
                         case OBJECTREF:
                             instrStr += "astore " + virtualReg;
@@ -207,7 +208,7 @@ public class JasminUtils {
                         instrStr = getIload(operand.getParamId());
                         break;
                     case ARRAYREF:
-                        instrStr = "aaload " + operand.getParamId();
+                        instrStr = "aload " + operand.getParamId();
                         break;
                     case OBJECTREF:
                         instrStr = "aload " + operand.getParamId();
@@ -238,7 +239,8 @@ public class JasminUtils {
                             instrStr = getIload(virtualReg);
                             break;
                         case ARRAYREF:
-                            instrStr = "aaload " + virtualReg;
+                            //TODO
+                            instrStr = "aload_1";
                             break;
                         case OBJECTREF:
                             instrStr = "aload " + virtualReg;

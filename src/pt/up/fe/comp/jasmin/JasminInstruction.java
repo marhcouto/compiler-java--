@@ -16,6 +16,8 @@ public class JasminInstruction {
     private int lastreg;
     private JasminUtils jasminUtils;
     private static int atLeastOneCond = 0;
+    private static Boolean pendingArray = false;
+    private static int numArgs = 0;
 
     JasminInstruction(ClassUnit classUnit, Method method)
     {
@@ -122,13 +124,34 @@ public class JasminInstruction {
 
     }
 
+    //ver invokevirtual
     private String getCodeNewInstr(CallInstruction instruction)
     {
         var code = new StringBuilder();
         var firstArg = ((Operand) instruction.getFirstArg());
 
-        code.append("\tnew " + firstArg.getName() + "\n");
-        code.append("\tdup\n");
+        for(Element element : instruction.getListOfOperands()){
+            code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
+        }
+
+        code.append("\tnew");
+        switch (firstArg.getType().getTypeOfElement()){
+            case INT32:
+
+                break;
+            case CLASS:
+                code.append("\t" + firstArg.getName() + "\n");
+                code.append("\tdup\n");
+                break;
+            case ARRAYREF:
+                code.append("array int");
+
+                break;
+            default:
+                throw new NotImplementedException(firstArg.getType().getTypeOfElement());
+        }
+        code.append("\n");
+        //code.append("\tdup\n");
 
         return code.toString();
     }
@@ -233,7 +256,33 @@ public class JasminInstruction {
         var o1 = (Operand) instruction.getDest();
 
         code.append(getCode(instruction.getRhs()));
-        code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable));
+        switch (instruction.getRhs().getInstType())
+        {
+            case CALL:
+                switch (instruction.getTypeOfAssign().getTypeOfElement())
+                {
+                    case ARRAYREF:
+                        this.pendingArray = true;
+                        break;
+                }
+                code.append("\tastore_1\n");
+                break;
+            default:
+                if(!this.pendingArray)
+                    code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable));
+                break;
+        }
+        if(this.pendingArray)
+        {
+            this.numArgs++;
+        }
+        if(this.numArgs == 4)
+        {
+            code.append("\tiastore\n");
+            this.pendingArray = false;
+            this.numArgs = 0;
+        }
+
 
         return code.toString();
     }
@@ -268,6 +317,7 @@ public class JasminInstruction {
 
         Operation op = instruction.getOperation();
         code.append("\t"+this.jasminUtils.loadElement(instruction.getOperand(), varTable));
+
         switch(op.getOpType()){
             case NOT:
             case NOTB:
@@ -335,7 +385,7 @@ public class JasminInstruction {
         return code.toString();
     }
 
-    //TODO: Acabar os whiles
+
     //TODO: Arrays
     //TODO: Limit stack
     //TODO: Limit locals
@@ -371,7 +421,7 @@ public class JasminInstruction {
                 break;
             case LTH:
                 this.atLeastOneCond++;
-                System.out.println("------HERE");
+
                 code.append(createBranchCode("lt", leftOperand, rightOperand));
                 break;
             case AND:
@@ -419,13 +469,6 @@ public class JasminInstruction {
         code.append(getCode(instruction.getCondition()));
         code.append("\tifeq " + instruction.getLabel() + "\n");
 
-
-
-        System.out.println("CONDITION : " + instruction.getCondition());
-        System.out.println("CODE :" + getCode(instruction.getCondition()));
-        System.out.println("LABEL : " + instruction.getLabel());
-        System.out.println("OPERANDS : " + instruction.getOperands());
-
         return code.toString();
     }
 
@@ -433,14 +476,7 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         code.append(getCode(instruction.getCondition()));
-        //code.append("\tifne " + instruction.getLabel() + "\n");
-
         code.append(instruction.getLabel() + "\n");
-        System.out.println("OP COND INSTRUCTION\n");
-        System.out.println("CONDITION : " + instruction.getCondition());
-        System.out.println("CODE: " + getCode(instruction.getCondition()));
-        System.out.println("LABEL : " + instruction.getLabel());
-        System.out.println("OPERANDS : " + instruction.getOperands());
 
         return code.toString();
     }
