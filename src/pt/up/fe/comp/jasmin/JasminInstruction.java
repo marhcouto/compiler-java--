@@ -401,16 +401,16 @@ public class JasminInstruction {
 
         switch(op.getOpType()){
             case DIV:
-                createArithmeticCode("idiv", leftOperand, rightOperand);
+                code.append(createArithmeticCode("idiv", leftOperand, rightOperand));
                 break;
             case MUL:
-                createArithmeticCode("imul", leftOperand, rightOperand);
+                code.append(createArithmeticCode("imul", leftOperand, rightOperand));
                 break;
             case SUB:
-                createArithmeticCode("isub", leftOperand, rightOperand);
+                code.append(createArithmeticCode("isub", leftOperand, rightOperand));
                 break;
             case ADD:
-                createArithmeticCode("iadd", leftOperand, rightOperand);
+                code.append(createArithmeticCode("iadd", leftOperand, rightOperand));
                 break;
             case EQ:
                 break;
