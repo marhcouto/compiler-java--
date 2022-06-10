@@ -13,12 +13,8 @@ public class JasminInstruction {
     private HashMap<String, Descriptor> varTable;
     private Method method;
     private ClassUnit classUnit;
-    private int lastreg;
     private JasminUtils jasminUtils;
-    private static int atLeastOneCond = 0;
-    private static Boolean pendingArray = false;
-    private static int numArgs = 0;
-
+    private int stackCounter;
     JasminInstruction(ClassUnit classUnit, Method method)
     {
         this.classUnit = classUnit;
@@ -27,11 +23,11 @@ public class JasminInstruction {
         method.buildVarTable();
         this.labels = method.getLabels();
         this.varTable = method.getVarTable();
-        this.lastreg = this.getLastReg();
         this.jasminUtils = new JasminUtils(this.classUnit);
-
+        this.stackCounter = 0;
     }
 
+    @Deprecated
     public int getLastReg() {
 
         var var2 = this.varTable.entrySet().iterator();
@@ -282,7 +278,7 @@ public class JasminInstruction {
 
     public String getCode(CallInstruction instruction)
     {
-
+        this.stackCounter = 1; // ?
         switch(instruction.getInvocationType()){
             case invokestatic:
                 return getCodeInvokeStatic(instruction);
