@@ -159,6 +159,7 @@ public class Cpf4_Jasmin {
     /**
      * Test the code of an addition: Variables are loaded with iload iadd is called The result is stored using istore
      */
+    //PASSOU
     @Test
     public void section2_Arithmetic_Simple_add() {
         CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_add.jmm"), "5");
@@ -167,6 +168,7 @@ public class Cpf4_Jasmin {
     /**
      * Test the code of a subtraction: Variables are loaded with iload isub is called The result is stored using istore
      */
+    //PASSOU
     @Test
     public void section2_Arithmetic_Simple_sub() {
         CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_sub.jmm"), "3");
@@ -176,6 +178,7 @@ public class Cpf4_Jasmin {
      * Test the code of a multiplication: Variables are loaded with iload imul is called The result is stored using
      * istore
      */
+    //PASSOU
     @Test
     public void section2_Arithmetic_Simple_mul() {
         CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_mul.jmm"), "22");
@@ -185,6 +188,7 @@ public class Cpf4_Jasmin {
      * Test the code of an integer division: Variables are loaded with iload idiv is called The result is stored using
      * istore
      */
+    //PASSOU
     @Test
     public void section2_Arithmetic_Simple_div() {
         CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_div.jmm"), "5");

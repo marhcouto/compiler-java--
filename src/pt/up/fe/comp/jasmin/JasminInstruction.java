@@ -53,6 +53,8 @@ public class JasminInstruction {
 
         FunctionClassMap<Instruction, String> instructionMap = new FunctionClassMap<>();
 
+        System.out.println(instruction);
+
         instructionMap.put(CallInstruction.class, this::getCode);
         instructionMap.put(PutFieldInstruction.class, this::getCode);
         instructionMap.put(GetFieldInstruction.class, this::getCode);
@@ -64,6 +66,7 @@ public class JasminInstruction {
         instructionMap.put(GotoInstruction.class, this::getCode);
         instructionMap.put(SingleOpCondInstruction.class, this::getCode);
         instructionMap.put(OpCondInstruction.class, this::getCode);
+        instructionMap.put(CondBranchInstruction.class, this::getCode);
 
         var labels = method.getLabels(instruction);
 
@@ -81,6 +84,16 @@ public class JasminInstruction {
         var methodClass = ((Operand) instruction.getFirstArg()).getName();
         var methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral().replace("\"", "");;
 
+        //code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
+        /*var firstArg = instruction.getFirstArg();
+        var sndArg = instruction.getSecondArg();
+
+        System.out.println(firstArg);
+        System.out.println(sndArg);
+
+        if(instruction.getFirstArg() != null) code.append(this.jasminUtils.loadElement(instruction.getFirstArg(),this.varTable ));
+        if(instruction.getSecondArg() != null) code.append(this.jasminUtils.loadElement(instruction.getSecondArg(),this.varTable ));
+*/
         for(Element element : instruction.getListOfOperands()){
             code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
         }
@@ -256,33 +269,7 @@ public class JasminInstruction {
         var o1 = (Operand) instruction.getDest();
 
         code.append(getCode(instruction.getRhs()));
-        switch (instruction.getRhs().getInstType())
-        {
-
-            case CALL:
-                switch (instruction.getTypeOfAssign().getTypeOfElement())
-                {
-                    case ARRAYREF:
-                        this.pendingArray = true;
-                        break;
-                }
-                code.append("\tastore_1\n");
-                break;
-            default:
-                //if(!this.pendingArray)
-                    code.append("\t"+ this.jasminUtils.storeElement(o1, this.varTable));
-                break;
-        }
-        /*if(this.pendingArray)
-        {
-            this.numArgs++;
-        }
-        if(this.numArgs == 4)
-        {
-            code.append("\tiastore\n");
-            this.pendingArray = false;
-            this.numArgs = 0;
-        }*/
+        code.append(this.jasminUtils.storeElement(o1, this.varTable));
 
 
         return code.toString();
@@ -430,14 +417,14 @@ public class JasminInstruction {
                 break;
             case ANDB:
                 code.append(createLogicOpCode("and",leftOperand,rightOperand));
-                code.append("\t" + "ifeq " );
+                //code.append("\t" + "ifeq " );
                 break;
             case OR:
                 code.append("ior\n");
                 break;
             case ORB:
                 code.append(createLogicOpCode("or", leftOperand, rightOperand));
-                code.append("\t" + "ifeq ");
+                //code.append("\t" + "ifeq " + instruction.getLa);
                 break;
             case LTE:
                 code.append(createBranchCode("le", leftOperand, rightOperand));
@@ -468,7 +455,7 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         code.append(getCode(instruction.getCondition()));
-        code.append("\tifeq " + instruction.getLabel() + "\n");
+        code.append("\tifeq " + instruction.getLabel() + ": \n");
 
         return code.toString();
     }
@@ -477,7 +464,18 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         code.append(getCode(instruction.getCondition()));
-        code.append(instruction.getLabel() + "\n");
+        code.append("\tifeq " + instruction.getLabel() + "\n");
+
+        return code.toString();
+    }
+
+    public String getCode(CondBranchInstruction instruction) {
+        var code = new StringBuilder();
+
+        System.out.println("COND BRANCH");
+        code.append("NOT IMPLEMENTED");
+        //code.append(getCode(instruction.getCondition()));
+        //code.append(instruction.getLabel() + "\n");
 
         return code.toString();
     }

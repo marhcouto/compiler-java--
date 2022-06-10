@@ -80,8 +80,10 @@ public class JasminUtils {
 
     public String storeElement(Element element, HashMap<String, Descriptor> varTable)
     {
+        System.out.println("INSIDE STORE");
         String instrStr ="";
         if(element.isLiteral()){
+            System.out.println("INSIDE LITERAL");
             LiteralElement lit = (LiteralElement) element;
 
             switch (lit.getType().getTypeOfElement())
@@ -95,6 +97,7 @@ public class JasminUtils {
             }
 
         } else {
+            System.out.println("INSIDE ELSE");
             Operand operand = (Operand) element;
             ElementType elemType = operand.getType().getTypeOfElement();
             if (operand.isParameter()) {
@@ -130,25 +133,30 @@ public class JasminUtils {
                     switch (elemType) {
                         case INT32:
                             instrStr += getIStore(virtualReg);
+                            instrStr += "\n";
                             break;
                         case BOOLEAN:
                             instrStr += getIStore(virtualReg);
+                            instrStr += "\n";
                             break;
                         case ARRAYREF:
 
-                            instrStr += "iastore";
+                            instrStr += "iastore\n";
                             break;
                         case OBJECTREF:
-                            instrStr += "astore " + virtualReg;
+                            instrStr += "\tastore " + virtualReg;
+                            instrStr += "\n";
                             break;
                         case CLASS:
                             instrStr += "astore " + virtualReg;
+                            instrStr += "\n";
                             break;
                         case THIS:
-                            instrStr += "astore_0";
+                            instrStr += "astore_0\n";
                             break;
                         case STRING:
                             instrStr += "astore " + virtualReg;
+                            instrStr += "\n";
                             break;
                         case VOID:
                             break;
@@ -159,7 +167,6 @@ public class JasminUtils {
 
             }
         }
-        instrStr += "\n";
 
         return instrStr;
     }
@@ -182,6 +189,7 @@ public class JasminUtils {
 
     public String loadElement(Element element, HashMap<String, Descriptor> varTable){
         String instrStr ="";
+
         if(element.isLiteral()){
             LiteralElement lit = (LiteralElement) element;
 
@@ -192,11 +200,13 @@ public class JasminUtils {
                     instrStr = getIConst(lit.getLiteral());
                     break;
                 default:
-                    instrStr = "ldc " + lit.getLiteral();
+                    instrStr = "\tldc " + lit.getLiteral();
                     break;
             }
 
         } else{
+
+
             Operand operand = (Operand) element;
             ElementType elemType = operand.getType().getTypeOfElement();
             if(operand.isParameter()) {
@@ -227,10 +237,17 @@ public class JasminUtils {
                 }
             }
             else{
-                int virtualReg = varTable.get(operand.getName()).getVirtualReg();
+
+                var operandName = operand.getName();
+                System.out.println(operandName);
+                var virtualReg = -1;
+
+                if(varTable.get(operandName) != null)
+                     virtualReg = varTable.get(operandName).getVirtualReg();
 
                 if(virtualReg != -1)
                 {
+
                     switch (elemType) {
                         case INT32:
                             instrStr = getIload(virtualReg);
@@ -256,11 +273,15 @@ public class JasminUtils {
                             break;
                         case VOID:
                             break;
+                        default:
+                            throw new NotImplementedException(element);
                     }
                 }
                 else
                 {
-                    instrStr += "getfield " + getJasminType(elemType)+"/"+operand.getName() + " ";
+
+
+                    instrStr += "\tgetfield " + getJasminType(element.getType())+"/"+operand.getName() + " " ;
                 }
 
             }
@@ -276,12 +297,14 @@ public class JasminUtils {
         {
             return "[" + getJasminType(((ArrayType) type).getArrayType());
         }
-        else if(type instanceof ClassType)
+        else if (type instanceof ClassType) {
+            System.out.println("here");
             return ((ClassType) type).getName();
-        else if(type instanceof Type)
+        }
+        else if (type instanceof Type)
             return getJasminType(type.getTypeOfElement());
         else{
-            throw new NotImplementedException(type.getTypeOfElement());
+            throw new NotImplementedException(type);
         }
 
     }
