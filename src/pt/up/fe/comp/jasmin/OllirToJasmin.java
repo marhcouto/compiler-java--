@@ -148,9 +148,9 @@ public class OllirToJasmin {
                 .map(element -> jasminUtils.getJasminType(element.getType()))
                 .collect(Collectors.joining());
         code.append(paramsTypes).append(")").append(jasminUtils.getJasminType(method.getReturnType()) + '\n');
-        int limitLocals = method.getParams().size() + (method.isStaticMethod() ? 0 : 1);
+        int limitLocals = method.getParams().size() + (method.isStaticMethod() ? 0 : 1) + method.getVarTable().size();
         code.append("\t.limit stack 99\n");
-        code.append("\t.limit locals " + limitLocals + "\n\t");
+        code.append("\t.limit locals 99\n");// + limitLocals + "\n");
 
 
         for (var instruction : method.getInstructions()) {

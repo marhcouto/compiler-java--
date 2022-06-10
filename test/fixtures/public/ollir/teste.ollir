@@ -1,17 +1,17 @@
 import io;
-    public Arithmetic_and  {
-        .construct Arithmetic_and().V {
-        invokespecial(this, "<init>").V;
-    }
-    .method public static main(args.array.String).V{
-        t0.boolean :=.boolean 1.bool &&.boolean 0.bool;
-        a.boolean :=.boolean t0.boolean;
-        if (!.bool a.boolean) goto Else0;
-            t1.V :=.V invokestatic(io, "print", 1.i32).V;
-            goto EndIf0;
-        Else0:
-            t2.V :=.V invokestatic(io, "print", 0.i32).V;
-        EndIf0:
-            ret.V;
-    }
+public Arithmetic_less  {
+.construct Arithmetic_less().V {
+invokespecial(this, "<init>").V;
+}
+.method public static main(args.array.String).V{
+t0.boolean :=.boolean 10.i32 <.boolean 20.i32;
+a.boolean :=.boolean t0.boolean;
+if (!.bool a.boolean) goto Else0;
+t1.V :=.V invokestatic(io, "print", 1.i32).V;
+goto EndIf0;
+Else0:
+t2.V :=.V invokestatic(io, "print", 0.i32).V;
+EndIf0:
+ret.V;
+}
 }

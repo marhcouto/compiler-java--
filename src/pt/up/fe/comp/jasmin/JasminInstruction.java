@@ -78,18 +78,8 @@ public class JasminInstruction {
     {
         var code = new StringBuilder();
         var methodClass = ((Operand) instruction.getFirstArg()).getName();
-        var methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral().replace("\"", "");;
+        var methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral().replace("\"", "");
 
-        //code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
-        /*var firstArg = instruction.getFirstArg();
-        var sndArg = instruction.getSecondArg();
-
-        System.out.println(firstArg);
-        System.out.println(sndArg);
-
-        if(instruction.getFirstArg() != null) code.append(this.jasminUtils.loadElement(instruction.getFirstArg(),this.varTable ));
-        if(instruction.getSecondArg() != null) code.append(this.jasminUtils.loadElement(instruction.getSecondArg(),this.varTable ));
-*/
         for(Element element : instruction.getListOfOperands()){
             code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
         }
@@ -99,7 +89,8 @@ public class JasminInstruction {
         var operandsTypes = instruction.getListOfOperands().stream()
                 .map(element ->this.jasminUtils.getJasminType(element.getType()))
                 .collect(Collectors.joining());
-        code.append(operandsTypes).append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + '\n');
+        code.append(operandsTypes).append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + "\n");
+
 
         return code.toString();
 
@@ -320,12 +311,7 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         code.append("if_icmp" + operation + " ");
-        /*code.append("if_icmp" + operation + " " + labelTrue + this.atLeastOneCond+ "\n");
-        code.append("\ticonst_0\n");
-        code.append("\tgoto " + labelFalse + this.atLeastOneCond+ "\n");
-        code.append(labelTrue + this.atLeastOneCond + ":\n");
-        code.append("\ticonst_1\n");
-        code.append(labelFalse + this.atLeastOneCond +":");*/
+
 
 
         return code.toString();
@@ -362,9 +348,50 @@ public class JasminInstruction {
     {
         var code = new StringBuilder();
 
+        //TODO FAZER PARA VARIAS LABELS
         code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
         code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-        code.append("\t" + "if_icmp" + operation + " ");
+        code.append("\t" + "if_icmp" + operation + " FALSE" + "\n" );
+        code.append("\ticonst_0\n");
+        code.append("\tgoto TRUE \n");
+        code.append("FALSE:\n");
+        code.append("\ticonst_1\n");
+        code.append("TRUE:\n");
+
+        return code.toString();
+    }
+
+
+    private String createOrAndCode(Element leftOperand, Element rightOperand)
+    {
+        var code = new StringBuilder();
+
+        //otimização
+        /*if(leftOperand.isLiteral() && rightOperand.isLiteral())
+        {
+            LiteralElement leftLiteral = (LiteralElement) leftOperand;
+            LiteralElement rightLiteral = (LiteralElement) rightOperand;
+
+            boolean result = Boolean.parseBoolean(leftLiteral.getLiteral()) && Boolean.parseBoolean(rightLiteral.getLiteral());
+
+            if(result) code.append("\ticonst_1\n");
+            else code.append("\ticonst_0\n");
+
+        }*/
+
+
+
+
+        //TODO VERIFICAR SE NAO EXISTEM ESTAS LABELS
+        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
+        code.append("\tifeq" + " STEP\n");
+        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+        code.append("\tifeq" + " STEP\n");
+        code.append("\ticonst_1\n");
+        code.append("\tgoto TRUE\n");
+        code.append("STEP:\n");
+        code.append("\ticonst_0\n");
+        code.append("TRUE:\n");
 
         return code.toString();
     }
@@ -400,27 +427,22 @@ public class JasminInstruction {
             case NEQ:
                 break;
             case GTH:
-                this.atLeastOneCond++;
                 code.append(createBranchCode("gt", leftOperand, rightOperand));
                 break;
             case LTH:
-                this.atLeastOneCond++;
-
                 code.append(createBranchCode("lt", leftOperand, rightOperand));
                 break;
             case AND:
                 code.append("\tiand\n");
                 break;
             case ANDB:
-                code.append(createLogicOpCode("and",leftOperand,rightOperand));
-                //code.append("\t" + "ifeq " );
+                code.append(createOrAndCode(leftOperand, rightOperand));
                 break;
             case OR:
                 code.append("ior\n");
                 break;
             case ORB:
-                code.append(createLogicOpCode("or", leftOperand, rightOperand));
-                //code.append("\t" + "ifeq " + instruction.getLa);
+                code.append(createOrAndCode(leftOperand, rightOperand));
                 break;
             case LTE:
                 code.append(createBranchCode("le", leftOperand, rightOperand));
