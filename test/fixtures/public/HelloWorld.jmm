@@ -1,13 +1,6 @@
-import io.ioPlus;
+import ioPlus;
 class HelloWorld {
 	public static void main(String[] args) {
 		ioPlus.printHelloWorld();
-	}
-
-	public int testMethod() {
-	    int[] a;
-	    a = new int[10];
-    	a[1] = 5;
-    	    return 1;
 	}
 }

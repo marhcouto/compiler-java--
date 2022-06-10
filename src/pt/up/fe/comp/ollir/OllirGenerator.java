@@ -27,8 +27,8 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         addVisit("FnCallOp", this::visitFnCallOp);
         addVisit("VarName", this::visitVarName);
         addVisit("IntegerLiteral", (node, dummy) -> String.format("%s.%s", node.get("image"), "i32"));
-        addVisit("False", (node, dummy) -> "false" + ".bool");
-        addVisit("True", (node, dummy) -> "true" + ".bool");
+        addVisit("False", (node, dummy) -> "0" + ".bool");
+        addVisit("True", (node, dummy) -> "1" + ".bool");
         addVisit("BinOp", this::visitBinOp);
         addVisit("UnaryOp", this::visitUnaryOp);
         addVisit("CreateObj", this::visitCreateObj);

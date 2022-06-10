@@ -116,7 +116,11 @@ public class OllirToJasmin {
 
     public String createConstructMethod(String superClassName)
     {
-        return SpecsIo.getResource("fixtures/public/jasmin/jasminConstructor.template").replace("$<SUPERCLASS_NAME>", superClassName);
+        return String.format(".method public <init>()V\n" +
+                "   aload_0\n" +
+                "   invokenonvirtual %s/<init>()V\n" +
+                "   return\n" +
+                ".end method\n", superClassName);
     }
 
     public String createJasminMethods()
