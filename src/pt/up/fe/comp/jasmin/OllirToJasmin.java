@@ -40,7 +40,7 @@ public class OllirToJasmin {
     {
         var code = new StringBuilder();
 
-        if (classType != "DEFAULT")
+        if (!classType.equals("DEFAULT"))
             code.append(classType.toLowerCase() + " ");
         if (isStatic)
             code.append("static ");

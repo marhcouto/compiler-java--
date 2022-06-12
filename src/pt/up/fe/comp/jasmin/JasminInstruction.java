@@ -65,8 +65,11 @@ public class JasminInstruction {
 
         var labels = method.getLabels(instruction);
 
-        if(labels.size() != 0)
-            code.append(labels.get(0) + ":\n");
+        if(labels.size() != 0) {
+            for (String label : labels) {
+                code.append(label + ":\n");
+            }
+        }
 
         code.append(instructionMap.apply(instruction));
 
@@ -309,8 +312,13 @@ public class JasminInstruction {
         switch(op.getOpType()){
             case NOT:
             case NOTB:
+                code.append("\tifne TRUE" + conditionalId + "\n");
+                code.append("\ticonst_1\n");
+                code.append("\tgoto FALSE" + conditionalId + "\n");
+                code.append("TRUE" + conditionalId + ":\n");
                 code.append("\ticonst_0\n");
-                code.append("\tixor\n");
+                code.append("FALSE"+conditionalId+":\n");
+                conditionalId++;
                 break;
             default:
                 throw new NotImplementedException(op.getOpType());
@@ -467,8 +475,15 @@ public class JasminInstruction {
                 code.append("ixor\n");
                 break;
             case NOTB:
-                code.append("iconst_0\n");
-                code.append("\tixor\n");
+                code.append("\tif_ne TRUE" + conditionalId + "\n");
+                code.append("\ticonst_1\n");
+                code.append("\tgoto FALSE" + conditionalId + "\n");
+                code.append("TRUE" + conditionalId + ":\n");
+                code.append("\ticonst_0");
+                code.append("FALSE"+conditionalId+":\n");
+                conditionalId++;
+
+
                 break;
             default:
                 throw new NotImplementedException(op.getOpType());
@@ -487,7 +502,7 @@ public class JasminInstruction {
 
         code.append(getCode(instruction.getCondition()));
 
-        code.append("\tifeq " + instruction.getLabel() + " \n");
+        code.append("\tifne " + instruction.getLabel() + " \n");
 
         return code.toString();
     }
@@ -496,7 +511,7 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         code.append(getCode(instruction.getCondition()));
-        code.append("\tifeq " + instruction.getLabel() + "\n");
+        code.append("\tifne " + instruction.getLabel() + "\n");
         return code.toString();
     }
 
