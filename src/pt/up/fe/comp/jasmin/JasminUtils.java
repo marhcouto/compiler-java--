@@ -79,10 +79,29 @@ public class JasminUtils {
         return code.toString();
     }
 
+    public String loadArrayRefAndIndex(ArrayOperand operand, HashMap<String, Descriptor> varTable){
+        StringBuilder code = new StringBuilder();
+        if(operand.isParameter()){
+            code.append("\taload ");
+            code.append(operand.getParamId());
+            code.append("\n\t");
+        } else {
+            var virtualReg = -1;
+
+            if(varTable.get(operand.getName()) != null)
+                virtualReg = varTable.get(operand.getName()).getVirtualReg();
+            code.append("\taload ");
+            code.append(virtualReg);
+            code.append("\n\t");
+        }
+        code.append(this.loadArrayIndexes(operand, varTable));
+        code.append("\n");
+        return code.toString();
+    }
+
     public String storeElement(Element element, HashMap<String, Descriptor> varTable)
     {
         System.out.println("INSIDE STORE");
-
         String instrStr ="";
         if(element.isLiteral()){
             System.out.println("INSIDE LITERAL");
@@ -103,16 +122,22 @@ public class JasminUtils {
         } else {
             System.out.println("INSIDE ELSE");
             Operand operand = (Operand) element;
+            boolean isArrayOperand = false;
             if(operand instanceof ArrayOperand){
-                System.out.println("found arrayoperand ");
-                operand.show();
+                System.out.println("found arrayoperand " + operand.getType().getTypeOfElement());
+                isArrayOperand = true;
             }
             ElementType elemType = operand.getType().getTypeOfElement();
+            System.out.println("elemtype = " + elemType);
             if (operand.isParameter()) {
                 switch (elemType) {
                     case INT32:
                         instrStr +="\t";
-                        instrStr += getIStore(operand.getParamId());
+                        if(isArrayOperand){
+                            instrStr += "iastore";
+                        } else {
+                            instrStr += getIStore(operand.getParamId());
+                        }
                         break;
                     case BOOLEAN:
                         instrStr +="\t";
@@ -150,7 +175,12 @@ public class JasminUtils {
                     switch (elemType) {
                         case INT32:
                             instrStr +="\t";
-                            instrStr += getIStore(virtualReg);
+                            if(isArrayOperand){
+                                instrStr += "iastore";
+                            } else {
+                                instrStr += getIStore(virtualReg);
+                            }
+
                             instrStr += "\n";
                             break;
                         case BOOLEAN:
@@ -293,6 +323,7 @@ public class JasminUtils {
                             if(isArrayOperand) {
                                 instrStr += "aload " + virtualReg + "\n\t";
                                 instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
+                                instrStr += "iaload";
                             }else {
                                 instrStr = getIload(virtualReg);
                             }
@@ -301,8 +332,7 @@ public class JasminUtils {
                             instrStr = getIload(virtualReg);
                             break;
                         case ARRAYREF:
-                            //TODO
-                            instrStr = "aload_1";
+                            instrStr = "aload " + virtualReg;
                             break;
                         case OBJECTREF:
                             instrStr = "aload " + virtualReg;

@@ -265,8 +265,10 @@ public class JasminInstruction {
     public String getCode(AssignInstruction instruction)
     {
         var code = new StringBuilder();
-        var o1 = (Operand) instruction.getDest();
-
+        Operand o1 = (Operand) instruction.getDest();
+        if(o1 instanceof ArrayOperand) {
+            code.append(jasminUtils.loadArrayRefAndIndex((ArrayOperand) o1, varTable));
+        }
         code.append(getCode(instruction.getRhs()));
         code.append(this.jasminUtils.storeElement(o1, this.varTable));
 
