@@ -145,6 +145,9 @@ public class JasminInstruction {
                 break;
             case ARRAYREF:
                 code.append("array int");
+                break;
+            case OBJECTREF:
+                code.append("\t" + firstArg.getName() + "\n");
 
                 break;
             default:
@@ -181,6 +184,15 @@ public class JasminInstruction {
     private String getCodeLdc(CallInstruction instruction)
     {
         return "\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable );
+    }
+
+    private String getArrayLength(CallInstruction instruction){
+        var code = new StringBuilder();
+        System.out.println("get array length");
+        instruction.show();
+        code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
+        code.append("\t" + "arraylength\n");
+        return code.toString();
     }
 
     public String getCode(PutFieldInstruction instruction) {
@@ -281,6 +293,8 @@ public class JasminInstruction {
                 return getCodeInvokeSpecial(instruction);
             case ldc:
                 return getCodeLdc(instruction);
+            case arraylength:
+                return getArrayLength(instruction);
         }
 
         throw new NotImplementedException(instruction.getInvocationType());
@@ -289,7 +303,6 @@ public class JasminInstruction {
     public String getCode(UnaryOpInstruction instruction)
     {
         var code = new StringBuilder();
-
         Operation op = instruction.getOperation();
         code.append("\t"+this.jasminUtils.loadElement(instruction.getOperand(), varTable));
 

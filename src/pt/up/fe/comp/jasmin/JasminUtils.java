@@ -3,6 +3,7 @@ package pt.up.fe.comp.jasmin;
 import org.specs.comp.ollir.*;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class JasminUtils {
@@ -81,6 +82,7 @@ public class JasminUtils {
     public String storeElement(Element element, HashMap<String, Descriptor> varTable)
     {
         System.out.println("INSIDE STORE");
+
         String instrStr ="";
         if(element.isLiteral()){
             System.out.println("INSIDE LITERAL");
@@ -101,6 +103,10 @@ public class JasminUtils {
         } else {
             System.out.println("INSIDE ELSE");
             Operand operand = (Operand) element;
+            if(operand instanceof ArrayOperand){
+                System.out.println("found arrayoperand ");
+                operand.show();
+            }
             ElementType elemType = operand.getType().getTypeOfElement();
             if (operand.isParameter()) {
                 switch (elemType) {
@@ -154,7 +160,7 @@ public class JasminUtils {
                             break;
                         case ARRAYREF:
                             instrStr +="\t";
-                            instrStr += "iastore\n";
+                            instrStr += "astore " + virtualReg + "\n";
                             break;
                         case OBJECTREF:
                             instrStr +="\t";
@@ -200,6 +206,8 @@ public class JasminUtils {
                 return "Ljava/lang/String;";
             case VOID:
                 return "";
+            case ARRAYREF:
+                return "a";
             default:
                 throw new NotImplementedException(type);
         }
@@ -224,13 +232,27 @@ public class JasminUtils {
 
         } else{
 
-
             Operand operand = (Operand) element;
+            boolean isArrayOperand = false;
+            if(operand instanceof ArrayOperand){
+                System.out.println("found arrayoperand ");
+                operand.show();
+                isArrayOperand = true;
+
+            }
+
             ElementType elemType = operand.getType().getTypeOfElement();
             if(operand.isParameter()) {
                 switch (elemType) {
                     case INT32:
-                        instrStr = getIload(operand.getParamId());
+                        if(isArrayOperand) {
+                            instrStr += "aload " + operand.getParamId() + "\n\t";
+                            instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
+                            instrStr += "iaload";
+                        } else {
+                            instrStr = getIload(operand.getParamId());
+                        }
+
                         break;
                     case BOOLEAN:
                         instrStr = getIload(operand.getParamId());
@@ -268,7 +290,12 @@ public class JasminUtils {
 
                     switch (elemType) {
                         case INT32:
-                            instrStr = getIload(virtualReg);
+                            if(isArrayOperand) {
+                                instrStr += "aload " + virtualReg + "\n\t";
+                                instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
+                            }else {
+                                instrStr = getIload(virtualReg);
+                            }
                             break;
                         case BOOLEAN:
                             instrStr = getIload(virtualReg);
@@ -370,6 +397,18 @@ public class JasminUtils {
                 break;
         }
 
+        return code.toString();
+    }
+
+    private String loadArrayIndexes(ArrayOperand operand, HashMap<String, Descriptor> varTable){
+        StringBuilder code = new StringBuilder();
+
+        ArrayList<Element> list = operand.getIndexOperands();
+        if(list.isEmpty()){
+            return "";
+        }
+
+        code.append(this.loadElement(list.get(0), varTable)+ "\n\t") ;
         return code.toString();
     }
 }
