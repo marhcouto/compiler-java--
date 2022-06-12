@@ -75,9 +75,10 @@ public class JasminUtils {
 
         if(Integer.parseInt(_const) < 6)
             code.append("iconst_" + _const);
+        else if (Integer.parseInt(_const) < 128)
+            code.append("bipush " + _const);
         else
-            code.append("ldc " + _const);
-
+            code.append("ldc " +  _const);
         return code.toString();
     }
 
