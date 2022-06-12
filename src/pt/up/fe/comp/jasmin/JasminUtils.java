@@ -182,37 +182,31 @@ public class JasminUtils {
                             } else {
                                 instrStr += getIStore(virtualReg);
                             }
-
-                            instrStr += "\n";
                             break;
                         case BOOLEAN:
                             instrStr +="\t";
                             instrStr += getIStore(virtualReg);
-                            instrStr += "\n";
                             break;
                         case ARRAYREF:
                             instrStr +="\t";
-                            instrStr += "astore " + virtualReg + "\n";
+                            instrStr += "astore " + virtualReg ;
                             break;
                         case OBJECTREF:
                             instrStr +="\t";
                             instrStr += "astore " + virtualReg;
-                            instrStr += "\n";
 
                             break;
                         case CLASS:
                             instrStr +="\t";
                             instrStr += "astore " + virtualReg;
-                            instrStr += "\n";
                             break;
                         case THIS:
                             instrStr +="\t";
-                            instrStr += "astore_0\n";
+                            instrStr += "astore_0";
                             break;
                         case STRING:
                             instrStr +="\t";
                             instrStr += "astore " + virtualReg;
-                            instrStr += "\n";
                             break;
                         case VOID:
                             break;
@@ -223,7 +217,7 @@ public class JasminUtils {
 
             }
         }
-
+        instrStr += "\n";
         return instrStr;
     }
 
@@ -447,7 +441,7 @@ public class JasminUtils {
             return "";
         }
 
-        code.append(this.loadElement(list.get(0), varTable)+ "\n\t") ;
+        code.append(this.loadElement(list.get(0), varTable)+ "\t") ;
         return code.toString();
     }
 }

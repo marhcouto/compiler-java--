@@ -20,7 +20,7 @@ public class JasminInstruction {
         this.classUnit = classUnit;
         this.method = method;
 
-        method.buildVarTable();
+        //method.buildVarTable();
         this.labels = method.getLabels();
         this.varTable = method.getVarTable();
         this.jasminUtils = new JasminUtils(this.classUnit);
@@ -421,16 +421,16 @@ public class JasminInstruction {
 
 
 
-        //TODO VERIFICAR SE NAO EXISTEM ESTAS LABELS
         code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-        code.append("\tifeq" + " STEP\n");
+        code.append("\tifeq" + " FALSE" + conditionalId + "\n");
         code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-        code.append("\tifeq" + " STEP\n");
+        code.append("\tifeq" + " FALSE" + conditionalId + "\n");
         code.append("\ticonst_1\n");
-        code.append("\tgoto TRUE\n");
-        code.append("STEP:\n");
+        code.append("\tgoto TRUE" + conditionalId + "\n");
+        code.append("FALSE" + conditionalId + ":\n");
         code.append("\ticonst_0\n");
-        code.append("TRUE:\n");
+        code.append("TRUE" + conditionalId + ":\n");
+        conditionalId++;
 
         return code.toString();
     }

@@ -143,14 +143,15 @@ public class OllirToJasmin {
 
         String accessSpecs = createAccessSpecsStr(method.getMethodAccessModifier().name(), method.isStaticMethod(), method.isFinalMethod());
         code.append(accessSpecs + method.getMethodName() + '(');
-
+        method.buildVarTable();
         var paramsTypes = method.getParams().stream()
                 .map(element -> jasminUtils.getJasminType(element.getType(), true))
                 .collect(Collectors.joining());
         code.append(paramsTypes).append(")").append(jasminUtils.getJasminType(method.getReturnType(), true) + '\n');
-        int limitLocals = method.getParams().size() + (method.isStaticMethod() ? 0 : 1) + method.getVarTable().size();
+        int limitLocals =  method.getVarTable().size() +
+                (method.getVarTable().containsKey("this") || method.isStaticMethod() ? 0 : 1);
         code.append("\t.limit stack 99\n");
-        code.append("\t.limit locals 99\n");// + limitLocals + "\n");
+        code.append("\t.limit locals " + limitLocals + "\n");
 
 
         for (var instruction : method.getInstructions()) {
@@ -181,7 +182,6 @@ public class OllirToJasmin {
         code.append(createMethodBody(method));
         code.append(createReturnStatment(method.getReturnType()));
 
-        HashMap<String, Instruction> labels = method.getLabels();
         code.append(".end method\n");
 
         return code.toString();

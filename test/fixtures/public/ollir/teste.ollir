@@ -1,21 +1,19 @@
+import GetterAndSetter;
 import io;
-Arithmetic_and {
+PrintOtherClassInline {
 
-    .construct Arithmetic_and().V {
+    .construct PrintOtherClassInline().V {
         invokespecial(this, "<init>").V;
     }
 
     .method public static main(args.array.String).V {
-    a.bool :=.bool true.bool &&.bool false.bool;
-
-    if (a.bool) goto ifbody_0;
-        invokestatic(io, "print", 0.i32).V;
-    goto endif_0;
-    ifbody_0:
-        invokestatic(io, "print", 1.i32).V;
-    endif_0:
+    b.GetterAndSetter :=.GetterAndSetter new(GetterAndSetter).GetterAndSetter;
+    invokespecial(b.GetterAndSetter,"<init>").V;
+    content.i32 :=.i32 invokevirtual(b.GetterAndSetter, "setA", 10.i32).i32;
+    content.i32 :=.i32 invokevirtual(b.GetterAndSetter, "getA").i32;
+    invokestatic(io, "print", content.i32).V;
 
     ret.V;
     }
-}
 
+}
