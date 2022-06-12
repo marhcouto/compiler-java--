@@ -44,13 +44,17 @@ public class JasminInstruction {
     }
 
     public String getCode(Instruction instruction){
+        return this.getCode(instruction, false);
+    }
+
+    public String getCode(Instruction instruction, boolean isAssign){
         var code = new StringBuilder();
 
         FunctionClassMap<Instruction, String> instructionMap = new FunctionClassMap<>();
 
         System.out.println(instruction);
 
-        instructionMap.put(CallInstruction.class, this::getCode);
+        //instructionMap.put(CallInstruction.class, this::getCode);
         instructionMap.put(PutFieldInstruction.class, this::getCode);
         instructionMap.put(GetFieldInstruction.class, this::getCode);
         instructionMap.put(AssignInstruction.class, this::getCode);
@@ -70,13 +74,16 @@ public class JasminInstruction {
                 code.append(label + ":\n");
             }
         }
-
-        code.append(instructionMap.apply(instruction));
+        if(instruction instanceof CallInstruction){
+            code.append(getCode((CallInstruction) instruction, isAssign));
+        } else {
+            code.append(instructionMap.apply(instruction));
+        }
 
         return code.toString();
     }
 
-    private String getCodeInvokeStatic(CallInstruction instruction)
+    private String getCodeInvokeStatic(CallInstruction instruction, boolean isAssign)
     {
         var code = new StringBuilder();
         var methodClass = ((Operand) instruction.getFirstArg()).getName();
@@ -93,7 +100,10 @@ public class JasminInstruction {
                 .collect(Collectors.joining());
         code.append(operandsTypes).append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + "\n");
 
-
+        if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)
+          && !isAssign){
+            code.append("\tpop\n");
+        }
         return code.toString();
 
     }
@@ -105,7 +115,7 @@ public class JasminInstruction {
                 .collect(Collectors.joining());
     }
 
-    private String getCodeInvokeVirtual(CallInstruction instruction)
+    private String getCodeInvokeVirtual(CallInstruction instruction, boolean isAssign)
     {
         var code = new StringBuilder();
 
@@ -121,6 +131,11 @@ public class JasminInstruction {
         code.append("\tinvokevirtual " +this.jasminUtils. getJasminType(firstArg.getType()) +  "/" + secondArg + "(");
         code.append(createListOperands(instruction));
         code.append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + '\n');
+
+        if(!method.getReturnType().getTypeOfElement().equals(ElementType.VOID)
+         && !isAssign){
+            code.append("\tpop\n");
+        }
 
         return code.toString();
 
@@ -161,7 +176,7 @@ public class JasminInstruction {
         return code.toString();
     }
 
-    private String getCodeInvokeSpecial(CallInstruction instruction)
+    private String getCodeInvokeSpecial(CallInstruction instruction, boolean isAssign)
     {
         var code = new StringBuilder();
 
@@ -178,7 +193,10 @@ public class JasminInstruction {
         code.append("/" + methodName + "(");
         code.append(createListOperands(instruction));
         code.append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + '\n');
-
+        if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)
+         && !isAssign){
+            code.append("\tpop\n");
+        }
         return code.toString();
 
     }
@@ -271,7 +289,7 @@ public class JasminInstruction {
         if(o1 instanceof ArrayOperand) {
             code.append(jasminUtils.loadArrayRefAndIndex((ArrayOperand) o1, varTable));
         }
-        code.append(getCode(instruction.getRhs()));
+        code.append(getCode(instruction.getRhs(), true));
         code.append(this.jasminUtils.storeElement(o1, this.varTable));
 
 
@@ -283,18 +301,18 @@ public class JasminInstruction {
         return "\t" + this.jasminUtils.loadElement(instruction.getSingleOperand(), this.varTable);
     }
 
-    public String getCode(CallInstruction instruction)
+    public String getCode(CallInstruction instruction, boolean isAssign)
     {
 
         switch(instruction.getInvocationType()){
             case invokestatic:
-                return getCodeInvokeStatic(instruction);
+                return getCodeInvokeStatic(instruction, isAssign);
             case invokevirtual:
-                return getCodeInvokeVirtual(instruction);
+                return getCodeInvokeVirtual(instruction, isAssign);
             case NEW:
                 return getCodeNewInstr(instruction);
             case invokespecial:
-                return getCodeInvokeSpecial(instruction);
+                return getCodeInvokeSpecial(instruction, isAssign);
             case ldc:
                 return getCodeLdc(instruction);
             case arraylength:
