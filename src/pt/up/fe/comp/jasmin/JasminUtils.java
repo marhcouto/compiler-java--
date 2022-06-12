@@ -242,7 +242,10 @@ public class JasminUtils {
     }
 
     public String loadElement(Element element, HashMap<String, Descriptor> varTable){
+
         String instrStr ="";
+
+
 
         if(element.isLiteral()){
             LiteralElement lit = (LiteralElement) element;

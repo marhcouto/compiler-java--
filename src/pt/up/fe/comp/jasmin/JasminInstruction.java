@@ -15,15 +15,18 @@ public class JasminInstruction {
     private ClassUnit classUnit;
     private JasminUtils jasminUtils;
     private static int conditionalId = 0;
+    private int stackLimit;
+    private int currentStack;
+
     JasminInstruction(ClassUnit classUnit, Method method)
     {
         this.classUnit = classUnit;
         this.method = method;
-
-        //method.buildVarTable();
         this.labels = method.getLabels();
         this.varTable = method.getVarTable();
         this.jasminUtils = new JasminUtils(this.classUnit);
+        this.stackLimit = 0;
+        this.currentStack = 0;
     }
 
     @Deprecated
@@ -43,6 +46,11 @@ public class JasminInstruction {
         return allRegs.size() == 0 ? 0 : allRegs.get(allRegs.size()-1);
     }
 
+    public int getStackLimit()
+    {
+        return this.stackLimit;
+    }
+
     public String getCode(Instruction instruction){
         return this.getCode(instruction, false);
     }
@@ -51,8 +59,6 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         FunctionClassMap<Instruction, String> instructionMap = new FunctionClassMap<>();
-
-        System.out.println(instruction);
 
         //instructionMap.put(CallInstruction.class, this::getCode);
         instructionMap.put(PutFieldInstruction.class, this::getCode);
@@ -92,6 +98,7 @@ public class JasminInstruction {
         for(Element element : instruction.getListOfOperands()){
             code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
         }
+
         code.append("\tinvokestatic " +this.jasminUtils.getFullyQualifiedName(methodClass));
         code.append("/" + methodName + "(");
 
@@ -104,6 +111,9 @@ public class JasminInstruction {
           && !isAssign){
             code.append("\tpop\n");
         }
+
+        this.stackLimit = Math.max(this.stackLimit, instruction.getListOfOperands().size());
+
         return code.toString();
 
     }
@@ -136,6 +146,8 @@ public class JasminInstruction {
          && !isAssign){
             code.append("\tpop\n");
         }
+
+        this.stackLimit = Math.max(this.stackLimit, instruction.getListOfOperands().size() + 1);
 
         return code.toString();
 
@@ -171,7 +183,8 @@ public class JasminInstruction {
                 throw new NotImplementedException(firstArg.getType().getTypeOfElement());
         }
         code.append("\n");
-        //code.append("\tdup\n");
+
+        this.stackLimit = Math.max(this.stackLimit, instruction.getListOfOperands().size());
 
         return code.toString();
     }
@@ -197,12 +210,15 @@ public class JasminInstruction {
          && !isAssign){
             code.append("\tpop\n");
         }
+
+        this.stackLimit = Math.max(this.stackLimit, instruction.getListOfOperands().size() + 1);
         return code.toString();
 
     }
 
     private String getCodeLdc(CallInstruction instruction)
     {
+        this.stackLimit = Math.max(this.stackLimit,1);
         return "\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable );
     }
 
@@ -212,16 +228,18 @@ public class JasminInstruction {
         instruction.show();
         code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
         code.append("\t" + "arraylength\n");
+
+        this.stackLimit = Math.max(this.stackLimit, 1);
         return code.toString();
     }
 
     public String getCode(PutFieldInstruction instruction) {
 
         var code = new StringBuilder();
-
         var firstArg = ((Operand) instruction.getFirstOperand());
         var secondArg = instruction.getSecondOperand();
         var thirdArg = instruction.getThirdOperand();
+
         String secondArgStr = "";
 
         code.append("\t" + this.jasminUtils.loadElement(firstArg, this.varTable));
@@ -240,6 +258,7 @@ public class JasminInstruction {
         code.append(this.jasminUtils.getFieldSpecs(firstArg, secondArgStr) + " ");
         code.append(this.jasminUtils.getJasminType(thirdArg.getType()) + "\n");
 
+        this.stackLimit = Math.max(2, this.stackLimit);
         return code.toString();
     }
 
@@ -264,6 +283,7 @@ public class JasminInstruction {
         code.append(this.jasminUtils.getFieldSpecs(firstArg, secondArgStr) + " ");
         code.append(this.jasminUtils.getJasminType(instruction.getFieldType()) + "\n");
 
+        this.stackLimit = Math.max(this.stackLimit, 1);
         return code.toString();
     }
 
@@ -278,6 +298,8 @@ public class JasminInstruction {
         code.append("\t" + this.jasminUtils.getJasminReturnType(instruction.getOperand().getType().getTypeOfElement()));
         code.append("return\n");
 
+        this.stackLimit = Math.max(1, this.stackLimit);
+
         return code.toString();
     }
 
@@ -288,17 +310,23 @@ public class JasminInstruction {
         Operand o1 = (Operand) instruction.getDest();
         if(o1 instanceof ArrayOperand) {
             code.append(jasminUtils.loadArrayRefAndIndex((ArrayOperand) o1, varTable));
+            this.stackLimit = Math.max(this.stackLimit, 3) ;
         }
         code.append(getCode(instruction.getRhs(), true));
         code.append(this.jasminUtils.storeElement(o1, this.varTable));
 
+        this.currentStack--;
 
         return code.toString();
     }
 
     public String getCode(SingleOpInstruction instruction)
     {
+        this.currentStack++;
+        this.stackLimit = Math.max(1, this.stackLimit);
+
         return "\t" + this.jasminUtils.loadElement(instruction.getSingleOperand(), this.varTable);
+
     }
 
     public String getCode(CallInstruction instruction, boolean isAssign)
@@ -341,6 +369,9 @@ public class JasminInstruction {
             default:
                 throw new NotImplementedException(op.getOpType());
         }
+
+        this.stackLimit = Math.max(this.stackLimit, 2);
+
         return code.toString();
     }
 
@@ -435,11 +466,6 @@ public class JasminInstruction {
         return code.toString();
     }
 
-
-    //TODO: Arrays
-    //TODO: Limit stack
-    //TODO: Limit locals
-
     public String getCode(BinaryOpInstruction instruction)
     {
         var code = new StringBuilder();
@@ -507,6 +533,8 @@ public class JasminInstruction {
                 throw new NotImplementedException(op.getOpType());
         }
 
+        this.stackLimit = Math.max(this.stackLimit, 2);
+        this.currentStack--;
         return code.toString();
     }
 
@@ -521,6 +549,8 @@ public class JasminInstruction {
         code.append(getCode(instruction.getCondition()));
 
         code.append("\tifne " + instruction.getLabel() + " \n");
+
+        this.currentStack--;
 
         return code.toString();
     }
