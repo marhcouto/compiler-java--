@@ -14,7 +14,7 @@ public class JasminInstruction {
     private Method method;
     private ClassUnit classUnit;
     private JasminUtils jasminUtils;
-    private int stackCounter;
+    private static int conditionalId = 0;
     JasminInstruction(ClassUnit classUnit, Method method)
     {
         this.classUnit = classUnit;
@@ -24,7 +24,6 @@ public class JasminInstruction {
         this.labels = method.getLabels();
         this.varTable = method.getVarTable();
         this.jasminUtils = new JasminUtils(this.classUnit);
-        this.stackCounter = 0;
     }
 
     @Deprecated
@@ -283,7 +282,7 @@ public class JasminInstruction {
 
     public String getCode(CallInstruction instruction)
     {
-        this.stackCounter = 1; // ?
+
         switch(instruction.getInvocationType()){
             case invokestatic:
                 return getCodeInvokeStatic(instruction);
@@ -307,13 +306,11 @@ public class JasminInstruction {
         var code = new StringBuilder();
         Operation op = instruction.getOperation();
         code.append("\t"+this.jasminUtils.loadElement(instruction.getOperand(), varTable));
-
         switch(op.getOpType()){
             case NOT:
             case NOTB:
-                /*code.append("\t"+this.jasminUtils.loadElement(instruction.getOperand(), varTable));
                 code.append("\ticonst_0\n");
-                code.append("\tixor\n");*/
+                code.append("\tixor\n");
                 break;
             default:
                 throw new NotImplementedException(op.getOpType());
@@ -366,13 +363,14 @@ public class JasminInstruction {
         //TODO FAZER PARA VARIAS LABELS
         code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
         code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-        code.append("\t" + "if_icmp" + operation + " FALSE" + "\n" );
+        code.append("\t" + "if_icmp" + operation + " FALSE" + conditionalId + "\n" );
         code.append("\ticonst_0\n");
-        code.append("\tgoto TRUE \n");
-        code.append("FALSE:\n");
+        code.append("\tgoto TRUE" + conditionalId +"\n");
+        code.append("FALSE" + conditionalId + ":\n");
         code.append("\ticonst_1\n");
-        code.append("TRUE:\n");
+        code.append("TRUE" + conditionalId + ":\n");
 
+        conditionalId++;
         return code.toString();
     }
 
@@ -488,7 +486,8 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         code.append(getCode(instruction.getCondition()));
-        code.append("\tifeq " + instruction.getLabel() + ": \n");
+
+        code.append("\tifeq " + instruction.getLabel() + " \n");
 
         return code.toString();
     }
@@ -498,7 +497,6 @@ public class JasminInstruction {
 
         code.append(getCode(instruction.getCondition()));
         code.append("\tifeq " + instruction.getLabel() + "\n");
-
         return code.toString();
     }
 

@@ -273,7 +273,7 @@ public class TestUtils {
      */
     public static JasminResult backend(OllirResult ollirResult) {
         JasminBackend backend = getJasminBackend();
-
+        System.out.println("OLLIR = " + ollirResult.getOllirCode());
         var jasminResult = backend.toJasmin(ollirResult);
         JasminEmitter emitter = new JasminEmitter();
         emitter.toJasmin(ollirResult);

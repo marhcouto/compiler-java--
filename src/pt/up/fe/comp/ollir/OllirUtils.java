@@ -33,6 +33,9 @@ public class OllirUtils {
             case ".Any":
                 ollirType += "V";
                 break;
+            case "boolean":
+                ollirType += "bool";
+                break;
             default:
                 ollirType += typeStr;
                 break;

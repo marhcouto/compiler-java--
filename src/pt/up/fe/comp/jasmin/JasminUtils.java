@@ -240,6 +240,8 @@ public class JasminUtils {
                 return "";
             case ARRAYREF:
                 return "a";
+            case OBJECTREF:
+                return "a";
             default:
                 throw new NotImplementedException(type);
         }
@@ -368,7 +370,11 @@ public class JasminUtils {
         return instrStr;
     }
 
-    public String getJasminType(Type type)
+    public String getJasminType(Type type){
+        return getJasminType(type, false);
+    }
+
+    public String getJasminType(Type type, boolean isMethodSignature)
     {
         if(type instanceof ArrayType)
         {
@@ -376,8 +382,10 @@ public class JasminUtils {
         }
         else if (type instanceof ClassType) {
             //return getJasminType(type.getTypeOfElement());
-            if(((ClassType) type).getName().equals("boolean")) return "Z";
-            return ((ClassType) type).getName();
+            if(isMethodSignature)
+                return "L" + ((ClassType) type).getName() + ";";
+            else
+                return ((ClassType) type).getName();
         }
         else if (type instanceof Type)
             return getJasminType(type.getTypeOfElement());
@@ -389,7 +397,6 @@ public class JasminUtils {
 
     public String getJasminType(ElementType type)
     {
-        System.out.println(type);
         switch (type)
         {
             case INT32:

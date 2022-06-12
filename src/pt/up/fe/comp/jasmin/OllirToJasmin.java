@@ -145,9 +145,9 @@ public class OllirToJasmin {
         code.append(accessSpecs + method.getMethodName() + '(');
 
         var paramsTypes = method.getParams().stream()
-                .map(element -> jasminUtils.getJasminType(element.getType()))
+                .map(element -> jasminUtils.getJasminType(element.getType(), true))
                 .collect(Collectors.joining());
-        code.append(paramsTypes).append(")").append(jasminUtils.getJasminType(method.getReturnType()) + '\n');
+        code.append(paramsTypes).append(")").append(jasminUtils.getJasminType(method.getReturnType(), true) + '\n');
         int limitLocals = method.getParams().size() + (method.isStaticMethod() ? 0 : 1) + method.getVarTable().size();
         code.append("\t.limit stack 99\n");
         code.append("\t.limit locals 99\n");// + limitLocals + "\n");
