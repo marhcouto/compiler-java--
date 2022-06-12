@@ -66,7 +66,7 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
-        if (config.containsKey("optimize")) {
+        if (config.get("optimize").equals("true")) {
             analysisResult = new JmmOptimizer().optimize(analysisResult);
         }
 
