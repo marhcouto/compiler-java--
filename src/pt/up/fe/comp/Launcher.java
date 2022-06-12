@@ -24,10 +24,10 @@ public class Launcher {
         SpecsLogs.info("Executing with args: " + Arrays.toString(args));
 
         // read the input code
-        if (args.length != 1) {
-            throw new RuntimeException("Expected a single argument, a path to an existing input file.");
+        if (args.length > 3) {
+            throw new RuntimeException("Expected at most 3 arguments");
         }
-        File inputFile = new File(args[0]);
+        File inputFile = new File(args[args.length - 1]);
         if (!inputFile.isFile()) {
             throw new RuntimeException("Expected a path to an existing input file, got '" + args[0] + "'.");
         }
@@ -35,10 +35,16 @@ public class Launcher {
 
         // Create config
         Map<String, String> config = new HashMap<>();
-        config.put("inputFile", args[0]);
+        config.put("inputFile", args[args.length - 1]);
         config.put("optimize", "false");
         config.put("registerAllocation", "-1");
         config.put("debug", "false");
+
+        for(int i = 0; i < args.length; i++) {
+            if (args[i].equals("-o")) {
+                config.put("optimize", "true");
+            }
+        }
 
 
         // PARSING STAGE
@@ -60,6 +66,9 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
+        if (config.containsKey("optimize")) {
+            analysisResult = new JmmOptimizer().optimize(analysisResult);
+        }
 
         // OPTIMIZATION/OLLIR STAGE
         JmmOptimization optimizer = new JmmOptimizer();
@@ -71,13 +80,13 @@ public class Launcher {
         }
 
         // JASMIN STAGE
-        JasminEmitter jasminEmitter = new JasminEmitter();
-        JasminResult jasminResult = jasminEmitter.toJasmin(optimizationResult);
+        //JasminEmitter jasminEmitter = new JasminEmitter();
+        //JasminResult jasminResult = jasminEmitter.toJasmin(optimizationResult);
         // Jasmin reports
         // TestUtils.noErrors(jasminResult.getReports());
-        for (Report r : jasminResult.getReports()) {
+        /*for (Report r : jasminResult.getReports()) {
             System.out.println(r.toString());
-        }
+        }*/
 
 
         // TREE PRINT
@@ -93,8 +102,8 @@ public class Launcher {
         System.out.println(optimizationResult.getOllirCode());
 
         // JASMIN CODE PRINT
-        System.out.println("\n\nJASMIN:\n");
-        System.out.println(jasminResult.getJasminCode());
+        //System.out.println("\n\nJASMIN:\n");
+        //System.out.println(jasminResult.getJasminCode());
     }
 
 }
