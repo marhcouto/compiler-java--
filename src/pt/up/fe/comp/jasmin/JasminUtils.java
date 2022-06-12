@@ -3,8 +3,10 @@ package pt.up.fe.comp.jasmin;
 import org.specs.comp.ollir.*;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class JasminUtils {
     ClassUnit classUnit;
