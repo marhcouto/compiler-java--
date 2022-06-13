@@ -22,4 +22,5 @@ public class CustomTests {
         String expected = "Result: 3\nResult: 4\nResult: 2\nResult: 3";
         CpUtils.runJasmin(getJasminResult("AllaroundTest.jmm"), expected);
     }
+
 }
