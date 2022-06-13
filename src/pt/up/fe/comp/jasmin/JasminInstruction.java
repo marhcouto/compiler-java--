@@ -376,16 +376,7 @@ public class JasminInstruction {
         return code.toString();
     }
 
-    public String createCmpCode(String operation)
-    {
-        var code = new StringBuilder();
 
-        code.append("if_icmp" + operation + " ");
-
-
-
-        return code.toString();
-    }
 
     private String createLogicOpCode(String operation, Element leftOperand, Element rightOperand)
     {
@@ -418,6 +409,21 @@ public class JasminInstruction {
     private String createBranchCode(String operation, Element leftOperand, Element rightOperand)
     {
         var code = new StringBuilder();
+        List<String> listBitwiseOperations = new ArrayList<>(Arrays.asList("ne", "eq", "and", "or"));
+        List<String> listCmpOperations = new ArrayList<>(Arrays.asList("lt", "lt", "gt", "ge"));
+
+
+        if(leftOperand.isLiteral() && rightOperand.isLiteral()) {
+            boolean result = false;
+            if(listBitwiseOperations.contains(operation))
+                result = doBitwiseOptimization(operation, ((LiteralElement) leftOperand).getLiteral(),((LiteralElement) rightOperand).getLiteral());
+            else if(listCmpOperations.contains(operation)) {
+                result = doCmpOptmization(operation, ((LiteralElement) leftOperand).getLiteral(),((LiteralElement) rightOperand).getLiteral());
+            }
+            if (result) return "\ticonst_1\n";
+            else return "\ticonst_0\n";
+        }
+
 
         code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
         code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
@@ -432,42 +438,59 @@ public class JasminInstruction {
         return code.toString();
     }
 
-    private String doOrANDOptimization(String operation, Element leftOperand, Element rightOperand)
+    private boolean doCmpOptmization(String operation, String leftLiteral, String rightLiteral) {
+        int left = Integer.parseInt(leftLiteral);
+        int right = Integer.parseInt(rightLiteral);
+
+        switch(operation) {
+
+            case "lt":
+                return left < right;
+            case "le":
+                return  left <= right;
+            case "gt":
+                return left > right;
+            case "ge":
+                return left >= right;
+            default:
+                return false;
+        }
+    }
+
+    private boolean doBitwiseOptimization(String operation, String leftLiteral, String rightLiteral)
     {
-        var code = new StringBuilder();
+        boolean left = (leftLiteral.equals("1")) ? true : false;
+        boolean right = (rightLiteral.equals("1")) ? true : false;
 
-        LiteralElement leftLiteral = (LiteralElement) leftOperand;
-        LiteralElement rightLiteral = (LiteralElement) rightOperand;
+        switch(operation) {
 
-        boolean left = (leftLiteral.getLiteral().equals("1")) ? true : false;
-        boolean right = (rightLiteral.getLiteral().equals("1")) ? true : false;
-        boolean result;
+            case "and":
+                return left && right;
+            case "or":
+                return  left || right;
 
-        if (operation.equals("AND")) result = left && right;
-        else result = left || right;
+            case "eq":
+                return left == right;
+            case "ne":
+                return left != right;
+            default:
+                return false;
+        }
 
-
-        System.out.println(left + operation + right + " = " + result);
-
-        if (result) code.append("\ticonst_1\n");
-        else code.append("\ticonst_0\n");
-        return code.toString();
 
     }
 
-    private String doAndOptimizationIfNeeded(LiteralElement literalElement)
+
+    private String doLogicalOptimizationIfNeeded(String operation ,LiteralElement literalElement)
     {
-        if(literalElement.getLiteral().equals("0"))
+        if(operation.equals("and") && literalElement.getLiteral().equals("0"))
             return "\ticonst_0\n";
-        return "";
+        else if(operation.equals("or") && literalElement.getLiteral().equals("1"))
+            return "\ticonst_1\n";
+        else return "";
     }
 
-    private String doOrOptimizationIfNeeded(LiteralElement literalElement)
-    {
-        if(literalElement.getLiteral().equals("1"))
-            return "\ticonst_1\n";
-        return "";
-    }
+
 
 
     private String createOrAndCode(String operation, Element leftOperand, Element rightOperand)
@@ -477,7 +500,9 @@ public class JasminInstruction {
         String result = "";
 
         if(leftOperand.isLiteral() && rightOperand.isLiteral()) {
-            return doOrANDOptimization(operation, leftOperand, rightOperand);
+            boolean res = doBitwiseOptimization(operation, ((LiteralElement) leftOperand).getLiteral(), ((LiteralElement) rightOperand).getLiteral());
+            if (res) return "\ticonst_1\n";
+            else return "\ticonst_0\n";
         }
         else if(leftOperand.isLiteral() && !rightOperand.isLiteral())
         {
@@ -489,14 +514,10 @@ public class JasminInstruction {
         }
 
 
-        if(operation.equals("AND") && literal != null)
-            result = doAndOptimizationIfNeeded(literal);
-        else if(operation.equals("OR") && literal != null)
-            result = doOrOptimizationIfNeeded(literal);
+        if(literal != null)
+            result = doLogicalOptimizationIfNeeded(operation, literal);
 
         if(result != "") return result;
-
-
 
             code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
             code.append("\tifeq" + " FALSE" + conditionalId + "\n");
@@ -657,7 +678,6 @@ public class JasminInstruction {
                 break;
             case EQ:
                 code.append(createBranchCode("eq", leftOperand,rightOperand));
-
                 break;
             case NEQ:
                 code.append(createBranchCode("ne", leftOperand,rightOperand));
@@ -672,13 +692,13 @@ public class JasminInstruction {
                 code.append("\tiand\n");
                 break;
             case ANDB:
-                code.append(createOrAndCode("AND", leftOperand, rightOperand));
+                code.append(createOrAndCode("and", leftOperand, rightOperand));
                 break;
             case OR:
                 code.append("ior\n");
                 break;
             case ORB:
-                code.append(createOrAndCode("OR", leftOperand, rightOperand));
+                code.append(createOrAndCode("or", leftOperand, rightOperand));
                 break;
             case LTE:
                 code.append(createBranchCode("le", leftOperand, rightOperand));
