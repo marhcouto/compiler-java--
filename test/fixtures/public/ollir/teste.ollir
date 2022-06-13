@@ -1,17 +1,200 @@
-import io;
-Arithmetic_mul {
-
-    .construct Arithmetic_mul().V {
-        invokespecial(this, "<init>").V;
-    }
-
-    .method public static main(args.array.String).V {
-        b.bool :=.bool 1.bool;
-        c.bool :=.bool 0.bool;
-        a.bool :=.bool b.bool ==.bool c.bool;
-        invokestatic(io, "print", a.bool).V;
-
-        ret.V;
-    }
-
-}
+class public SwitchStat
+.super java/lang/Object
+.method public <init>()V
+   aload_0
+   invokenonvirtual java/lang/Object/<init>()V
+   return
+.end method
+.method public func(I)I
+	.limit stack 2
+	.limit locals 15
+	iload_1
+	iconst_1
+	if_cmplt FALSE0
+	iconst_0
+	goto TRUE0
+FALSE0:
+	iconst_1
+TRUE0:
+	istore_2
+	iload_2
+	ifne TRUE1
+	iconst_1
+	goto FALSE1
+TRUE1:
+	iconst_0
+FALSE1:
+	ifne Else0
+	iconst_1
+	invokestatic ioPlus/printResult(I)V
+	goto EndIf0
+Else0:
+	iload_1
+	iconst_2
+	if_cmplt FALSE2
+	iconst_0
+	goto TRUE2
+FALSE2:
+	iconst_1
+TRUE2:
+	istore 4
+	iload 4
+	ifne TRUE3
+	iconst_1
+	goto FALSE3
+TRUE3:
+	iconst_0
+FALSE3:
+	ifne Else1
+	iconst_2
+	invokestatic ioPlus/printResult(I)V
+	goto EndIf1
+Else1:
+	iload_1
+	iconst_3
+	if_cmplt FALSE4
+	iconst_0
+	goto TRUE4
+FALSE4:
+	iconst_1
+TRUE4:
+	istore 6
+	iload 6
+	ifne TRUE5
+	iconst_1
+	goto FALSE5
+TRUE5:
+	iconst_0
+FALSE5:
+	ifne Else2
+	iconst_3
+	invokestatic ioPlus/printResult(I)V
+	goto EndIf2
+Else2:
+	iload_1
+	iconst_4
+	if_cmplt FALSE6
+	iconst_0
+	goto TRUE6
+FALSE6:
+	iconst_1
+TRUE6:
+	istore 8
+	iload 8
+	ifne TRUE7
+	iconst_1
+	goto FALSE7
+TRUE7:
+	iconst_0
+FALSE7:
+	ifne Else3
+	iconst_4
+	invokestatic ioPlus/printResult(I)V
+	goto EndIf3
+Else3:
+	iload_1
+	iconst_5
+	if_cmplt FALSE8
+	iconst_0
+	goto TRUE8
+FALSE8:
+	iconst_1
+TRUE8:
+	istore 10
+	iload 10
+	ifne TRUE9
+	iconst_1
+	goto FALSE9
+TRUE9:
+	iconst_0
+FALSE9:
+	ifne Else4
+	iconst_5
+	invokestatic ioPlus/printResult(I)V
+	goto EndIf4
+Else4:
+	iload_1
+	bipush 6
+	if_cmplt FALSE10
+	iconst_0
+	goto TRUE10
+FALSE10:
+	iconst_1
+TRUE10:
+	istore 12
+	iload 12
+	ifne TRUE11
+	iconst_1
+	goto FALSE11
+TRUE11:
+	iconst_0
+FALSE11:
+	ifne Else5
+	bipush 6
+	invokestatic ioPlus/printResult(I)V
+	goto EndIf5
+Else5:
+	bipush 7
+	invokestatic ioPlus/printResult(I)V
+EndIf3:
+EndIf2:
+EndIf1:
+EndIf0:
+EndIf5:
+EndIf4:
+	iconst_1
+	ireturn
+.end method
+.method public static main([Ljava/lang/String;)V
+	.limit stack 2
+	.limit locals 11
+	new	SwitchStat
+	astore_1
+	aload_1
+	invokespecial SwitchStat/<init>()V
+	aload_1
+	astore_2
+	aload_2
+	iconst_0
+	invokevirtual SwitchStat/func(I)I
+	istore_3
+	iload_3
+	istore 4
+	aload_2
+	iconst_1
+	invokevirtual SwitchStat/func(I)I
+	istore 5
+	iload 5
+	istore 4
+	aload_2
+	iconst_2
+	invokevirtual SwitchStat/func(I)I
+	istore 6
+	iload 6
+	istore 4
+	aload_2
+	iconst_3
+	invokevirtual SwitchStat/func(I)I
+	istore 7
+	iload 7
+	istore 4
+	aload_2
+	iconst_4
+	invokevirtual SwitchStat/func(I)I
+	istore 8
+	iload 8
+	istore 4
+	aload_2
+	iconst_5
+	invokevirtual SwitchStat/func(I)I
+	istore 9
+	iload 9
+	istore 4
+	aload_2
+	bipush 6
+	invokevirtual SwitchStat/func(I)I
+	istore 10
+	iload 10
+	istore 4
+	return
+.end method

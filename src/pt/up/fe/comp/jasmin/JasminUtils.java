@@ -77,6 +77,8 @@ public class JasminUtils {
             code.append("iconst_" + _const);
         else if (Integer.parseInt(_const) < 128)
             code.append("bipush " + _const);
+        else if (Integer.parseInt(_const) < 32768)
+            code.append("sipush " + _const);
         else
             code.append("ldc " +  _const);
         return code.toString();
@@ -271,7 +273,6 @@ public class JasminUtils {
             return "[" + getJasminType(((ArrayType) type).getArrayType());
         }
         else if (type instanceof ClassType) {
-            //return getJasminType(type.getTypeOfElement());
             if(isMethodSignature)
                 return "L" + ((ClassType) type).getName() + ";";
             else
@@ -293,16 +294,8 @@ public class JasminUtils {
                 return "I";
             case BOOLEAN:
                 return "Z";
-            /*TODO
-            case ARRAYREF:
-                //return "[" + ((ArrayType) typeOllir).getTypeOfElement();
-                return "[";*/
             case OBJECTREF:
                 return "";
-            /*case CLASS:
-                return "[" + classUnit.getClassName() + ";";
-            case THIS:
-                return getFullyQualifiedName(classUnit.getSuperClass());*/
             case STRING:
                 return "Ljava/lang/String;";
             case VOID:
