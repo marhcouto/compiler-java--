@@ -154,7 +154,7 @@ public class JasminUtils {
                     case CLASS:
                     case STRING:
                         instrStr += "\t";
-                        instrStr += "astore " + id;
+                        instrStr += "astore" + (id <= 3 ? '_' : ' ') + id;
                         break;
                     case THIS:
                         instrStr += "\t";
@@ -228,7 +228,7 @@ public class JasminUtils {
                 switch (elemType) {
                     case INT32:
                         if (isArrayOperand) {
-                            instrStr += "aload " + id + "\n\t";
+                            instrStr += "aload" + (id <= 3 ? '_' : ' ') + id + "\n\t";
                             instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
                             instrStr += "iaload";
                         } else {
@@ -243,7 +243,7 @@ public class JasminUtils {
                     case OBJECTREF:
                     case CLASS:
                     case STRING:
-                        instrStr = "aload " + id;
+                        instrStr = "aload"+ (id <= 3 ? '_' : ' ') + id;
                         break;
                     case THIS:
                         instrStr = "aload_0";
