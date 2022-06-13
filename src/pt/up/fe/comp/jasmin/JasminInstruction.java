@@ -419,7 +419,6 @@ public class JasminInstruction {
     {
         var code = new StringBuilder();
 
-        //TODO FAZER PARA VARIAS LABELS
         code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
         code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
         code.append("\t" + "if_icmp" + operation + " FALSE" + conditionalId + "\n" );
@@ -468,31 +467,76 @@ public class JasminInstruction {
         return code.toString();
     }
 
-    private String doOtimizationIfNeeded(String operation, Element leftOperand, Element rightOperand)
+    private String doDivOtimizationIfNeeded(Element leftOperand, Element rightOperand)
     {
         LiteralElement literalElement = null;
-        Operand operand = null;
+        Element operand = null;
 
         if(rightOperand.isLiteral() && !leftOperand.isLiteral())
         {
             literalElement = (LiteralElement) rightOperand;
-            operand = (Operand) leftOperand;
+            operand = leftOperand;
         }
-        else if(!rightOperand.isLiteral() && leftOperand.isLiteral())
+        else if(rightOperand.isLiteral() && leftOperand.isLiteral())
         {
-            literalElement = (LiteralElement) leftOperand;
-            operand = (Operand) rightOperand;
+            literalElement = (LiteralElement) rightOperand;
+            operand = leftOperand;
         }
-        //TODO - Falta a situação em que ambos são literais
 
         if(literalElement != null)
         {
             int numShifts = this.jasminUtils.checkIfIsPower2(Integer.parseInt(literalElement.getLiteral()));
+
+
             if(numShifts != -1)
             {
                 Type type = new Type(ElementType.INT32);
                 LiteralElement newLiteral = new LiteralElement(Integer.toString(numShifts), type);
-                return createArithmeticCode(operation, operand,  newLiteral);
+                return createArithmeticCode("ishr", operand,  newLiteral);
+            }
+        }
+        return "";
+
+    }
+
+    private String doMulOtimizationIfNeeded( Element leftOperand, Element rightOperand)
+    {
+        LiteralElement literalElement = null;
+        Element operand = null;
+
+        if(rightOperand.isLiteral() && !leftOperand.isLiteral())
+        {
+            literalElement = (LiteralElement) rightOperand;
+            operand = leftOperand;
+        }
+        else if(!rightOperand.isLiteral() && leftOperand.isLiteral())
+        {
+            literalElement = (LiteralElement) leftOperand;
+            operand = rightOperand;
+        }
+        else if(rightOperand.isLiteral() && leftOperand.isLiteral())
+        {
+            literalElement = (LiteralElement) leftOperand;
+            operand = rightOperand;
+        }
+
+        if(literalElement != null)
+        {
+            int numShifts = this.jasminUtils.checkIfIsPower2(Integer.parseInt(literalElement.getLiteral()));
+            System.out.println(literalElement.getLiteral());
+
+            if(operand instanceof LiteralElement && numShifts == -1)
+            {
+
+                numShifts = this.jasminUtils.checkIfIsPower2(Integer.parseInt(((LiteralElement)operand).getLiteral()));
+                operand = literalElement;
+            }
+
+            if(numShifts != -1)
+            {
+                Type type = new Type(ElementType.INT32);
+                LiteralElement newLiteral = new LiteralElement(Integer.toString(numShifts), type);
+                return createArithmeticCode("ishl" , operand,  newLiteral);
             }
         }
         return "";
@@ -511,14 +555,14 @@ public class JasminInstruction {
 
         switch(op.getOpType()){
             case DIV:
-                optimizedCode = doOtimizationIfNeeded("ishr", leftOperand, rightOperand);
+                optimizedCode = doDivOtimizationIfNeeded(leftOperand, rightOperand);
                 if(optimizedCode == "")
                     code.append(createArithmeticCode("idiv", leftOperand, rightOperand));
                 else code.append(optimizedCode);
 
                 break;
             case MUL:
-                optimizedCode = doOtimizationIfNeeded("ishl", leftOperand, rightOperand);
+                optimizedCode = doMulOtimizationIfNeeded(leftOperand, rightOperand);
                 if(optimizedCode == "")
                     code.append(createArithmeticCode("imul", leftOperand, rightOperand));
                 else code.append(optimizedCode);
