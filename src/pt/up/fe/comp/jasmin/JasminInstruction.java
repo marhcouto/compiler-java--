@@ -521,7 +521,7 @@ public class JasminInstruction {
 
         if(literalElement != null)
         {
-            int numShifts = this.jasminUtils.checkIfIsPower2(Integer.parseInt(literalElement.getLiteral())););
+            int numShifts = this.jasminUtils.checkIfIsPower2(Integer.parseInt(literalElement.getLiteral()));
 
             if(operand instanceof LiteralElement && numShifts == -1)
             {

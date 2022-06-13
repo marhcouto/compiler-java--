@@ -107,7 +107,6 @@ public class JasminUtils {
         String instrStr ="";
         if(element.isLiteral()){
             LiteralElement lit = (LiteralElement) element;
-
             switch (lit.getType().getTypeOfElement())
             {
                 case INT32:
@@ -123,96 +122,52 @@ public class JasminUtils {
         } else {
             Operand operand = (Operand) element;
             boolean isArrayOperand = false;
+
+            int id;
+            if(operand.isParameter()){
+                id = operand.getParamId();
+            } else {
+                id = varTable.get(operand.getName()).getVirtualReg();
+            }
+
             if(operand instanceof ArrayOperand){
                 isArrayOperand = true;
             }
             ElementType elemType = operand.getType().getTypeOfElement();
-            if (operand.isParameter()) {
+
+            if(id != -1) {
                 switch (elemType) {
                     case INT32:
-                        instrStr +="\t";
-                        if(isArrayOperand){
+                        instrStr += "\t";
+                        if (isArrayOperand) {
                             instrStr += "iastore";
                         } else {
-                            instrStr += getIStore(operand.getParamId());
+                            instrStr += getIStore(id);
                         }
                         break;
                     case BOOLEAN:
-                        instrStr +="\t";
-                        instrStr += getIStore(operand.getParamId());
+                        instrStr += "\t";
+                        instrStr += getIStore(id);
                         break;
                     case ARRAYREF:
-                        instrStr +="\t";
-                        instrStr += "aastore " + operand.getParamId();
-                        break;
                     case OBJECTREF:
-                        instrStr +="\t";
-                        instrStr += "astore " + operand.getParamId();
-                        break;
                     case CLASS:
-                        instrStr +="\t";
-                        instrStr += "astore " + operand.getParamId();
+                    case STRING:
+                        instrStr += "\t";
+                        instrStr += "astore " + id;
                         break;
                     case THIS:
-                        instrStr +="\t";
+                        instrStr += "\t";
                         instrStr += "astore_0";
-                        break;
-                    case STRING:
-                        instrStr +="\t";
-                        instrStr += "astore " + operand.getParamId();
                         break;
                     case VOID:
                         break;
                 }
             } else {
-                int virtualReg = varTable.get(operand.getName()).getVirtualReg();
-
-
-                if (virtualReg != -1) {
-
-                    switch (elemType) {
-                        case INT32:
-                            instrStr +="\t";
-                            if(isArrayOperand){
-                                instrStr += "iastore";
-                            } else {
-                                instrStr += getIStore(virtualReg);
-                            }
-                            break;
-                        case BOOLEAN:
-                            instrStr +="\t";
-                            instrStr += getIStore(virtualReg);
-                            break;
-                        case ARRAYREF:
-                            instrStr +="\t";
-                            instrStr += "astore " + virtualReg ;
-                            break;
-                        case OBJECTREF:
-                            instrStr +="\t";
-                            instrStr += "astore " + virtualReg;
-
-                            break;
-                        case CLASS:
-                            instrStr +="\t";
-                            instrStr += "astore " + virtualReg;
-                            break;
-                        case THIS:
-                            instrStr +="\t";
-                            instrStr += "astore_0";
-                            break;
-                        case STRING:
-                            instrStr +="\t";
-                            instrStr += "astore " + virtualReg;
-                            break;
-                        case VOID:
-                            break;
-                    }
-                } else {
                     instrStr += "\tputfield " + getJasminType(elemType) + "/" + operand.getName() + " " + getJasminType(elemType);
                 }
 
             }
-        }
         instrStr += "\n";
         return instrStr;
     }
@@ -238,10 +193,7 @@ public class JasminUtils {
     }
 
     public String loadElement(Element element, HashMap<String, Descriptor> varTable){
-
         String instrStr ="";
-
-
 
         if(element.isLiteral()){
             LiteralElement lit = (LiteralElement) element;
@@ -264,94 +216,44 @@ public class JasminUtils {
             if(operand instanceof ArrayOperand){
                 operand.show();
                 isArrayOperand = true;
-
             }
-
-            ElementType elemType = operand.getType().getTypeOfElement();
-            if(operand.isParameter()) {
+            int id;
+            if(operand.isParameter()){
+                id = operand.getParamId();
+            } else {
+                id = varTable.get(operand.getName()).getVirtualReg();
+            }
+            if(id != -1) {
+                ElementType elemType = operand.getType().getTypeOfElement();
                 switch (elemType) {
                     case INT32:
-                        if(isArrayOperand) {
-                            instrStr += "aload " + operand.getParamId() + "\n\t";
+                        if (isArrayOperand) {
+                            instrStr += "aload " + id + "\n\t";
                             instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
                             instrStr += "iaload";
                         } else {
-                            instrStr = getIload(operand.getParamId());
+                            instrStr = getIload(id);
                         }
 
                         break;
                     case BOOLEAN:
-                        instrStr = getIload(operand.getParamId());
+                        instrStr = getIload(id);
                         break;
                     case ARRAYREF:
-                        instrStr = "aload " + operand.getParamId();
-                        break;
                     case OBJECTREF:
-                        instrStr = "aload " + operand.getParamId();
-                        break;
                     case CLASS:
-                        instrStr = "aload " + operand.getParamId();
+                    case STRING:
+                        instrStr = "aload " + id;
                         break;
                     case THIS:
                         instrStr = "aload_0";
                         break;
-                    case STRING:
-                        instrStr = "aload " + operand.getParamId();
-                        break;
                     case VOID:
                         break;
                 }
+            } else {
+                instrStr += "\tgetfield " + getJasminType(element.getType())+"/"+operand.getName() + " " ;
             }
-            else{
-
-                var operandName = operand.getName();
-                var virtualReg = -1;
-
-                if(varTable.get(operandName) != null)
-                     virtualReg = varTable.get(operandName).getVirtualReg();
-
-                if(virtualReg != -1)
-                {
-
-                    switch (elemType) {
-                        case INT32:
-                            if(isArrayOperand) {
-                                instrStr += "aload " + virtualReg + "\n\t";
-                                instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
-                                instrStr += "iaload";
-                            }else {
-                                instrStr = getIload(virtualReg);
-                            }
-                            break;
-                        case BOOLEAN:
-                            instrStr = getIload(virtualReg);
-                            break;
-                        case ARRAYREF:
-                        case OBJECTREF:
-                        case CLASS:
-                            instrStr = "aload " + virtualReg;
-                            break;
-                        case THIS:
-                            instrStr = "aload_0";
-                            break;
-                        case STRING:
-                            instrStr = "aload " + virtualReg;
-                            break;
-                        case VOID:
-                            break;
-                        default:
-                            throw new NotImplementedException(element);
-                    }
-                }
-                else
-                {
-
-
-                    instrStr += "\tgetfield " + getJasminType(element.getType())+"/"+operand.getName() + " " ;
-                }
-
-            }
-
         }
         instrStr += "\n";
         return instrStr;
