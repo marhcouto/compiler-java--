@@ -609,10 +609,11 @@ public class JasminInstruction {
                 code.append(createArithmeticCode("iadd", leftOperand, rightOperand));
                 break;
             case EQ:
-                //TODO
+                code.append(createBranchCode("eq", leftOperand,rightOperand));
+
                 break;
             case NEQ:
-                //TODO
+                code.append(createBranchCode("ne", leftOperand,rightOperand));
                 break;
             case GTH:
                 code.append(createBranchCode("gt", leftOperand, rightOperand));

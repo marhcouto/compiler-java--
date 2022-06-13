@@ -6,9 +6,10 @@ Arithmetic_mul {
     }
 
     .method public static main(args.array.String).V {
-        b.i32 :=.i32 11.i32;
-        a.i32 :=.i32 2.i32 /.i32 b.i32;
-        invokestatic(io, "print", a.i32).V;
+        b.bool :=.bool 1.bool;
+        c.bool :=.bool 0.bool;
+        a.bool :=.bool b.bool ==.bool c.bool;
+        invokestatic(io, "print", a.bool).V;
 
         ret.V;
     }
