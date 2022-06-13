@@ -229,12 +229,14 @@ public class JasminUtils {
                 ElementType elemType = operand.getType().getTypeOfElement();
                 switch (elemType) {
                     case INT32:
+
                         if (isArrayOperand) {
                             instrStr += "aload" + (id <= 3 ? '_' : ' ') + id + "\n\t";
                             instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
                             instrStr += "iaload";
                         } else {
                             instrStr = getIload(id);
+
                         }
 
                         break;

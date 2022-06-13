@@ -302,6 +302,51 @@ public class JasminInstruction {
         return code.toString();
     }
 
+    private String checkIfIincOptimization(Operand dest, Instruction instruction)
+    {
+        if(instruction instanceof BinaryOpInstruction)
+        {
+            BinaryOpInstruction binaryOpInstruction = (BinaryOpInstruction) instruction;
+            if(binaryOpInstruction.getOperation().getOpType().equals(OperationType.ADD))
+            {
+                LiteralElement literalElement;
+                Operand operand;
+
+
+                if(binaryOpInstruction.getLeftOperand().isLiteral() && !binaryOpInstruction.getRightOperand().isLiteral())
+                {
+
+                    literalElement = (LiteralElement) binaryOpInstruction.getLeftOperand();
+                    operand = (Operand) binaryOpInstruction.getRightOperand();
+                }
+                else if(!binaryOpInstruction.getLeftOperand().isLiteral() && binaryOpInstruction.getRightOperand().isLiteral())
+                {
+
+                    literalElement = (LiteralElement) binaryOpInstruction.getRightOperand();
+                    operand = (Operand) binaryOpInstruction.getLeftOperand();
+                }
+                else return "";
+
+
+
+                if(this.varTable.get(dest.getName()).getVirtualReg() == this.varTable.get(operand.getName()).getVirtualReg())
+                {
+                    var code = new StringBuilder();
+                    code.append("\t" + this.jasminUtils.loadElement(operand, this.varTable));
+                    code.append("\tiinc " + this.varTable.get(operand.getName()).getVirtualReg() + " " + literalElement.getLiteral()  +"\n");
+                    return code.toString();
+
+                }
+
+                return "";
+            }
+            return "";
+        }
+
+
+        return "";
+    }
+
 
     public String getCode(AssignInstruction instruction)
     {
@@ -312,8 +357,13 @@ public class JasminInstruction {
             this.stackLimit = Math.max(this.stackLimit, 3) ;
         }
 
-        code.append(getCode(instruction.getRhs(), true));
-        code.append(this.jasminUtils.storeElement(o1, this.varTable));
+        String result = checkIfIincOptimization(o1, instruction.getRhs());
+        if(result == "")
+        {
+            code.append(getCode(instruction.getRhs(), true));
+            code.append(this.jasminUtils.storeElement(o1, this.varTable));
+        }
+        else code.append(result);
 
         this.currentStack--;
 
@@ -374,8 +424,6 @@ public class JasminInstruction {
 
         return code.toString();
     }
-
-
 
     private String createLogicOpCode(String operation, Element leftOperand, Element rightOperand)
     {
@@ -482,7 +530,6 @@ public class JasminInstruction {
                 return left && right;
             case "or":
                 return  left || right;
-
             case "eq":
                 return left == right;
             case "ne":
@@ -494,7 +541,6 @@ public class JasminInstruction {
 
     }
 
-
     private String doLogicalOptimizationIfNeeded(String operation ,LiteralElement literalElement)
     {
         if(operation.equals("and") && literalElement.getLiteral().equals("0"))
@@ -503,8 +549,6 @@ public class JasminInstruction {
             return "\ticonst_1\n";
         else return "";
     }
-
-
 
 
     private String createOrAndCode(String operation, Element leftOperand, Element rightOperand)
@@ -543,8 +587,6 @@ public class JasminInstruction {
             code.append("\ticonst_0\n");
             code.append("TRUE" + conditionalId + ":\n");
             conditionalId++;
-
-
 
         return code.toString();
     }
@@ -652,41 +694,6 @@ public class JasminInstruction {
                 code.append(createArithmeticCode("isub", leftOperand, rightOperand));
                 break;
             case ADD:
-
-                /*System.out.println("INSTR SUCC1" + instruction.getPredecessors());
-                System.out.println("INSTR SUCC1" + instruction.getSuccessors());
-                if(instruction.getSucc1() instanceof AssignInstruction)
-                {
-
-                    LiteralElement literalElement;
-                    Operand operand;
-                    String operandName;
-
-                    AssignInstruction assignInstruction = (AssignInstruction) instruction.getSucc1();
-                    Operand operandDest = (Operand) assignInstruction.getDest();
-                    String operandDestName = operandDest.getName();
-
-                    if(rightOperand.isLiteral() && !leftOperand.isLiteral())
-                    {
-                        literalElement = (LiteralElement) rightOperand;
-                        operand = (Operand) leftOperand;
-
-
-                    }
-                    else
-                    {
-                        literalElement = (LiteralElement) leftOperand;
-                        operand = (Operand) rightOperand;
-                    }
-
-                    operandName = operand.getName();
-
-                    if(this.varTable.get(operandDestName).getVirtualReg() == this.varTable.get(operandName).getVirtualReg())
-                        code.append("\tiinc " + this.varTable.get(operandDestName).getVirtualReg() + " " + literalElement.getLiteral()  +"\n");
-
-                }*/
-
-
                 code.append(createArithmeticCode("iadd", leftOperand, rightOperand));
                 break;
             case EQ:
