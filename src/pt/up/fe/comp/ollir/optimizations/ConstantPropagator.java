@@ -35,6 +35,9 @@ public class ConstantPropagator extends PreorderJmmVisitor<Object, Object> {
     }
 
     private Object visitAsmOp(JmmNode node, Object dummy) {
+        if(!node.getJmmChild(0).getKind().equals("VarName")) {
+            return null;
+        }
         String varName = node.getJmmChild(0).get("image");
         JmmNode valueNode = node.getJmmChild(1);
         if (!node.getJmmChild(0).getKind().equals("VarName")) {
