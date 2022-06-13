@@ -312,6 +312,7 @@ public class JasminInstruction {
             code.append(jasminUtils.loadArrayRefAndIndex((ArrayOperand) o1, varTable));
             this.stackLimit = Math.max(this.stackLimit, 3) ;
         }
+
         code.append(getCode(instruction.getRhs(), true));
         code.append(this.jasminUtils.storeElement(o1, this.varTable));
 
@@ -413,6 +414,7 @@ public class JasminInstruction {
         return code.toString();
     }
 
+
     private String createBranchCode(String operation, Element leftOperand, Element rightOperand)
     {
         var code = new StringBuilder();
@@ -466,30 +468,107 @@ public class JasminInstruction {
         return code.toString();
     }
 
+    private String doOtimizationIfNeeded(String operation, Element leftOperand, Element rightOperand)
+    {
+        LiteralElement literalElement = null;
+        Operand operand = null;
+
+        if(rightOperand.isLiteral() && !leftOperand.isLiteral())
+        {
+            literalElement = (LiteralElement) rightOperand;
+            operand = (Operand) leftOperand;
+        }
+        else if(!rightOperand.isLiteral() && leftOperand.isLiteral())
+        {
+            literalElement = (LiteralElement) leftOperand;
+            operand = (Operand) rightOperand;
+        }
+        //TODO - Falta a situação em que ambos são literais
+
+        if(literalElement != null)
+        {
+            int numShifts = this.jasminUtils.checkIfIsPower2(Integer.parseInt(literalElement.getLiteral()));
+            if(numShifts != -1)
+            {
+                Type type = new Type(ElementType.INT32);
+                LiteralElement newLiteral = new LiteralElement(Integer.toString(numShifts), type);
+                return createArithmeticCode(operation, operand,  newLiteral);
+            }
+        }
+        return "";
+
+    }
+
+
     public String getCode(BinaryOpInstruction instruction)
     {
         var code = new StringBuilder();
         Operation op = instruction.getOperation();
+        String optimizedCode;
 
-        var leftOperand = instruction.getLeftOperand();
-        var rightOperand= instruction.getRightOperand();
+        Element leftOperand = instruction.getLeftOperand();
+        Element rightOperand= instruction.getRightOperand();
 
         switch(op.getOpType()){
             case DIV:
-                code.append(createArithmeticCode("idiv", leftOperand, rightOperand));
+                optimizedCode = doOtimizationIfNeeded("ishr", leftOperand, rightOperand);
+                if(optimizedCode == "")
+                    code.append(createArithmeticCode("idiv", leftOperand, rightOperand));
+                else code.append(optimizedCode);
+
                 break;
             case MUL:
-                code.append(createArithmeticCode("imul", leftOperand, rightOperand));
+                optimizedCode = doOtimizationIfNeeded("ishl", leftOperand, rightOperand);
+                if(optimizedCode == "")
+                    code.append(createArithmeticCode("imul", leftOperand, rightOperand));
+                else code.append(optimizedCode);
                 break;
             case SUB:
                 code.append(createArithmeticCode("isub", leftOperand, rightOperand));
                 break;
             case ADD:
+
+                /*System.out.println("INSTR SUCC1" + instruction.getPredecessors());
+                System.out.println("INSTR SUCC1" + instruction.getSuccessors());
+                if(instruction.getSucc1() instanceof AssignInstruction)
+                {
+
+                    LiteralElement literalElement;
+                    Operand operand;
+                    String operandName;
+
+                    AssignInstruction assignInstruction = (AssignInstruction) instruction.getSucc1();
+                    Operand operandDest = (Operand) assignInstruction.getDest();
+                    String operandDestName = operandDest.getName();
+
+                    if(rightOperand.isLiteral() && !leftOperand.isLiteral())
+                    {
+                        literalElement = (LiteralElement) rightOperand;
+                        operand = (Operand) leftOperand;
+
+
+                    }
+                    else
+                    {
+                        literalElement = (LiteralElement) leftOperand;
+                        operand = (Operand) rightOperand;
+                    }
+
+                    operandName = operand.getName();
+
+                    if(this.varTable.get(operandDestName).getVirtualReg() == this.varTable.get(operandName).getVirtualReg())
+                        code.append("\tiinc " + this.varTable.get(operandDestName).getVirtualReg() + " " + literalElement.getLiteral()  +"\n");
+
+                }*/
+
+
                 code.append(createArithmeticCode("iadd", leftOperand, rightOperand));
                 break;
             case EQ:
+                //TODO
                 break;
             case NEQ:
+                //TODO
                 break;
             case GTH:
                 code.append(createBranchCode("gt", leftOperand, rightOperand));
@@ -526,8 +605,10 @@ public class JasminInstruction {
                 code.append("\ticonst_0");
                 code.append("FALSE"+conditionalId+":\n");
                 conditionalId++;
-
-
+                break;
+            case NOT:
+                //~
+                //TODO
                 break;
             default:
                 throw new NotImplementedException(op.getOpType());

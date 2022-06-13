@@ -334,11 +334,7 @@ public class JasminUtils {
                             instrStr = getIload(virtualReg);
                             break;
                         case ARRAYREF:
-                            instrStr = "aload " + virtualReg;
-                            break;
                         case OBJECTREF:
-                            instrStr = "aload " + virtualReg;
-                            break;
                         case CLASS:
                             instrStr = "aload " + virtualReg;
                             break;
@@ -447,5 +443,19 @@ public class JasminUtils {
 
         code.append(this.loadElement(list.get(0), varTable)+ "\t") ;
         return code.toString();
+    }
+
+    public int checkIfIsPower2(int number)
+    {
+        int acc = 0;
+        while(number % 2 == 0)
+        {
+            number /= 2;
+            acc++;
+        }
+
+        if(number == 1) return acc;
+        else return -1;
+
     }
 }

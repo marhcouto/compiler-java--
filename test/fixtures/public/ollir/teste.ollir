@@ -1,19 +1,15 @@
-import GetterAndSetter;
 import io;
-PrintOtherClassInline {
+Arithmetic_mul {
 
-    .construct PrintOtherClassInline().V {
+    .construct Arithmetic_mul().V {
         invokespecial(this, "<init>").V;
     }
 
     .method public static main(args.array.String).V {
-    b.GetterAndSetter :=.GetterAndSetter new(GetterAndSetter).GetterAndSetter;
-    invokespecial(b.GetterAndSetter,"<init>").V;
-    content.i32 :=.i32 invokevirtual(b.GetterAndSetter, "setA", 10.i32).i32;
-    content.i32 :=.i32 invokevirtual(b.GetterAndSetter, "getA").i32;
-    invokestatic(io, "print", content.i32).V;
+        a.i32 :=.i32 2.i32 *.i32 11.i32;
+        invokestatic(io, "print", a.i32).V;
 
-    ret.V;
+        ret.V;
     }
 
 }
