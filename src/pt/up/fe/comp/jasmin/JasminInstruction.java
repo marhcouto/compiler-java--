@@ -121,7 +121,7 @@ public class JasminInstruction {
     private String createListOperands(CallInstruction instruction)
     {
         return instruction.getListOfOperands().stream()
-                .map(element ->this.jasminUtils.getJasminType(element.getType()))
+                .map(element ->this.jasminUtils.getJasminType(element.getType(), true))
                 .collect(Collectors.joining());
     }
 
@@ -138,7 +138,7 @@ public class JasminInstruction {
             code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
         }
 
-        code.append("\tinvokevirtual " +this.jasminUtils. getJasminType(firstArg.getType()) +  "/" + secondArg + "(");
+        code.append("\tinvokevirtual " +this.jasminUtils.getJasminType(firstArg.getType()) +  "/" + secondArg + "(");
         code.append(createListOperands(instruction));
         code.append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + '\n');
 

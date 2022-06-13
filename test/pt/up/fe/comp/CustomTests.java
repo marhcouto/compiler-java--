@@ -22,4 +22,10 @@ public class CustomTests {
         String expected = "Result: 3\nResult: 4\nResult: 2\nResult: 3";
         CpUtils.runJasmin(getJasminResult("AllaroundTest.jmm"), expected);
     }
+
+    @Test
+    public void testLimitStack() {
+        String expected = "Result: 2\nResult: 3\nResult: 4";
+        CpUtils.runJasmin(getJasminResult("LimitStack.jmm"), expected);
+    }
 }

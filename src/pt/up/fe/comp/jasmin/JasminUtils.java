@@ -265,6 +265,7 @@ public class JasminUtils {
 
     public String getJasminType(Type type, boolean isMethodSignature)
     {
+        System.out.println("Type = " + type + " " + isMethodSignature + " " + (type instanceof ClassType));
         if(type instanceof ArrayType)
         {
             return "[" + getJasminType(((ArrayType) type).getArrayType());
