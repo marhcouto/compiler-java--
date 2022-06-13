@@ -408,8 +408,10 @@ public class JasminInstruction {
     private String createBranchCode(String operation, Element leftOperand, Element rightOperand)
     {
         var code = new StringBuilder();
+        LiteralElement literalElement = null;
+        String prefix = "_icmp";
         List<String> listBitwiseOperations = new ArrayList<>(Arrays.asList("ne", "eq", "and", "or"));
-        List<String> listCmpOperations = new ArrayList<>(Arrays.asList("lt", "lt", "gt", "ge"));
+        List<String> listCmpOperations = new ArrayList<>(Arrays.asList("lt", "le", "gt", "ge"));
 
 
         if(leftOperand.isLiteral() && rightOperand.isLiteral()) {
@@ -422,11 +424,24 @@ public class JasminInstruction {
             if (result) return "\ticonst_1\n";
             else return "\ticonst_0\n";
         }
+        else if(leftOperand.isLiteral() && !rightOperand.isLiteral())
+        {
+            literalElement = (LiteralElement) leftOperand;
+        }
+        else if(!leftOperand.isLiteral() && rightOperand.isLiteral())
+        {
+            literalElement = (LiteralElement) rightOperand;
+        }
+
+        if(literalElement != null && literalElement.getLiteral().equals("0"))
+        {
+            prefix = "";
+        }
 
 
         code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
         code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-        code.append("\t" + "if_icmp" + operation + " FALSE" + conditionalId + "\n" );
+        code.append("\t" + "if" + prefix + operation + " FALSE" + conditionalId + "\n" );
         code.append("\ticonst_0\n");
         code.append("\tgoto TRUE" + conditionalId +"\n");
         code.append("FALSE" + conditionalId + ":\n");
