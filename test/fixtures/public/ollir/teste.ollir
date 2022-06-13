@@ -1,25 +1,17 @@
-public HelloWorld  {
+import io;
+Arithmetic_mul {
 
-	.construct Test().V {
-		invokespecial(this, "<init>").V;
-	}
+    .construct Arithmetic_mul().V {
+        invokespecial(this, "<init>").V;
+    }
 
-	.method public static main(args.array.String).V {
-		ret.V;
-	}
-	.method public foo().bool {
-        c.bool :=.bool false.bool;
-        d.bool :=.bool true.bool;
-        a.i32 :=.i32 1.i32;
-        b.i32 :=.i32 4.i32;
+    .method public static main(args.array.String).V {
+        b.bool :=.bool 1.bool;
+        c.bool :=.bool 0.bool;
+        a.bool :=.bool b.bool ==.bool c.bool;
+        invokestatic(io, "print", a.bool).V;
 
-        Loop1:
-            if (c.bool &&.bool d.bool) goto End;
-            if (a.i32 >=.bool 1.i32) goto End2;
-            u.i32 :=.i32 1.i32;
-            End2:
-                goto Loop1;
-        End:
-            ret.i32 c.i32;
-	}
+        ret.V;
+    }
+
 }

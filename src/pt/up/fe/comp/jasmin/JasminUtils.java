@@ -75,52 +75,95 @@ public class JasminUtils {
 
         if(Integer.parseInt(_const) < 6)
             code.append("iconst_" + _const);
+        else if (Integer.parseInt(_const) < 128)
+            code.append("bipush " + _const);
         else
-            code.append("ldc " + _const);
+            code.append("ldc " +  _const);
+        return code.toString();
+    }
 
+    public String loadArrayRefAndIndex(ArrayOperand operand, HashMap<String, Descriptor> varTable){
+        StringBuilder code = new StringBuilder();
+        if(operand.isParameter()){
+            code.append("\taload ");
+            code.append(operand.getParamId());
+            code.append("\n\t");
+        } else {
+            var virtualReg = -1;
+
+            if(varTable.get(operand.getName()) != null)
+                virtualReg = varTable.get(operand.getName()).getVirtualReg();
+            code.append("\taload ");
+            code.append(virtualReg);
+            code.append("\n\t");
+        }
+        code.append(this.loadArrayIndexes(operand, varTable));
+        code.append("\n");
         return code.toString();
     }
 
     public String storeElement(Element element, HashMap<String, Descriptor> varTable)
     {
+        System.out.println("INSIDE STORE");
         String instrStr ="";
         if(element.isLiteral()){
+            System.out.println("INSIDE LITERAL");
             LiteralElement lit = (LiteralElement) element;
 
             switch (lit.getType().getTypeOfElement())
             {
                 case INT32:
+                    instrStr +="\t";
                     instrStr += getIStore(Integer.parseInt(lit.getLiteral()));
                     break;
                 default:
+                    instrStr +="\t";
                     instrStr += "store " + lit.getLiteral();
                     break;
             }
 
         } else {
+            System.out.println("INSIDE ELSE");
             Operand operand = (Operand) element;
+            boolean isArrayOperand = false;
+            if(operand instanceof ArrayOperand){
+                System.out.println("found arrayoperand " + operand.getType().getTypeOfElement());
+                isArrayOperand = true;
+            }
             ElementType elemType = operand.getType().getTypeOfElement();
+            System.out.println("elemtype = " + elemType);
             if (operand.isParameter()) {
                 switch (elemType) {
                     case INT32:
-                        instrStr += getIStore(operand.getParamId());
+                        instrStr +="\t";
+                        if(isArrayOperand){
+                            instrStr += "iastore";
+                        } else {
+                            instrStr += getIStore(operand.getParamId());
+                        }
                         break;
                     case BOOLEAN:
+                        instrStr +="\t";
                         instrStr += getIStore(operand.getParamId());
                         break;
                     case ARRAYREF:
+                        instrStr +="\t";
                         instrStr += "aastore " + operand.getParamId();
                         break;
                     case OBJECTREF:
+                        instrStr +="\t";
                         instrStr += "astore " + operand.getParamId();
                         break;
                     case CLASS:
+                        instrStr +="\t";
                         instrStr += "astore " + operand.getParamId();
                         break;
                     case THIS:
+                        instrStr +="\t";
                         instrStr += "astore_0";
                         break;
                     case STRING:
+                        instrStr +="\t";
                         instrStr += "astore " + operand.getParamId();
                         break;
                     case VOID:
@@ -129,41 +172,53 @@ public class JasminUtils {
             } else {
                 int virtualReg = varTable.get(operand.getName()).getVirtualReg();
 
+
                 if (virtualReg != -1) {
+
                     switch (elemType) {
                         case INT32:
-                            instrStr += getIStore(virtualReg);
+                            instrStr +="\t";
+                            if(isArrayOperand){
+                                instrStr += "iastore";
+                            } else {
+                                instrStr += getIStore(virtualReg);
+                            }
                             break;
                         case BOOLEAN:
+                            instrStr +="\t";
                             instrStr += getIStore(virtualReg);
                             break;
                         case ARRAYREF:
-                            instrStr += this.loadElement(getArrayIndex(operand), varTable) + "\n\t";
-                            instrStr += "iastore";
+                            instrStr +="\t";
+                            instrStr += "astore " + virtualReg ;
                             break;
                         case OBJECTREF:
+                            instrStr +="\t";
                             instrStr += "astore " + virtualReg;
+
                             break;
                         case CLASS:
+                            instrStr +="\t";
                             instrStr += "astore " + virtualReg;
                             break;
                         case THIS:
+                            instrStr +="\t";
                             instrStr += "astore_0";
                             break;
                         case STRING:
+                            instrStr +="\t";
                             instrStr += "astore " + virtualReg;
                             break;
                         case VOID:
                             break;
                     }
                 } else {
-                    instrStr += "putfield " + getJasminType(elemType) + "/" + operand.getName() + " " + getJasminType(elemType);
+                    instrStr += "\tputfield " + getJasminType(elemType) + "/" + operand.getName() + " " + getJasminType(elemType);
                 }
 
             }
         }
         instrStr += "\n";
-
         return instrStr;
     }
 
@@ -178,13 +233,21 @@ public class JasminUtils {
                 return "Ljava/lang/String;";
             case VOID:
                 return "";
+            case ARRAYREF:
+                return "a";
+            case OBJECTREF:
+                return "a";
             default:
                 throw new NotImplementedException(type);
         }
     }
 
     public String loadElement(Element element, HashMap<String, Descriptor> varTable){
+
         String instrStr ="";
+
+
+
         if(element.isLiteral()){
             LiteralElement lit = (LiteralElement) element;
 
@@ -195,17 +258,33 @@ public class JasminUtils {
                     instrStr = getIConst(lit.getLiteral());
                     break;
                 default:
-                    instrStr = "ldc " + lit.getLiteral();
+                    instrStr = "\tldc " + lit.getLiteral();
                     break;
             }
 
         } else{
+
             Operand operand = (Operand) element;
+            boolean isArrayOperand = false;
+            if(operand instanceof ArrayOperand){
+                System.out.println("found arrayoperand ");
+                operand.show();
+                isArrayOperand = true;
+
+            }
+
             ElementType elemType = operand.getType().getTypeOfElement();
             if(operand.isParameter()) {
                 switch (elemType) {
                     case INT32:
-                        instrStr = getIload(operand.getParamId());
+                        if(isArrayOperand) {
+                            instrStr += "aload " + operand.getParamId() + "\n\t";
+                            instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
+                            instrStr += "iaload";
+                        } else {
+                            instrStr = getIload(operand.getParamId());
+                        }
+
                         break;
                     case BOOLEAN:
                         instrStr = getIload(operand.getParamId());
@@ -230,23 +309,32 @@ public class JasminUtils {
                 }
             }
             else{
-                int virtualReg = varTable.get(operand.getName()).getVirtualReg();
+
+                var operandName = operand.getName();
+                System.out.println(operandName);
+                var virtualReg = -1;
+
+                if(varTable.get(operandName) != null)
+                     virtualReg = varTable.get(operandName).getVirtualReg();
+
                 if(virtualReg != -1)
                 {
+
                     switch (elemType) {
                         case INT32:
-                            instrStr = getIload(virtualReg);
+                            if(isArrayOperand) {
+                                instrStr += "aload " + virtualReg + "\n\t";
+                                instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
+                                instrStr += "iaload";
+                            }else {
+                                instrStr = getIload(virtualReg);
+                            }
                             break;
                         case BOOLEAN:
                             instrStr = getIload(virtualReg);
                             break;
                         case ARRAYREF:
-                            //TODO
-                            instrStr = "aload_1";
-                            break;
                         case OBJECTREF:
-                            instrStr = "aload " + virtualReg;
-                            break;
                         case CLASS:
                             instrStr = "aload " + virtualReg;
                             break;
@@ -258,11 +346,15 @@ public class JasminUtils {
                             break;
                         case VOID:
                             break;
+                        default:
+                            throw new NotImplementedException(element);
                     }
                 }
                 else
                 {
-                    instrStr += "getfield " + getJasminType(elemType)+"/"+operand.getName() + " ";
+
+
+                    instrStr += "\tgetfield " + getJasminType(element.getType())+"/"+operand.getName() + " " ;
                 }
 
             }
@@ -272,25 +364,33 @@ public class JasminUtils {
         return instrStr;
     }
 
-    public String getJasminType(Type type)
+    public String getJasminType(Type type){
+        return getJasminType(type, false);
+    }
+
+    public String getJasminType(Type type, boolean isMethodSignature)
     {
         if(type instanceof ArrayType)
         {
             return "[" + getJasminType(((ArrayType) type).getArrayType());
         }
-        else if(type instanceof ClassType)
-            return ((ClassType) type).getName();
-        else if(type instanceof Type)
+        else if (type instanceof ClassType) {
+            //return getJasminType(type.getTypeOfElement());
+            if(isMethodSignature)
+                return "L" + ((ClassType) type).getName() + ";";
+            else
+                return ((ClassType) type).getName();
+        }
+        else if (type instanceof Type)
             return getJasminType(type.getTypeOfElement());
         else{
-            throw new NotImplementedException(type.getTypeOfElement());
+            throw new NotImplementedException(type);
         }
 
     }
 
     public String getJasminType(ElementType type)
     {
-
         switch (type)
         {
             case INT32:
@@ -300,11 +400,10 @@ public class JasminUtils {
             /*TODO
             case ARRAYREF:
                 //return "[" + ((ArrayType) typeOllir).getTypeOfElement();
-                return "[";
+                return "[";*/
             case OBJECTREF:
-                //return "L" + getFullyQualifiedName(classUnit.getSuperClass()) + ";";
                 return "";
-            case CLASS:
+            /*case CLASS:
                 return "[" + classUnit.getClassName() + ";";
             case THIS:
                 return getFullyQualifiedName(classUnit.getSuperClass());*/
@@ -334,20 +433,29 @@ public class JasminUtils {
         return code.toString();
     }
 
-    /**
-     * Return operand
-     * @param operand
-     * @return
-     */
-    private Element getArrayIndex(Operand operand){
-        if(operand instanceof ArrayOperand) {
-            ArrayOperand arrOperand = (ArrayOperand)  operand;
-            ArrayList<Element> indexes = arrOperand.getIndexOperands();
-            if (!indexes.isEmpty()) {
+    private String loadArrayIndexes(ArrayOperand operand, HashMap<String, Descriptor> varTable){
+        StringBuilder code = new StringBuilder();
 
-                return  indexes.get(0);
-            }
+        ArrayList<Element> list = operand.getIndexOperands();
+        if(list.isEmpty()){
+            return "";
         }
-        return null;
+
+        code.append(this.loadElement(list.get(0), varTable)+ "\t") ;
+        return code.toString();
+    }
+
+    public int checkIfIsPower2(int number)
+    {
+        int acc = 0;
+        while(number % 2 == 0)
+        {
+            number /= 2;
+            acc++;
+        }
+
+        if(number == 1) return acc;
+        else return -1;
+
     }
 }

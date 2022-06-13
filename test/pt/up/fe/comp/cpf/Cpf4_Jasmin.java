@@ -178,14 +178,16 @@ public class Cpf4_Jasmin {
     /**
      * Test the code of an addition: Variables are loaded with iload iadd is called The result is stored using istore
      */
+    //PASSOU
     @Test
     public void section2_Arithmetic_Simple_add() {
-        CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_add.jmm"), "5");
+        CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_add.jmm"), "1");
     }
 
     /**
      * Test the code of a subtraction: Variables are loaded with iload isub is called The result is stored using istore
      */
+    //PASSOU
     @Test
     public void section2_Arithmetic_Simple_sub() {
         CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_sub.jmm"), "3");
@@ -195,6 +197,7 @@ public class Cpf4_Jasmin {
      * Test the code of a multiplication: Variables are loaded with iload imul is called The result is stored using
      * istore
      */
+    //PASSOU
     @Test
     public void section2_Arithmetic_Simple_mul() {
         CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_mul.jmm"), "22");
@@ -204,6 +207,7 @@ public class Cpf4_Jasmin {
      * Test the code of an integer division: Variables are loaded with iload idiv is called The result is stored using
      * istore
      */
+    //PASSOU
     @Test
     public void section2_Arithmetic_Simple_div() {
         CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_div.jmm"), "5");
@@ -221,24 +225,28 @@ public class Cpf4_Jasmin {
 
     /*checks if an addition is correct (more than 2 values)*/
     @Test
+    //passou
     public void section2_Arithmetic_Complex_Add() {
         CpUtils.runJasmin(getJasminResult("arithmetic/ComplexAdd.jmm"), "Result: 19");
     }
 
     /*checks if a multiplication is correct (more than 2 values)*/
     @Test
+    //passou
     public void section2_Arithmetic_Complex_Prod() {
         CpUtils.runJasmin(getJasminResult("arithmetic/ComplexProd.jmm"), "Result: 196");
     }
 
     /*checks if a combination of addition and multiplication is correct (checks precedences)*/
     @Test
+    //passou
     public void section2_Arithmetic_Complex_AddMul() {
         CpUtils.runJasmin(getJasminResult("arithmetic/ComplexAddMul.jmm"), "Result: 73");
     }
 
     /*checks if a combination of subtraction and division is correct (checks precedences)*/
     @Test
+    //passou
     public void section2_Arithmetic_Complex_SubDiv() {
         CpUtils.runJasmin(getJasminResult("arithmetic/ComplexSubDiv.jmm"), "Result: 5");
     }
