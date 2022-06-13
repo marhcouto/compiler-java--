@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ConstantPropagator extends PreorderJmmVisitor<Boolean, Object> {
+public class ConstantPropagator extends PreorderJmmVisitor<Object, Object> {
     private Map<String, JmmNode> scopeConstants;
     private Set<String> blackListedVariables;
 
@@ -15,7 +15,6 @@ public class ConstantPropagator extends PreorderJmmVisitor<Boolean, Object> {
         addVisit("AsmOp", this::visitAsmOp);
         addVisit("MethodBody", this::visitMethodBody);
         addVisit("VarName", this::visitVarName);
-        addVisit("LoopBody", this::visitLoopBody);
     }
 
     private Object visitVarName(JmmNode node, Object dummy) {
@@ -35,24 +34,18 @@ public class ConstantPropagator extends PreorderJmmVisitor<Boolean, Object> {
         return null;
     }
 
-    private Object visitAsmOp(JmmNode node, Boolean insideLoop) {
+    private Object visitAsmOp(JmmNode node, Object dummy) {
+        String varName = node.getJmmChild(0).get("image");
         JmmNode valueNode = node.getJmmChild(1);
         if (!node.getJmmChild(0).getKind().equals("VarName")) {
             return null;
         }
-        if (((valueNode.getKind().equals("IntegerLiteral") || valueNode.getKind().equals("True") || valueNode.getKind().equals("False"))) && insideLoop != null) {
-            scopeConstants.put(node.getJmmChild(0).get("image"), node.getJmmChild(1));
+        if (((valueNode.getKind().equals("IntegerLiteral") || valueNode.getKind().equals("True") || valueNode.getKind().equals("False"))) && !blackListedVariables.contains(varName)) {
+            scopeConstants.put(varName, node.getJmmChild(1));
             node.getJmmParent().removeJmmChild(node);
-        } else if (scopeConstants.containsKey(node.getJmmChild(0).get("image"))) {
+        } else if (scopeConstants.containsKey(varName)) {
             // Removes variable if it is no longer a constant
-            scopeConstants.remove(node.getJmmChild(0).get("image"));
-        }
-        return null;
-    }
-
-    private Object visitLoopBody(JmmNode node, Object dummy) {
-        for (var child: node.getChildren()) {
-            visit(child, true);
+            scopeConstants.remove(varName);
         }
         return null;
     }

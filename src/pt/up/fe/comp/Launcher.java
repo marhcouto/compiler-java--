@@ -29,7 +29,7 @@ public class Launcher {
         }
         File inputFile = new File(args[args.length - 1]);
         if (!inputFile.isFile()) {
-            throw new RuntimeException("Expected a path to an existing input file, got '" + args[0] + "'.");
+            throw new RuntimeException("Expected a path to an existing input file, got '" + args[args.length - 1] + "'.");
         }
         String input = SpecsIo.read(inputFile);
 
@@ -56,9 +56,6 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
-        System.out.println("\n\nTREE:\n");
-        System.out.println(parserResult.getRootNode().toTree());
-
         // SEMANTIC ANALYSIS STAGE
         JmmAnalyser analyser = new JmmAnalyser();
         JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
@@ -82,13 +79,13 @@ public class Launcher {
         }
 
         // JASMIN STAGE
-        //JasminEmitter jasminEmitter = new JasminEmitter();
-        //JasminResult jasminResult = jasminEmitter.toJasmin(optimizationResult);
+        JasminEmitter jasminEmitter = new JasminEmitter();
+        JasminResult jasminResult = jasminEmitter.toJasmin(optimizationResult);
         // Jasmin reports
         // TestUtils.noErrors(jasminResult.getReports());
-        /*for (Report r : jasminResult.getReports()) {
+        for (Report r : jasminResult.getReports()) {
             System.out.println(r.toString());
-        }*/
+        }
 
 
         // TREE PRINT
@@ -104,8 +101,8 @@ public class Launcher {
         System.out.println(optimizationResult.getOllirCode());
 
         // JASMIN CODE PRINT
-        //System.out.println("\n\nJASMIN:\n");
-        //System.out.println(jasminResult.getJasminCode());
+        System.out.println("\n\nJASMIN:\n");
+        System.out.println(jasminResult.getJasminCode());
     }
 
 }

@@ -10,12 +10,12 @@ public class CheckIfVarUsedInsideLoop extends PreorderJmmVisitor<Boolean, Set<St
     Set<String> blacklistedVariables;
 
     public CheckIfVarUsedInsideLoop() {
-        addVisit("IfStm", this::visitIfStm);
-        addVisit("VarName", this::visitVarName);
+        addVisit("LoopBody", this::visitLoopBody);
+        addVisit("AsmOp", this::visitAsmOp);
         addVisit("MethodBody", this::visitMethodBody);
     }
 
-    private Set<String> visitIfStm(JmmNode node, Boolean dummy) {
+    private Set<String> visitLoopBody(JmmNode node, Boolean dummy) {
         for (var child: node.getChildren()) {
             visit(child, true);
         }
@@ -30,7 +30,7 @@ public class CheckIfVarUsedInsideLoop extends PreorderJmmVisitor<Boolean, Set<St
         return blacklistedVariables;
     }
 
-    private Set<String> visitVarName(JmmNode node, Boolean insideLoop) {
+    private Set<String> visitAsmOp(JmmNode node, Boolean insideLoop) {
         if (insideLoop != null) {
             blacklistedVariables.add(node.getJmmChild(0).get("image"));
         }
