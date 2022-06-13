@@ -8,7 +8,8 @@ Arithmetic_mul {
     .method public static main(args.array.String).V {
         b.bool :=.bool 1.bool;
         c.bool :=.bool 0.bool;
-        a.bool :=.bool b.bool ==.bool c.bool;
+        a.bool :=.bool 0.bool ||.bool 1.bool;
+
         invokestatic(io, "print", a.bool).V;
 
         ret.V;

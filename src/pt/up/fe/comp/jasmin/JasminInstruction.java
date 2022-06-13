@@ -432,42 +432,89 @@ public class JasminInstruction {
         return code.toString();
     }
 
-
-    private String createOrAndCode(Element leftOperand, Element rightOperand)
+    private String doOrANDOptimization(String operation, Element leftOperand, Element rightOperand)
     {
         var code = new StringBuilder();
 
-        //otimização
-        /*if(leftOperand.isLiteral() && rightOperand.isLiteral())
+        LiteralElement leftLiteral = (LiteralElement) leftOperand;
+        LiteralElement rightLiteral = (LiteralElement) rightOperand;
+
+        boolean left = (leftLiteral.getLiteral().equals("1")) ? true : false;
+        boolean right = (rightLiteral.getLiteral().equals("1")) ? true : false;
+        boolean result;
+
+        if (operation.equals("AND")) result = left && right;
+        else result = left || right;
+
+
+        System.out.println(left + operation + right + " = " + result);
+
+        if (result) code.append("\ticonst_1\n");
+        else code.append("\ticonst_0\n");
+        return code.toString();
+
+    }
+
+    private String doAndOptimizationIfNeeded(LiteralElement literalElement)
+    {
+        if(literalElement.getLiteral().equals("0"))
+            return "\ticonst_0\n";
+        return "";
+    }
+
+    private String doOrOptimizationIfNeeded(LiteralElement literalElement)
+    {
+        if(literalElement.getLiteral().equals("1"))
+            return "\ticonst_1\n";
+        return "";
+    }
+
+
+    private String createOrAndCode(String operation, Element leftOperand, Element rightOperand)
+    {
+        var code = new StringBuilder();
+        LiteralElement literal = null;
+        String result = "";
+
+        if(leftOperand.isLiteral() && rightOperand.isLiteral()) {
+            return doOrANDOptimization(operation, leftOperand, rightOperand);
+        }
+        else if(leftOperand.isLiteral() && !rightOperand.isLiteral())
         {
-            LiteralElement leftLiteral = (LiteralElement) leftOperand;
-            LiteralElement rightLiteral = (LiteralElement) rightOperand;
-
-            boolean result = Boolean.parseBoolean(leftLiteral.getLiteral()) && Boolean.parseBoolean(rightLiteral.getLiteral());
-
-            if(result) code.append("\ticonst_1\n");
-            else code.append("\ticonst_0\n");
-
-        }*/
+            literal = (LiteralElement) leftOperand;
+        }
+        else if(!leftOperand.isLiteral() && rightOperand.isLiteral())
+        {
+            literal = (LiteralElement) rightOperand;
+        }
 
 
+        if(operation.equals("AND") && literal != null)
+            result = doAndOptimizationIfNeeded(literal);
+        else if(operation.equals("OR") && literal != null)
+            result = doOrOptimizationIfNeeded(literal);
+
+        if(result != "") return result;
 
 
-        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-        code.append("\tifeq" + " FALSE" + conditionalId + "\n");
-        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-        code.append("\tifeq" + " FALSE" + conditionalId + "\n");
-        code.append("\ticonst_1\n");
-        code.append("\tgoto TRUE" + conditionalId + "\n");
-        code.append("FALSE" + conditionalId + ":\n");
-        code.append("\ticonst_0\n");
-        code.append("TRUE" + conditionalId + ":\n");
-        conditionalId++;
+
+            code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
+            code.append("\tifeq" + " FALSE" + conditionalId + "\n");
+            code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+            code.append("\tifeq" + " FALSE" + conditionalId + "\n");
+            code.append("\ticonst_1\n");
+            code.append("\tgoto TRUE" + conditionalId + "\n");
+            code.append("FALSE" + conditionalId + ":\n");
+            code.append("\ticonst_0\n");
+            code.append("TRUE" + conditionalId + ":\n");
+            conditionalId++;
+
+
 
         return code.toString();
     }
 
-    private String doDivOtimizationIfNeeded(Element leftOperand, Element rightOperand)
+    private String doDivOptimizationIfNeeded(Element leftOperand, Element rightOperand)
     {
         LiteralElement literalElement = null;
         Element operand = null;
@@ -499,7 +546,7 @@ public class JasminInstruction {
 
     }
 
-    private String doMulOtimizationIfNeeded( Element leftOperand, Element rightOperand)
+    private String doMulOptimizationIfNeeded( Element leftOperand, Element rightOperand)
     {
         LiteralElement literalElement = null;
         Element operand = null;
@@ -555,14 +602,14 @@ public class JasminInstruction {
 
         switch(op.getOpType()){
             case DIV:
-                optimizedCode = doDivOtimizationIfNeeded(leftOperand, rightOperand);
+                optimizedCode = doDivOptimizationIfNeeded(leftOperand, rightOperand);
                 if(optimizedCode == "")
                     code.append(createArithmeticCode("idiv", leftOperand, rightOperand));
                 else code.append(optimizedCode);
 
                 break;
             case MUL:
-                optimizedCode = doMulOtimizationIfNeeded(leftOperand, rightOperand);
+                optimizedCode = doMulOptimizationIfNeeded(leftOperand, rightOperand);
                 if(optimizedCode == "")
                     code.append(createArithmeticCode("imul", leftOperand, rightOperand));
                 else code.append(optimizedCode);
@@ -625,13 +672,13 @@ public class JasminInstruction {
                 code.append("\tiand\n");
                 break;
             case ANDB:
-                code.append(createOrAndCode(leftOperand, rightOperand));
+                code.append(createOrAndCode("AND", leftOperand, rightOperand));
                 break;
             case OR:
                 code.append("ior\n");
                 break;
             case ORB:
-                code.append(createOrAndCode(leftOperand, rightOperand));
+                code.append(createOrAndCode("OR", leftOperand, rightOperand));
                 break;
             case LTE:
                 code.append(createBranchCode("le", leftOperand, rightOperand));
@@ -651,10 +698,6 @@ public class JasminInstruction {
                 code.append("FALSE"+conditionalId+":\n");
                 conditionalId++;
                 break;
-            case NOT:
-                //~
-                //TODO
-                break;
             default:
                 throw new NotImplementedException(op.getOpType());
         }
@@ -673,7 +716,6 @@ public class JasminInstruction {
         var code = new StringBuilder();
 
         code.append(getCode(instruction.getCondition()));
-
         code.append("\tifne " + instruction.getLabel() + " \n");
 
         this.currentStack--;
@@ -689,6 +731,7 @@ public class JasminInstruction {
         return code.toString();
     }
 
+    //TODO: VER QUANDO ACONTECE
     public String getCode(CondBranchInstruction instruction) {
         var code = new StringBuilder();
 
