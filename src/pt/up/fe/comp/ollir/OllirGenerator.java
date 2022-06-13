@@ -28,9 +28,9 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
         addVisit("MethodBody", this::visitMethodBody);
         addVisit("FnCallOp", this::visitFnCallOp);
         addVisit("VarName", this::visitVarName);
-        addVisit("IntegerLiteral", (node, dummy) -> Arrays.asList(String.format("%s.%s", node.get("image"), "i32"), "Constant"));
-        addVisit("False", (node, dummy) -> Arrays.asList("0" + ".bool", "Constant"));
-        addVisit("True", (node, dummy) -> Arrays.asList("1" + ".bool", "Constant"));
+        addVisit("IntegerLiteral", (node, dummy) -> Arrays.asList(String.format("%s.%s", node.get("image"), "i32"), "Constant", node.get("image")));
+        addVisit("False", (node, dummy) -> Arrays.asList("0" + ".bool", "Constant", "0"));
+        addVisit("True", (node, dummy) -> Arrays.asList("1" + ".bool", "Constant", "1"));
         addVisit("BinOp", this::visitBinOp);
         addVisit("UnaryOp", this::visitUnaryOp);
         addVisit("CreateObj", this::visitCreateObj);
@@ -96,28 +96,54 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
     }
 
     private List<String> visitBinOp(JmmNode node, String scope) {
+        List<String> resultLhs = visit(node.getJmmChild(0), scope);
+        List<String> resultRhs = visit(node.getJmmChild(1), scope);
         String lhs = visit(node.getJmmChild(0), scope).get(0);
         String rhs = visit(node.getJmmChild(1), scope).get(0);
+        String expressionVariability = "Not Constant";
+        Integer value = null;
+        String valueString = null;
+        if (resultLhs.size() > 2 && resultRhs.size() > 2 && resultLhs.get(1).equals("Constant") && resultRhs.get(1).equals("Constant")) {
+            expressionVariability = "Constant";
+        }
         String tempVar = generateTempVar();
         String operator;
         switch (node.get("op")) {
             case "ADD":
                 operator = "+";
+                if (expressionVariability.equals("Constant")) {
+                    value = (Integer.parseInt(resultLhs.get(2)) + Integer.parseInt(resultRhs.get(2)));
+                }
                 break;
             case "MUL":
                 operator = "*";
+                if (expressionVariability.equals("Constant")) {
+                    value = (Integer.parseInt(resultLhs.get(2)) * Integer.parseInt(resultRhs.get(2)));
+                }
                 break;
             case "DIV":
                 operator = "/";
+                if (expressionVariability.equals("Constant")) {
+                    value = (Integer.parseInt(resultLhs.get(2)) / Integer.parseInt(resultRhs.get(2)));
+                }
                 break;
             case "LT":
                 operator = "<";
+                if (expressionVariability.equals("Constant")) {
+                    value = (Integer.parseInt(resultLhs.get(2)) < Integer.parseInt(resultRhs.get(2))) ? 1 : 0;
+                }
                 break;
             case "SUB":
                 operator = "-";
+                if (expressionVariability.equals("Constant")) {
+                    value = (Integer.parseInt(resultLhs.get(2)) - Integer.parseInt(resultRhs.get(2)));
+                }
                 break;
             case "AND":
                 operator = "&&";
+                if (expressionVariability.equals("Constant")) {
+                    value = ((Integer.parseInt(resultLhs.get(2)) >= 1) && (Integer.parseInt(resultRhs.get(2)) >= 1)) ? 1 : 0;
+                }
                 break;
             default:
                 throw new RuntimeException("To make the compiler calm");
@@ -131,7 +157,8 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                 OllirUtils.toOllir(node),
                 rhs
         ));
-        return Collections.singletonList(String.format("%s.%s", tempVar, OllirUtils.toOllir(node)));
+        if (value != null) valueString = value.toString();
+        return Arrays.asList(String.format("%s.%s", tempVar, OllirUtils.toOllir(node)), expressionVariability, valueString);
     }
     private List<String> visitFnCallOp(JmmNode node, String scope) {
         String called = null;
@@ -335,14 +362,25 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
 
     public List<String> visitWhile(JmmNode node, String scope) {
         int labelIdx = labels++;
-        code.append(String.format("Loop%d: \n", labelIdx));
-        String condition = visit(node.getJmmChild(0), scope).get(0);
-        code.append(String.format("if (!.bool %s) goto EndLoop%d;\n", condition, labelIdx));
-        for (var child: node.getJmmChild(1).getChildren()) {
-            visit(child, scope);
+        List<String> conditionResult = visit(node.getJmmChild(0), scope);
+        String condition = conditionResult.get(0);
+        if (conditionResult.size() > 2 && conditionResult.get(1).equals("Constant")) {
+            if (conditionResult.get(2).equals("1")) {
+                code.append(String.format("Loop%d: \n", labelIdx));
+                for (var child: node.getJmmChild(1).getChildren()) {
+                    visit(child, scope);
+                }
+                code.append(String.format("if (%s) goto Loop%d;\n", condition, labelIdx));
+            }
+        } else {
+            code.append(String.format("Loop%d: \n", labelIdx));
+            code.append(String.format("if (!.bool %s) goto EndLoop%d;\n", condition, labelIdx));
+            for (var child: node.getJmmChild(1).getChildren()) {
+                visit(child, scope);
+            }
+            code.append(String.format("goto Loop%d;\n", labelIdx));
+            code.append(String.format("EndLoop%d: \n", labelIdx));
         }
-        code.append(String.format("goto Loop%d;\n", labelIdx));
-        code.append(String.format("EndLoop%d: \n", labelIdx));
         return null;
     }
 
