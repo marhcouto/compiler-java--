@@ -224,7 +224,6 @@ public class JasminInstruction {
 
     private String getArrayLength(CallInstruction instruction){
         var code = new StringBuilder();
-        System.out.println("get array length");
         instruction.show();
         code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
         code.append("\t" + "arraylength\n");
@@ -522,8 +521,7 @@ public class JasminInstruction {
 
         if(literalElement != null)
         {
-            int numShifts = this.jasminUtils.checkIfIsPower2(Integer.parseInt(literalElement.getLiteral()));
-            System.out.println(literalElement.getLiteral());
+            int numShifts = this.jasminUtils.checkIfIsPower2(Integer.parseInt(literalElement.getLiteral())););
 
             if(operand instanceof LiteralElement && numShifts == -1)
             {

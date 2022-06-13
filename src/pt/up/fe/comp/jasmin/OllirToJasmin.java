@@ -157,7 +157,6 @@ public class OllirToJasmin {
                 (method.getVarTable().containsKey("this") || method.isStaticMethod() ? 0 : 1);
 
         for (int i = 0; i < method.getInstructions().size(); i++) {
-            System.out.println("instruction: " + method.getInstr(i).getInstType() + " - labels : " + method.getLabels(method.getInstr(i)));
 
             var jasminInstruction = new JasminInstruction(classUnit, method);
 

@@ -104,10 +104,8 @@ public class JasminUtils {
 
     public String storeElement(Element element, HashMap<String, Descriptor> varTable)
     {
-        System.out.println("INSIDE STORE");
         String instrStr ="";
         if(element.isLiteral()){
-            System.out.println("INSIDE LITERAL");
             LiteralElement lit = (LiteralElement) element;
 
             switch (lit.getType().getTypeOfElement())
@@ -123,15 +121,12 @@ public class JasminUtils {
             }
 
         } else {
-            System.out.println("INSIDE ELSE");
             Operand operand = (Operand) element;
             boolean isArrayOperand = false;
             if(operand instanceof ArrayOperand){
-                System.out.println("found arrayoperand " + operand.getType().getTypeOfElement());
                 isArrayOperand = true;
             }
             ElementType elemType = operand.getType().getTypeOfElement();
-            System.out.println("elemtype = " + elemType);
             if (operand.isParameter()) {
                 switch (elemType) {
                     case INT32:
@@ -267,7 +262,6 @@ public class JasminUtils {
             Operand operand = (Operand) element;
             boolean isArrayOperand = false;
             if(operand instanceof ArrayOperand){
-                System.out.println("found arrayoperand ");
                 operand.show();
                 isArrayOperand = true;
 
@@ -311,7 +305,6 @@ public class JasminUtils {
             else{
 
                 var operandName = operand.getName();
-                System.out.println(operandName);
                 var virtualReg = -1;
 
                 if(varTable.get(operandName) != null)
