@@ -28,4 +28,10 @@ public class CustomTests {
         String expected = "Result: 2\nResult: 3\nResult: 4";
         CpUtils.runJasmin(getJasminResult("LimitStack.jmm"), expected);
     }
+
+    @Test
+    public void bigifs(){
+        String expected = "Result: 1\nResult: 1\nResult: 1";
+        CpUtils.runJasmin(getJasminResult("BigIf.jmm"), expected);
+    }
 }
