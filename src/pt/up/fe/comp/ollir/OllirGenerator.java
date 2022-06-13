@@ -146,7 +146,9 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
             return varName;
         }).collect(Collectors.toList());
         if (OllirUtils.needToPlaceVariable(node.getJmmChild(0))) {
-            called = visit(node.getJmmChild(0), scope).get(0);
+            var temp = visit(node.getJmmChild(0), scope);
+            if (temp != null)
+                called = visit(node.getJmmChild(0), scope).get(0);
         }
         if (OllirUtils.needToPlaceVariable(node)) {
             String type = OllirUtils.toOllir(node);
