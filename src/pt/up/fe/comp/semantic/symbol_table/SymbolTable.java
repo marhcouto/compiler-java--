@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable {
     private List<Report> reports;
@@ -65,7 +66,7 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
 
     @Override
     public List<Symbol> getParameters(String methodSignature) {
-        return new LinkedList<>(methods.get(methodSignature).getParameters().values());
+        return new LinkedList<>(methods.get(methodSignature).getParameters());
     }
 
     public Method getMethodScope(String name) {
@@ -117,7 +118,13 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
     }
 
     public int getParamIndex(String methodScope, String paramName) {
-        return this.getMethodScope(methodScope).getParameters().get(paramName).getIndex();
+        return this.getMethodScope(methodScope)
+                .getParameters()
+                .stream()
+                .filter(symbol -> symbol.getName().equals(paramName))
+                .collect(Collectors.toList())
+                .get(0)
+                .getIndex();
     }
 
     @Override

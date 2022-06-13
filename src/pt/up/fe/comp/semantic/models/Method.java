@@ -3,7 +3,9 @@ package pt.up.fe.comp.semantic.models;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Method {
@@ -37,13 +39,22 @@ public class Method {
         return returnType;
     }
 
-    public Map<String, ExtendedSymbol> getParameters() {
-        Map<String, ExtendedSymbol> parameters = new HashMap<>();
+    public List<ExtendedSymbol> getParameters() {
+        List<ExtendedSymbol> parameters = new ArrayList<>();
         for (ExtendedSymbol variable: variables.values()) {
             if (variable.getOrigin() == Origin.PARAMS) {
-                parameters.put(variable.getName(), variable);
+                parameters.add(variable);
             }
         }
+        parameters.sort((elem1, elem2) -> {
+            if (elem1.getIndex() < elem2.getIndex()) {
+                return -1;
+            }
+            if (elem1.getIndex() == elem2.getIndex()) {
+                return 0;
+            }
+            return 1;
+        });
         return parameters;
     }
 
