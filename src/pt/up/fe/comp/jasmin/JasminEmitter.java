@@ -16,11 +16,8 @@ public class JasminEmitter implements JasminBackend {
 
         var jasminResult = new JasminResult(jasminCode);
         System.out.println(jasminResult.getJasminCode());
-        System.out.println("1");
         File outputDir = new File("test/fixtures/public/testing");
-        System.out.println("2");
         jasminResult.compile(outputDir);
-        System.out.println("3");
 
         return new JasminResult(ollirResult, jasminCode, Collections.emptyList());
 

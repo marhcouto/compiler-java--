@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import pt.up.fe.comp.jasmin.JasminEmitter;
 import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ast2jasmin.AstToJasmin;
@@ -272,9 +273,9 @@ public class TestUtils {
      */
     public static JasminResult backend(OllirResult ollirResult) {
         JasminBackend backend = getJasminBackend();
-
         var jasminResult = backend.toJasmin(ollirResult);
-
+        JasminEmitter emitter = new JasminEmitter();
+        emitter.toJasmin(ollirResult);
         return jasminResult;
 
     }

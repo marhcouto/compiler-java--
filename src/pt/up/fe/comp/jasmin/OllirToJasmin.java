@@ -40,7 +40,7 @@ public class OllirToJasmin {
     {
         var code = new StringBuilder();
 
-        if (classType != "DEFAULT")
+        if (!classType.equals("DEFAULT"))
             code.append(classType.toLowerCase() + " ");
         if (isStatic)
             code.append("static ");
@@ -140,23 +140,35 @@ public class OllirToJasmin {
     public String createMethodBody(Method method)
     {
         var code = new StringBuilder();
+        String methodBody = "";
+        int instruction_stack = 0;
+        int limit_stack = 0;
 
         String accessSpecs = createAccessSpecsStr(method.getMethodAccessModifier().name(), method.isStaticMethod(), method.isFinalMethod());
         code.append(accessSpecs + method.getMethodName() + '(');
+        method.buildVarTable();
 
         var paramsTypes = method.getParams().stream()
-                .map(element -> jasminUtils.getJasminType(element.getType()))
+                .map(element -> jasminUtils.getJasminType(element.getType(), true))
                 .collect(Collectors.joining());
-        code.append(paramsTypes).append(")").append(jasminUtils.getJasminType(method.getReturnType()) + '\n');
+        code.append(paramsTypes).append(")").append(jasminUtils.getJasminType(method.getReturnType(), true) + '\n');
 
-        code.append("\t.limit stack 99\n");
-        code.append("\t.limit locals 99\n");
+        int limitLocals =  method.getVarTable().size() +
+                (method.getVarTable().containsKey("this") || method.isStaticMethod() ? 0 : 1);
 
-        for (var instruction : method.getInstructions()) {
-            System.out.println("instruction: " + instruction.getInstType() + " - labels : " + method.getLabels(instruction));
+        for (int i = 0; i < method.getInstructions().size(); i++) {
+
             var jasminInstruction = new JasminInstruction(classUnit, method);
-            code.append(jasminInstruction.getCode(instruction));
+
+            methodBody += jasminInstruction.getCode(method.getInstr(i));
+            instruction_stack = jasminInstruction.getStackLimit();
+            limit_stack = Math.max(instruction_stack, limit_stack);
+
         }
+
+        code.append("\t.limit stack "+ limit_stack +"\n");
+        code.append("\t.limit locals " + limitLocals + "\n");
+        code.append(methodBody);
 
         return code.toString();
     }
@@ -180,7 +192,6 @@ public class OllirToJasmin {
         code.append(createMethodBody(method));
         code.append(createReturnStatment(method.getReturnType()));
 
-        HashMap<String, Instruction> labels = method.getLabels();
         code.append(".end method\n");
 
         return code.toString();
