@@ -56,6 +56,8 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
+        System.out.println("\n\nTREE:\n");
+        System.out.println(parserResult.getRootNode().toTree());
 
         // SEMANTIC ANALYSIS STAGE
         JmmAnalyser analyser = new JmmAnalyser();

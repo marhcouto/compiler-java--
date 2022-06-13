@@ -1,14 +1,16 @@
 import ioPlus;
 class HelloWorld {
 	public static void main(String[] args) {
-	    boolean c;
-	    boolean d;
 	    int a;
 	    int b;
-	    a = 2;
-	    b = a + 3;
-	    c = false;
-	    d = true && c;
+	    boolean c;
+	    c = true;
+	    a = 1;
+	    b = a;
+        while (c) {
+            b = a;
+        }
+        b = a;
 		ioPlus.printHelloWorld();
 	}
 }

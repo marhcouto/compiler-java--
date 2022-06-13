@@ -9,11 +9,13 @@ import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp.semantic.Constants;
 import pt.up.fe.comp.semantic.analysers.utils.Utils;
+import pt.up.fe.comp.semantic.models.ExtendedSymbol;
 import pt.up.fe.comp.semantic.models.Method;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
     private final SymbolTable symbolTable;
@@ -211,7 +213,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         if (subjectType.equals(Constants.ANY_TYPE)) {
             return true;
         }
-        List<Symbol> params = new ArrayList<>(symbolTable.getMethodScope(node.getJmmChild(1).get("image")).getParameters().values());
+        List<ExtendedSymbol> params = symbolTable.getMethodScope(node.getJmmChild(1).get("image")).getParameters();
         List<JmmNode> args = node.getJmmChild(2).getChildren();
         if (args.size() != params.size()) {
             return false;
@@ -240,7 +242,7 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
             node.put("type", Constants.ANY_TYPE);
             return null;
         }
-        List<Symbol> expectedParams = new ArrayList<>(symbolTable.getMethodScope(node.getJmmChild(1).get("image")).getParameters().values());
+        List<Symbol> expectedParams = new ArrayList<>(symbolTable.getMethodScope(node.getJmmChild(1).get("image")).getParameters());
         List<JmmNode> args = node.getJmmChild(2).getChildren();
         if (!methodArgsCompatible(node)) {
             reports.add(new Report(
