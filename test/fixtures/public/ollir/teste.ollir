@@ -1,18 +1,11 @@
 import io;
-Arithmetic_mul {
 
-    .construct Arithmetic_mul().V {
-        invokespecial(this, "<init>").V;
-    }
+class Arithmetic_add {
+	public static void main(String[] args) {
+		boolean a;
 
-    .method public static main(args.array.String).V {
-        b.bool :=.bool 1.bool;
-        c.bool :=.bool 0.bool;
-        a.bool :=.bool 0.bool ||.bool 1.bool;
+		a = true && false;
 
-        invokestatic(io, "print", a.bool).V;
-
-        ret.V;
-    }
-
+		io.print(1);
+	}
 }

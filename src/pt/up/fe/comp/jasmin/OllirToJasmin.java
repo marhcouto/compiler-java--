@@ -156,8 +156,8 @@ public class OllirToJasmin {
         int limitLocals =  method.getVarTable().size() +
                 (method.getVarTable().containsKey("this") || method.isStaticMethod() ? 0 : 1);
 
+        this.jasminUtils.reset();
         for (int i = 0; i < method.getInstructions().size(); i++) {
-            System.out.println("instruction: " + method.getInstr(i).getInstType() + " - labels : " + method.getLabels(method.getInstr(i)));
 
             var jasminInstruction = new JasminInstruction(classUnit, method);
 
@@ -167,9 +167,12 @@ public class OllirToJasmin {
 
         }
 
+
         code.append("\t.limit stack "+ limit_stack +"\n");
         code.append("\t.limit locals " + limitLocals + "\n");
         code.append(methodBody);
+
+
 
         return code.toString();
     }
