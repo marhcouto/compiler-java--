@@ -1,0 +1,25 @@
+import ioPlus;
+class AllaroundTest {
+
+    public int f(int a, boolean b) {
+        if(b && a < 5){
+            ioPlus.printResult(a);
+        } else {
+            a = this.f(a - 1, !b);
+        }
+        return 1;
+    }
+
+	public static void main(String[] args) {
+
+        AllaroundTest b;
+        b = new AllaroundTest();
+	    int a;
+	    a = 3;
+	    b.f(a, true); //3
+	    b.f(6, true); //4
+	    b.f(a, false); //2
+	    b.f(6, false); //3
+
+	}
+}

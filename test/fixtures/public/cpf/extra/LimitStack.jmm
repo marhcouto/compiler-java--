@@ -1,0 +1,41 @@
+import ioPlus;
+class LimitStack {
+
+    int var;
+
+    public int getVar(){
+        return var;
+    }
+
+    public int setVar(int a){
+        var = a;
+        return 0;
+    }
+
+    public int f(LimitStack a, LimitStack b, LimitStack c) {
+        ioPlus.printResult(a.getVar());
+        ioPlus.printResult(b.getVar());
+        ioPlus.printResult(c.getVar());
+
+        return 1;
+    }
+
+	public static void main(String[] args) {
+
+        LimitStack a;
+        LimitStack b;
+        LimitStack c;
+        LimitStack d;
+        a = new LimitStack();
+        b = new LimitStack();
+        c = new LimitStack();
+        d = new LimitStack();
+        a.setVar(1);
+        b.setVar(2);
+        c.setVar(3);
+        d.setVar(4);
+        a.f(b, c, d);
+
+
+	}
+}
