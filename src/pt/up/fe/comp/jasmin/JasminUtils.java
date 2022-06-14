@@ -10,6 +10,8 @@ import java.util.List;
 
 public class JasminUtils {
     ClassUnit classUnit;
+    private int stackLimit;
+    private int currentStack;
 
     JasminUtils(ClassUnit classUnit)
     {
@@ -99,6 +101,9 @@ public class JasminUtils {
         }
         code.append(this.loadArrayIndexes(operand, varTable));
         code.append("\n");
+
+        this.addCurrentStack();
+
         return code.toString();
     }
 
@@ -219,6 +224,9 @@ public class JasminUtils {
             }
         }
         instrStr += "\n";
+        this.updateStackLimit();
+        this.subCurrentStack();
+
         return instrStr;
     }
 
@@ -245,8 +253,7 @@ public class JasminUtils {
     public String loadElement(Element element, HashMap<String, Descriptor> varTable){
 
         String instrStr ="";
-
-
+        int loads = 1;
 
         if(element.isLiteral()){
             LiteralElement lit = (LiteralElement) element;
@@ -326,6 +333,7 @@ public class JasminUtils {
                                 instrStr += "aload " + virtualReg + "\n\t";
                                 instrStr += loadArrayIndexes((ArrayOperand) operand, varTable);
                                 instrStr += "iaload";
+                                loads = 2;
                             }else {
                                 instrStr = getIload(virtualReg);
                             }
@@ -361,6 +369,7 @@ public class JasminUtils {
 
         }
         instrStr += "\n";
+        this.currentStack += loads;
         return instrStr;
     }
 
@@ -458,4 +467,28 @@ public class JasminUtils {
         else return -1;
 
     }
+
+    public int getStackLimit() {
+        return this.stackLimit;
+    }
+
+    public int getCurrentStack(){
+        return this.currentStack;
+    }
+
+    public void updateStackLimit()
+    {
+        this.stackLimit = Math.max(this.stackLimit, this.currentStack);
+    }
+
+    public void addCurrentStack()
+    {
+        this.currentStack++;
+    }
+
+    public void subCurrentStack()
+    {
+        this.currentStack--;
+    }
+
 }
