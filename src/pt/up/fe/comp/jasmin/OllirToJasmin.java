@@ -20,6 +20,7 @@ public class OllirToJasmin {
     {
         this.classUnit = classUnit;
         this.jasminUtils = new JasminUtils(this.classUnit);
+
     }
 
     public String getCode()
@@ -28,9 +29,13 @@ public class OllirToJasmin {
 
         this.classUnit.show();
 
+        JasminInstruction.reset();
+
         code.append(createJasminHeader());
         code.append(createJasminFields());
         code.append(createJasminMethods());
+
+        System.out.println(code.toString());
 
         return code.toString();
     }
@@ -156,6 +161,7 @@ public class OllirToJasmin {
         int limitLocals =  method.getVarTable().size() +
                 (method.getVarTable().containsKey("this") || method.isStaticMethod() ? 0 : 1);
 
+        this.jasminUtils.resetStack();
         for (int i = 0; i < method.getInstructions().size(); i++) {
 
             var jasminInstruction = new JasminInstruction(classUnit, method);
@@ -166,9 +172,12 @@ public class OllirToJasmin {
 
         }
 
+
         code.append("\t.limit stack "+ limit_stack +"\n");
         code.append("\t.limit locals " + limitLocals + "\n");
         code.append(methodBody);
+
+
 
         return code.toString();
     }

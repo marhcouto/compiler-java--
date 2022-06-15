@@ -1,0 +1,11 @@
+import ioPlus;
+class FoldingAdd {
+
+	public static void main(String[] args) {
+
+        int a;
+        a = 1 * 3;
+        ioPlus.printResult(a);
+
+	}
+}

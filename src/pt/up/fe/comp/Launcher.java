@@ -1,8 +1,12 @@
 package pt.up.fe.comp;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
+import org.eclipse.jgit.util.IO;
 import pt.up.fe.comp.jasmin.JasminEmitter;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
@@ -18,27 +22,36 @@ import pt.up.fe.specs.util.SpecsSystem;
 
 public class Launcher {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         SpecsSystem.programStandardInit();
 
         SpecsLogs.info("Executing with args: " + Arrays.toString(args));
 
         // read the input code
-        if (args.length != 1) {
-            throw new RuntimeException("Expected a single argument, a path to an existing input file.");
+        if (args.length > 3) {
+            throw new RuntimeException("Expected at most 3 arguments");
         }
-        File inputFile = new File(args[0]);
+        File inputFile = new File(args[args.length - 1]);
         if (!inputFile.isFile()) {
-            throw new RuntimeException("Expected a path to an existing input file, got '" + args[0] + "'.");
+            throw new RuntimeException("Expected a path to an existing input file, got '" + args[args.length - 1] + "'.");
         }
         String input = SpecsIo.read(inputFile);
 
         // Create config
         Map<String, String> config = new HashMap<>();
-        config.put("inputFile", args[0]);
+        config.put("inputFile", args[args.length - 1]);
         config.put("optimize", "false");
         config.put("registerAllocation", "-1");
         config.put("debug", "false");
+
+        for(int i = 0; i < args.length; i++) {
+            if (args[i].equals("-o")) {
+                config.put("optimize", "true");
+            }
+            if (args[i].equals("-d")) {
+                config.put("debug", "true");
+            }
+        }
 
 
         // PARSING STAGE
@@ -50,7 +63,6 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
-
         // SEMANTIC ANALYSIS STAGE
         JmmAnalyser analyser = new JmmAnalyser();
         JmmSemanticsResult analysisResult = analyser.semanticAnalysis(parserResult);
@@ -60,6 +72,9 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
+        if (config.get("optimize").equals("true")) {
+            analysisResult = new JmmOptimizer().optimize(analysisResult);
+        }
 
         // OPTIMIZATION/OLLIR STAGE
         JmmOptimization optimizer = new JmmOptimizer();
@@ -79,7 +94,6 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
-
         // TREE PRINT
         System.out.println("\n\nTREE:\n");
         System.out.println(parserResult.getRootNode().toTree());
@@ -95,6 +109,16 @@ public class Launcher {
         // JASMIN CODE PRINT
         System.out.println("\n\nJASMIN:\n");
         System.out.println(jasminResult.getJasminCode());
+
+        if (config.get("debug").equals("false")) {
+            writeJasminCode(args[args.length - 1], jasminResult);
+        }
+    }
+
+    private static void writeJasminCode(String inputFilePath, JasminResult result) throws IOException {
+        String fileName = Paths.get(inputFilePath).getFileName().toString();
+        String fileNameWOExtension = fileName.split("\\.")[0];
+        Files.writeString(Paths.get(fileNameWOExtension + ".j"), result.getJasminCode());
     }
 
 }

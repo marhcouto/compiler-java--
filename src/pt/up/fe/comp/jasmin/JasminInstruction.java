@@ -15,8 +15,7 @@ public class JasminInstruction {
     private ClassUnit classUnit;
     private JasminUtils jasminUtils;
     private static int conditionalId = 0;
-    private int stackLimit;
-    private int currentStack;
+
 
     JasminInstruction(ClassUnit classUnit, Method method)
     {
@@ -25,8 +24,6 @@ public class JasminInstruction {
         this.labels = method.getLabels();
         this.varTable = method.getVarTable();
         this.jasminUtils = new JasminUtils(this.classUnit);
-        this.stackLimit = 0;
-        this.currentStack = 0;
     }
 
     @Deprecated
@@ -48,7 +45,7 @@ public class JasminInstruction {
 
     public int getStackLimit()
     {
-        return this.stackLimit;
+        return this.jasminUtils.getStackLimit();
     }
 
     public String getCode(Instruction instruction){
@@ -107,12 +104,19 @@ public class JasminInstruction {
                 .collect(Collectors.joining());
         code.append(operandsTypes).append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + "\n");
 
+        this.jasminUtils.updateStackLimit();
+        for(int i = 0; i < instruction.getListOfOperands().size(); i++){
+            this.jasminUtils.subCurrentStack();
+        }
+
         if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)
           && !isAssign){
             code.append("\tpop\n");
+            this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();
         }
 
-        this.stackLimit = Math.max(this.stackLimit, instruction.getListOfOperands().size());
+        this.jasminUtils.addCurrentStack();
 
         return code.toString();
 
@@ -121,7 +125,7 @@ public class JasminInstruction {
     private String createListOperands(CallInstruction instruction)
     {
         return instruction.getListOfOperands().stream()
-                .map(element ->this.jasminUtils.getJasminType(element.getType()))
+                .map(element ->this.jasminUtils.getJasminType(element.getType(), true))
                 .collect(Collectors.joining());
     }
 
@@ -138,16 +142,24 @@ public class JasminInstruction {
             code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
         }
 
-        code.append("\tinvokevirtual " +this.jasminUtils. getJasminType(firstArg.getType()) +  "/" + secondArg + "(");
+        code.append("\tinvokevirtual " +this.jasminUtils.getJasminType(firstArg.getType()) +  "/" + secondArg + "(");
         code.append(createListOperands(instruction));
         code.append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + '\n');
+
+        this.jasminUtils.updateStackLimit();
+        this.jasminUtils.subCurrentStack();
+        for(int i = 0; i < instruction.getListOfOperands().size(); i++){
+            this.jasminUtils.subCurrentStack();
+        }
 
         if(!method.getReturnType().getTypeOfElement().equals(ElementType.VOID)
          && !isAssign){
             code.append("\tpop\n");
+            this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();
         }
 
-        this.stackLimit = Math.max(this.stackLimit, instruction.getListOfOperands().size() + 1);
+        this.jasminUtils.addCurrentStack();
 
         return code.toString();
 
@@ -184,7 +196,12 @@ public class JasminInstruction {
         }
         code.append("\n");
 
-        this.stackLimit = Math.max(this.stackLimit, instruction.getListOfOperands().size());
+        this.jasminUtils.updateStackLimit();
+        for(int i = 0; i < instruction.getListOfOperands().size(); i++){
+            this.jasminUtils.subCurrentStack();
+        }
+
+        this.jasminUtils.addCurrentStack();
 
         return code.toString();
     }
@@ -206,19 +223,31 @@ public class JasminInstruction {
         code.append("/" + methodName + "(");
         code.append(createListOperands(instruction));
         code.append(")").append(this.jasminUtils.getJasminType(instruction.getReturnType()) + '\n');
+
+
+        this.jasminUtils.updateStackLimit();
+        this.jasminUtils.subCurrentStack();
+        for(int i = 0; i < instruction.getListOfOperands().size(); i++){
+            this.jasminUtils.subCurrentStack();
+        }
+
         if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)
          && !isAssign){
             code.append("\tpop\n");
+            /*this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();*/
+            return code.toString();
         }
 
-        this.stackLimit = Math.max(this.stackLimit, instruction.getListOfOperands().size() + 1);
+        this.jasminUtils.addCurrentStack();
+
         return code.toString();
 
     }
 
     private String getCodeLdc(CallInstruction instruction)
     {
-        this.stackLimit = Math.max(this.stackLimit,1);
+
         return "\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable );
     }
 
@@ -228,7 +257,10 @@ public class JasminInstruction {
         code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
         code.append("\t" + "arraylength\n");
 
-        this.stackLimit = Math.max(this.stackLimit, 1);
+        this.jasminUtils.updateStackLimit();
+        this.jasminUtils.subCurrentStack();
+        this.jasminUtils.addCurrentStack();
+
         return code.toString();
     }
 
@@ -257,7 +289,10 @@ public class JasminInstruction {
         code.append(this.jasminUtils.getFieldSpecs(firstArg, secondArgStr) + " ");
         code.append(this.jasminUtils.getJasminType(thirdArg.getType()) + "\n");
 
-        this.stackLimit = Math.max(2, this.stackLimit);
+        this.jasminUtils.updateStackLimit();
+        this.jasminUtils.subCurrentStack();
+        this.jasminUtils.subCurrentStack();
+
         return code.toString();
     }
 
@@ -282,7 +317,10 @@ public class JasminInstruction {
         code.append(this.jasminUtils.getFieldSpecs(firstArg, secondArgStr) + " ");
         code.append(this.jasminUtils.getJasminType(instruction.getFieldType()) + "\n");
 
-        this.stackLimit = Math.max(this.stackLimit, 1);
+        this.jasminUtils.updateStackLimit();
+        this.jasminUtils.subCurrentStack();
+        this.jasminUtils.addCurrentStack();
+
         return code.toString();
     }
 
@@ -297,7 +335,8 @@ public class JasminInstruction {
         code.append("\t" + this.jasminUtils.getJasminReturnType(instruction.getOperand().getType().getTypeOfElement()));
         code.append("return\n");
 
-        this.stackLimit = Math.max(1, this.stackLimit);
+        this.jasminUtils.updateStackLimit();
+        this.jasminUtils.subCurrentStack();
 
         return code.toString();
     }
@@ -354,7 +393,7 @@ public class JasminInstruction {
         Operand o1 = (Operand) instruction.getDest();
         if(o1 instanceof ArrayOperand) {
             code.append(jasminUtils.loadArrayRefAndIndex((ArrayOperand) o1, varTable));
-            this.stackLimit = Math.max(this.stackLimit, 3) ;
+
         }
 
         String result = checkIfIincOptimization(o1, instruction.getRhs());
@@ -365,16 +404,11 @@ public class JasminInstruction {
         }
         else code.append(result);
 
-        this.currentStack--;
-
         return code.toString();
     }
 
     public String getCode(SingleOpInstruction instruction)
     {
-        this.currentStack++;
-        this.stackLimit = Math.max(1, this.stackLimit);
-
         return "\t" + this.jasminUtils.loadElement(instruction.getSingleOperand(), this.varTable);
 
     }
@@ -409,54 +443,71 @@ public class JasminInstruction {
             case NOT:
             case NOTB:
                 code.append("\tifne TRUE" + conditionalId + "\n");
+                this.jasminUtils.updateStackLimit();
+                this.jasminUtils.subCurrentStack();
                 code.append("\ticonst_1\n");
                 code.append("\tgoto FALSE" + conditionalId + "\n");
                 code.append("TRUE" + conditionalId + ":\n");
                 code.append("\ticonst_0\n");
                 code.append("FALSE"+conditionalId+":\n");
+                this.jasminUtils.addCurrentStack();
                 conditionalId++;
                 break;
             default:
                 throw new NotImplementedException(op.getOpType());
         }
 
-        this.stackLimit = Math.max(this.stackLimit, 2);
 
         return code.toString();
     }
 
-    private String createLogicOpCode(String operation, Element leftOperand, Element rightOperand)
-    {
-        var code = new StringBuilder();
-        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-
-        if(leftOperand.isLiteral())
-        {
-            var leftLiteral = (LiteralElement) leftOperand;
-            code.append("\t" + ((leftLiteral.getLiteral().equals("0")) ? "pop" : "i") + operation + "\n");
-        }
-        else
-        {
-            code.append("\ti" + operation + "\n");
-        }
-        return code.toString();
-    }
 
     private String createArithmeticCode(String operation, Element leftOperand, Element rightOperand)
+
     {
         var code = new StringBuilder();
-        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-        code.append("\t" + operation + "\n");
+        List<String> availableOps = new ArrayList<>(Arrays.asList("iadd", "imul", "idiv", "isub"));
+        if(leftOperand.isLiteral() && rightOperand.isLiteral() && availableOps.contains(operation)) {
+            int result = 0;
+            LiteralElement left = (LiteralElement) leftOperand;
+            LiteralElement right = (LiteralElement) rightOperand;
+            switch (operation) {
+                case "iadd":
+                    result = Integer.parseInt(left.getLiteral()) + Integer.parseInt(right.getLiteral());
+                    break;
+                case "imul":
+                    result = Integer.parseInt(left.getLiteral()) * Integer.parseInt(right.getLiteral());
+                    break;
+                case "idiv":
+                    result = Integer.parseInt(left.getLiteral()) / Integer.parseInt(right.getLiteral());
+                    break;
+                case "isub":
+                    result = Integer.parseInt(left.getLiteral()) - Integer.parseInt(right.getLiteral());
+                    break;
+            }
+            System.out.println(left.getLiteral() + " " + operation + " " + right.getLiteral() +  " = " + result);
+            LiteralElement literal = new LiteralElement(result + "", new Type(ElementType.INT32));
+            code.append("\t" + jasminUtils.loadElement(literal, varTable));
+            this.jasminUtils.updateStackLimit();
+        } else{
+            code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
+            code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+            code.append("\t" + operation + "\n");
+            this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();
+            this.jasminUtils.subCurrentStack();
+            this.jasminUtils.addCurrentStack();
+        }
+
+
         return code.toString();
     }
-
 
     private String createBranchCode(String operation, Element leftOperand, Element rightOperand)
     {
         var code = new StringBuilder();
         LiteralElement literalElement = null;
+        Operand operand = null;
         String prefix = "_icmp";
         List<String> listBitwiseOperations = new ArrayList<>(Arrays.asList("ne", "eq", "and", "or"));
         List<String> listCmpOperations = new ArrayList<>(Arrays.asList("lt", "le", "gt", "ge"));
@@ -469,16 +520,19 @@ public class JasminInstruction {
             else if(listCmpOperations.contains(operation)) {
                 result = doCmpOptmization(operation, ((LiteralElement) leftOperand).getLiteral(),((LiteralElement) rightOperand).getLiteral());
             }
+            this.jasminUtils.addCurrentStack();
             if (result) return "\ticonst_1\n";
             else return "\ticonst_0\n";
         }
         else if(leftOperand.isLiteral() && !rightOperand.isLiteral())
         {
             literalElement = (LiteralElement) leftOperand;
+            operand = (Operand) rightOperand;
         }
         else if(!leftOperand.isLiteral() && rightOperand.isLiteral())
         {
             literalElement = (LiteralElement) rightOperand;
+            operand = (Operand) leftOperand;
         }
 
         if(literalElement != null && literalElement.getLiteral().equals("0"))
@@ -486,16 +540,30 @@ public class JasminInstruction {
             prefix = "";
         }
 
+        if(prefix.equals(""))
+        {
+            code.append("\t" + this.jasminUtils.loadElement(operand, this.varTable));
+            this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();
+        }
+        else
+        {
 
-        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+            code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
+            code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+            this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();
+            this.jasminUtils.subCurrentStack();
+        }
+
+
         code.append("\t" + "if" + prefix + operation + " FALSE" + conditionalId + "\n" );
         code.append("\ticonst_0\n");
         code.append("\tgoto TRUE" + conditionalId +"\n");
         code.append("FALSE" + conditionalId + ":\n");
         code.append("\ticonst_1\n");
         code.append("TRUE" + conditionalId + ":\n");
-
+        this.jasminUtils.addCurrentStack();
         conditionalId++;
         return code.toString();
     }
@@ -543,13 +611,13 @@ public class JasminInstruction {
 
     private String doLogicalOptimizationIfNeeded(String operation ,LiteralElement literalElement)
     {
+
         if(operation.equals("and") && literalElement.getLiteral().equals("0"))
             return "\ticonst_0\n";
         else if(operation.equals("or") && literalElement.getLiteral().equals("1"))
             return "\ticonst_1\n";
         else return "";
     }
-
 
     private String createOrAndCode(String operation, Element leftOperand, Element rightOperand)
     {
@@ -558,6 +626,7 @@ public class JasminInstruction {
         String result = "";
 
         if(leftOperand.isLiteral() && rightOperand.isLiteral()) {
+            this.jasminUtils.addCurrentStack();
             boolean res = doBitwiseOptimization(operation, ((LiteralElement) leftOperand).getLiteral(), ((LiteralElement) rightOperand).getLiteral());
             if (res) return "\ticonst_1\n";
             else return "\ticonst_0\n";
@@ -571,7 +640,6 @@ public class JasminInstruction {
             literal = (LiteralElement) rightOperand;
         }
 
-
         if(literal != null)
             result = doLogicalOptimizationIfNeeded(operation, literal);
 
@@ -579,13 +647,18 @@ public class JasminInstruction {
 
             code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
             code.append("\tifeq" + " FALSE" + conditionalId + "\n");
+            this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();
             code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
             code.append("\tifeq" + " FALSE" + conditionalId + "\n");
+            this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();
             code.append("\ticonst_1\n");
             code.append("\tgoto TRUE" + conditionalId + "\n");
             code.append("FALSE" + conditionalId + ":\n");
             code.append("\ticonst_0\n");
             code.append("TRUE" + conditionalId + ":\n");
+            this.jasminUtils.addCurrentStack();
             conditionalId++;
 
         return code.toString();
@@ -689,6 +762,7 @@ public class JasminInstruction {
                 if(optimizedCode == "")
                     code.append(createArithmeticCode("imul", leftOperand, rightOperand));
                 else code.append(optimizedCode);
+                this.jasminUtils.updateStackLimit();
                 break;
             case SUB:
                 code.append(createArithmeticCode("isub", leftOperand, rightOperand));
@@ -709,13 +783,25 @@ public class JasminInstruction {
                 code.append(createBranchCode("lt", leftOperand, rightOperand));
                 break;
             case AND:
+                code.append(this.jasminUtils.loadElement(leftOperand, this.varTable));
+                code.append(this.jasminUtils.loadElement(rightOperand, this.varTable));
+                this.jasminUtils.updateStackLimit();
+                this.jasminUtils.subCurrentStack();
+                this.jasminUtils.subCurrentStack();
+                this.jasminUtils.addCurrentStack();
                 code.append("\tiand\n");
                 break;
             case ANDB:
                 code.append(createOrAndCode("and", leftOperand, rightOperand));
                 break;
             case OR:
+                code.append(this.jasminUtils.loadElement(leftOperand, this.varTable));
+                code.append(this.jasminUtils.loadElement(rightOperand, this.varTable));
                 code.append("ior\n");
+                this.jasminUtils.updateStackLimit();
+                this.jasminUtils.subCurrentStack();
+                this.jasminUtils.subCurrentStack();
+                this.jasminUtils.addCurrentStack();
                 break;
             case ORB:
                 code.append(createOrAndCode("or", leftOperand, rightOperand));
@@ -727,7 +813,13 @@ public class JasminInstruction {
                 code.append(createBranchCode("ge", leftOperand, rightOperand));
                 break;
             case XOR:
+                code.append(this.jasminUtils.loadElement(leftOperand, this.varTable));
+                code.append(this.jasminUtils.loadElement(rightOperand, this.varTable));
                 code.append("ixor\n");
+                this.jasminUtils.updateStackLimit();
+                this.jasminUtils.subCurrentStack();
+                this.jasminUtils.subCurrentStack();
+                this.jasminUtils.addCurrentStack();
                 break;
             case NOTB:
                 code.append("\tif_ne TRUE" + conditionalId + "\n");
@@ -742,8 +834,11 @@ public class JasminInstruction {
                 throw new NotImplementedException(op.getOpType());
         }
 
-        this.stackLimit = Math.max(this.stackLimit, 2);
-        this.currentStack--;
+        this.jasminUtils.updateStackLimit();
+        /*this.jasminUtils.subCurrentStack();
+        this.jasminUtils.subCurrentStack();
+        this.jasminUtils.addCurrentStack();*/
+
         return code.toString();
     }
 
@@ -758,7 +853,8 @@ public class JasminInstruction {
         code.append(getCode(instruction.getCondition()));
         code.append("\tifne " + instruction.getLabel() + " \n");
 
-        this.currentStack--;
+        this.jasminUtils.updateStackLimit();
+        this.jasminUtils.subCurrentStack();
 
         return code.toString();
     }
@@ -768,18 +864,24 @@ public class JasminInstruction {
 
         code.append(getCode(instruction.getCondition()));
         code.append("\tifne " + instruction.getLabel() + "\n");
+
+        this.jasminUtils.updateStackLimit();
+        this.jasminUtils.subCurrentStack();
+
         return code.toString();
     }
 
-    //TODO: VER QUANDO ACONTECE
     public String getCode(CondBranchInstruction instruction) {
         var code = new StringBuilder();
 
-        System.out.println("COND BRANCH");
-        code.append("NOT IMPLEMENTED");
-        //code.append(getCode(instruction.getCondition()));
-        //code.append(instruction.getLabel() + "\n");
+        code.append(getCode(instruction.getCondition()));
+        code.append(instruction.getLabel() + "\n");
 
         return code.toString();
+    }
+
+    public static void reset()
+    {
+        conditionalId = 0;
     }
 }

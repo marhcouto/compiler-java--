@@ -181,7 +181,7 @@ public class Cpf4_Jasmin {
     //PASSOU
     @Test
     public void section2_Arithmetic_Simple_add() {
-        CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_add.jmm"), "1");
+        CpUtils.runJasmin(getJasminResult("arithmetic/Arithmetic_add.jmm"), "5");
     }
 
     /**

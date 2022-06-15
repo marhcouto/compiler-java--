@@ -1,0 +1,17 @@
+import io;
+
+class ShiftLeft{
+
+    public static void main(String[] args) {
+        int a;
+        int b;
+
+        a = 5;
+
+        b = 8 * a ;
+
+        io.print(b);
+
+    }
+
+}
