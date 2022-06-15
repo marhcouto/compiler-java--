@@ -6,7 +6,7 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 public class ExtendedSymbol extends pt.up.fe.comp.jmm.analysis.table.Symbol {
     private final Origin origin;
     private int index;
-    private boolean uncertain = false;
+    private int certaintyLimitLine = Integer.MAX_VALUE;
     private String value = "";
 
     public static ExtendedSymbol fromSymbol(Symbol symbol, Origin origin) {
@@ -45,7 +45,11 @@ public class ExtendedSymbol extends pt.up.fe.comp.jmm.analysis.table.Symbol {
 
     public String getValue() { return value; }
 
-    public void setUncertain(boolean uncertain) { this.uncertain = uncertain; }
+    public int getCertaintyLimitLine() {
+        return certaintyLimitLine;
+    }
 
-    public boolean isUncertain() { return uncertain; }
+    public void setCertaintyLimitLine(int certaintyLimitLine) {
+        this.certaintyLimitLine = certaintyLimitLine;
+    }
 }
