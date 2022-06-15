@@ -2,10 +2,10 @@ import io;
 
 class Arithmetic_add {
 	public static void main(String[] args) {
-		boolean a;
+		int a;
 
-		a = true && false;
+		a = 2 + 3;
 
-		io.print(1);
+		io.print(a);
 	}
 }
