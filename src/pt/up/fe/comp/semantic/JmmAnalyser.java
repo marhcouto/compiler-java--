@@ -6,6 +6,7 @@ import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.semantic.analysers.*;
 import pt.up.fe.comp.semantic.analysers.utils.FindMainBody;
+import pt.up.fe.comp.semantic.protectors.ChangeFieldInVarName;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTableFactory;
 
@@ -17,6 +18,7 @@ public class JmmAnalyser implements JmmAnalysis {
 
     @Override
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
+        new ChangeFieldInVarName().visit(parserResult.getRootNode());
         SymbolTable symbolTable = new SymbolTableFactory().generateTable(parserResult.getRootNode(), reports);
         new CheckValidSymbolAccess(symbolTable, reports).visit(parserResult.getRootNode());
         if (reports.isEmpty()) {
@@ -26,14 +28,14 @@ public class JmmAnalyser implements JmmAnalysis {
             } catch (AnalysisException e) { /* Errors are already handled somewhere*/ }
         }
         if (reports.isEmpty()) {
-            new CheckVarInit(symbolTable, reports).visit(parserResult.getRootNode());
-        }
-        if (reports.isEmpty()) {
             FindMainBody mainBodyFinder = new FindMainBody();
             mainBodyFinder.visit(parserResult.getRootNode());
             if (mainBodyFinder.getMainMethodBody() != null) {
                 new CheckThisInMain(reports).visit(mainBodyFinder.getMainMethodBody());
             }
+        }
+        if (reports.isEmpty()) {
+            new CheckVarInit(symbolTable, reports).visit(parserResult.getRootNode());
         }
         return new JmmSemanticsResult(parserResult, symbolTable, reports);
     }
