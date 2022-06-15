@@ -218,11 +218,7 @@ public class JasminUtils {
         } else {
 
             Operand operand = (Operand) element;
-            boolean isArrayOperand = false;
-            if (operand instanceof ArrayOperand) {
-                operand.show();
-                isArrayOperand = true;
-            }
+            boolean isArrayOperand = operand instanceof ArrayOperand;
             int id;
             if (operand.isParameter()) {
                 id = operand.getParamId();

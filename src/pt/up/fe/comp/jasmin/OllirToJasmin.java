@@ -27,15 +27,11 @@ public class OllirToJasmin {
     {
         var code = new StringBuilder();
 
-        this.classUnit.show();
-
         JasminInstruction.reset();
 
         code.append(createJasminHeader());
         code.append(createJasminFields());
         code.append(createJasminMethods());
-
-        System.out.println(code.toString());
 
         return code.toString();
     }

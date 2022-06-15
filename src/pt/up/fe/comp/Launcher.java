@@ -43,6 +43,7 @@ public class Launcher {
         config.put("optimize", "false");
         config.put("registerAllocation", "-1");
         config.put("debug", "false");
+        config.put("verbose", "false");
 
         for(int i = 0; i < args.length; i++) {
             if (args[i].equals("-o")) {
@@ -50,6 +51,9 @@ public class Launcher {
             }
             if (args[i].equals("-d")) {
                 config.put("debug", "true");
+            }
+            if (args[i].equals("-v")) {
+                config.put("verbose", "true");
             }
         }
 
@@ -76,10 +80,10 @@ public class Launcher {
             analysisResult = new JmmOptimizer().optimize(analysisResult);
         }
 
-        // OPTIMIZATION/OLLIR STAGE
+        // OLLIR STAGE
         JmmOptimization optimizer = new JmmOptimizer();
         OllirResult optimizationResult = optimizer.toOllir(analysisResult);
-        // Optimization reports
+        // OLLIR reports
         // TestUtils.noErrors(optimizationResult.getReports());
         for (Report r : optimizationResult.getReports()) {
             System.out.println(r.toString());
@@ -94,21 +98,23 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
-        // TREE PRINT
-        System.out.println("\n\nTREE:\n");
-        System.out.println(parserResult.getRootNode().toTree());
+        if (config.get("verbose").equals("true")) {
+            // TREE PRINT
+            System.out.println("\n\nTREE:\n");
+            System.out.println(parserResult.getRootNode().toTree());
 
-        // TABLE PRINT
-        System.out.println("\n\nTABLE:\n");
-        System.out.println(analysisResult.getSymbolTable().print());
+            // TABLE PRINT
+            System.out.println("\n\nTABLE:\n");
+            System.out.println(analysisResult.getSymbolTable().print());
 
-        // OLLIR CODE PRINT
-        System.out.println("\n\nOLLIR:\n");
-        System.out.println(optimizationResult.getOllirCode());
+            // OLLIR CODE PRINT
+            System.out.println("\n\nOLLIR:\n");
+            System.out.println(optimizationResult.getOllirCode());
 
-        // JASMIN CODE PRINT
-        System.out.println("\n\nJASMIN:\n");
-        System.out.println(jasminResult.getJasminCode());
+            // JASMIN CODE PRINT
+            System.out.println("\n\nJASMIN:\n");
+            System.out.println(jasminResult.getJasminCode());
+        }
 
         if (config.get("debug").equals("false")) {
             writeJasminCode(args[args.length - 1], jasminResult);
