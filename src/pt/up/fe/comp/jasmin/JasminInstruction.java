@@ -365,10 +365,6 @@ public class JasminInstruction {
                 }
                 else return "";
 
-                System.out.println(instruction);
-
-
-
                 if(this.varTable.get(dest.getName()).getVirtualReg() == this.varTable.get(operand.getName()).getVirtualReg())
                 {
                     var code = new StringBuilder();
