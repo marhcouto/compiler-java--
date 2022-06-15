@@ -6,6 +6,8 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 public class ExtendedSymbol extends pt.up.fe.comp.jmm.analysis.table.Symbol {
     private final Origin origin;
     private int index;
+    private boolean uncertain = false;
+    private String value = "";
 
     public static ExtendedSymbol fromSymbol(Symbol symbol, Origin origin) {
         return new ExtendedSymbol(symbol.getType(), symbol.getName(), -1, origin);
@@ -38,4 +40,12 @@ public class ExtendedSymbol extends pt.up.fe.comp.jmm.analysis.table.Symbol {
     public void setIndex(int index) {
         this.index = index;
     }
+
+    public void setValue(String value) { this.value = value; }
+
+    public String getValue() { return value; }
+
+    public void setUncertain(boolean uncertain) { this.uncertain = uncertain; }
+
+    public boolean isUncertain() { return uncertain; }
 }

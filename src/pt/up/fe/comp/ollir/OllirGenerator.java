@@ -1,8 +1,11 @@
 package pt.up.fe.comp.ollir;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp.ollir.optimizations.MarkUncertainVariables;
 import pt.up.fe.comp.semantic.Constants;
+import pt.up.fe.comp.semantic.models.ExtendedSymbol;
 import pt.up.fe.comp.semantic.models.Origin;
 import pt.up.fe.comp.semantic.symbol_table.SymbolTable;
 
@@ -89,6 +92,7 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
     }
 
     private List<String> visitMethodBody(JmmNode node, String scope) {
+        new MarkUncertainVariables(symbolTable, scope).visit(node);
         for (var child: node.getChildren()) {
             visit(child, scope);
         }
@@ -96,10 +100,11 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
     }
 
     private List<String> visitBinOp(JmmNode node, String scope) {
+        System.out.println("BINOP: " + node.getJmmChild(0) + " | " + node.getJmmChild(1));
         List<String> resultLhs = visit(node.getJmmChild(0), scope);
         List<String> resultRhs = visit(node.getJmmChild(1), scope);
-        String lhs = visit(node.getJmmChild(0), scope).get(0);
-        String rhs = visit(node.getJmmChild(1), scope).get(0);
+        String lhs = resultLhs.get(0);
+        String rhs = resultRhs.get(0);
         String expressionVariability = "Not Constant";
         Integer value = null;
         String valueString = null;
@@ -241,10 +246,16 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
     }
 
     private List<String> visitVarName(JmmNode node, String scope) {
+        System.out.println("Var: " + node);
         Origin varOrigin = symbolTable.getSymbolOrigin(scope, node.get("image"));
+        ExtendedSymbol variable = symbolTable.getSymbol(scope, node.get("image"));
         switch (varOrigin) {
             case LOCAL:
-                return Collections.singletonList(String.format("%s.%s", node.get("image"), OllirUtils.toOllir(node)));
+                if (!variable.getValue().equals("") && !variable.isUncertain()) {
+                    return Arrays.asList(String.format("%s.%s", node.get("image"), OllirUtils.toOllir(node)), "Constant", variable.getValue());
+                } else {
+                    return Collections.singletonList(String.format("%s.%s", node.get("image"), OllirUtils.toOllir(node)));
+                }
             case IMPORT_PATH:
                 return Collections.singletonList(String.format("%s.%s", node.get("image"), Constants.ANY_TYPE));
             case PARAMS:
@@ -270,7 +281,9 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
     }
 
     private List<String> visitAsmOp(JmmNode node, String scope) {
-        String expr = visit(node.getJmmChild(1), scope).get(0);
+        System.out.println("Assignment: " + node.getJmmChild(0) + " | " + node.getJmmChild(1));
+        List<String> visitExpression = visit(node.getJmmChild(1), scope);
+        String expr = visitExpression.get(0);
         switch (node.getJmmChild(0).getKind()) {
             case "VarName": {
                 String varName = node.getJmmChild(0).get("image");
@@ -284,7 +297,13 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                     ));
                     break;
                 }
-                String dest = visit(node.getJmmChild(0), scope).get(0);
+                JmmNode variable = node.getJmmChild(0);
+                String dest = visit(variable, scope).get(0);
+                ExtendedSymbol s = symbolTable.getSymbol(scope, variable.get("image"));
+                if (visitExpression.size() > 2 && visitExpression.get(1).equals("Constant")) {
+                    // s.setValue(visitExpression.get(2));
+                    System.out.println("Assigned value: " + s.getValue());
+                }
                 code.append(String.format("%s :=.%s %s;\n",
                    dest,
                    OllirUtils.toOllir(node.getJmmChild(0)),
@@ -364,9 +383,11 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
         int labelIdx = labels++;
         String loopString = String.format("Loop%d: \n", labelIdx);
         code.append(loopString);
+        System.out.println("While condition:" + node.getJmmChild(0));
         List<String> conditionResult = visit(node.getJmmChild(0), scope);
         String condition = conditionResult.get(0);
         if (conditionResult.size() > 2 && conditionResult.get(1).equals("Constant")) {
+            System.out.println("CONSTANT");
             if (conditionResult.get(2).equals("1")) {
                 for (var child: node.getJmmChild(1).getChildren()) {
                     visit(child, scope);
@@ -377,6 +398,7 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                 code.delete(startIndexOfLoopString, startIndexOfLoopString + loopString.length());
             }
         } else {
+            System.out.println("NOT CONSTANT");
             code.append(String.format("if (!.bool %s) goto EndLoop%d;\n", condition, labelIdx));
             for (var child: node.getJmmChild(1).getChildren()) {
                 visit(child, scope);
