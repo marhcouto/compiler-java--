@@ -354,6 +354,7 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
 
     private List<String> visitUnaryOp(JmmNode node, String scope) {
         String generatedCode;
+        List<String> visitResult = visit(node.getJmmChild(0), scope);
         switch (node.get("op")) {
             case "NOT":
                 generatedCode = generateTempVar() + ".bool";
@@ -361,9 +362,11 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                         generatedCode,
                         visit(node.getJmmChild(0), scope).get(0)
                 ));
+                if (visitResult.size() > 2 && visitResult.get(1).equals("Constant")) {
+                    return Arrays.asList(generatedCode, "Constant", visitResult.get(2).equals("1") ? "0" : "1");
+                }
                 break;
             case "SIM":
-                List<String> visitResult = visit(node.getJmmChild(0), scope);
                 generatedCode = generateTempVar() + (".i32");
                 code.append(String.format("%s :=.i32 0.i32 -.i32 %s;\n",
                         generatedCode,

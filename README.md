@@ -95,7 +95,7 @@ The output of our compiler is a single .j file with jasmin code that must be lat
 - Is able to perform constant folding with arithmetic expressions and comparations in Jasmin
 - Is able to perform short-circuit evaluation of boolean expressions in Jasmin
 - Is able to perform strength reduction in multiplication/divisions by factors of 2 in Jasmin
-- Is able to perform minimization of *gotos* in *while loops* (integrated in ollir generation)
+- Is able to perform minimization of *gotos* in *while loops* (integrated in base ollir generation, no need for '-o' flag)
 
 ## Cons
 - Does not support overloading
@@ -108,6 +108,8 @@ implementation details:
 - Jasmin Optimization
 - Semantic Analysis
 - Jasmin Edges Cases
+- Test to show minimization of gotos optimization, as the ones presented failed due to not
+considering 'ifne' an if statement on jasmin
 
 Note: the tests are located in the folder test/pt/up/fe/comp/extra.
 

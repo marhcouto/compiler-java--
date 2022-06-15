@@ -35,9 +35,8 @@ public class MarkUncertainVariables extends PreorderJmmVisitor<Boolean, Object> 
     private Object visitAsmOp(JmmNode node, Boolean insideLoop) {
         if (!node.getJmmChild(0).getKind().equals("VarName")) return null;
         String varName = node.getJmmChild(0).get("image");
-        if (insideLoop != null) {
-            ExtendedSymbol s = symbolTable.getSymbol(scope, varName);
-            System.out.println("LINE:"  + node + " " + node.get("line"));
+        ExtendedSymbol s = symbolTable.getSymbol(scope, varName);
+        if (insideLoop != null && s.getCertaintyLimitLine() == Integer.MAX_VALUE) {
             s.setCertaintyLimitLine(Integer.parseInt(node.get("line")));
         }
         return null;
