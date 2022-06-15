@@ -391,6 +391,7 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                 for (var child: node.getJmmChild(1).getChildren()) {
                     visit(child, scope);
                 }
+                condition = visit(node.getJmmChild(0), scope).get(0);
                 code.append(String.format("if (%s) goto Loop%d;\n", condition, labelIdx));
             } else {
                 int startIndexOfLoopString = code.lastIndexOf(loopString);
