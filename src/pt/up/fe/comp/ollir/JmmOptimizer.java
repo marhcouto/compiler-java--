@@ -18,7 +18,9 @@ public class JmmOptimizer implements JmmOptimization {
 
     @Override
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
-        new ConstantPropagator().visit(semanticsResult.getRootNode());
+        if(Boolean.parseBoolean(semanticsResult.getConfig().get("optimize"))) {
+            new ConstantPropagator().visit(semanticsResult.getRootNode());
+        }
         return semanticsResult;
     }
 }
