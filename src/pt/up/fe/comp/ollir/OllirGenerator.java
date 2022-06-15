@@ -247,11 +247,6 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
     private List<String> visitVarName(JmmNode node, String scope) {
         Origin varOrigin = symbolTable.getSymbolOrigin(scope, node.get("image"));
         ExtendedSymbol variable = symbolTable.getSymbol(scope, node.get("image"));
-        if (node.get("line").equals("47")) {
-            System.out.println("DUDE");
-            System.out.println(node.get("image"));
-            System.out.println(varOrigin);
-        }
         switch (varOrigin) {
             case LOCAL:
                 if (!variable.getValue().equals("") && (variable.getCertaintyLimitLine() > Integer.parseInt(node.get("line")))) {
@@ -271,12 +266,12 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                 String newVar = generateTempVar();
                 String type = OllirUtils.toOllir(node);
                 code.append(String.format("%s.%s :=.%s getfield(this, %s.%s).%s;\n",
-                    newVar,
-                    type,
-                    type,
-                    node.get("image"),
-                    type,
-                    type
+                        newVar,
+                        type,
+                        type,
+                        node.get("image"),
+                        type,
+                        type
                 ));
                 return Collections.singletonList(String.format("%s.%s", newVar, type));
         }
@@ -292,10 +287,10 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                 Origin varOrigin = symbolTable.getSymbolOrigin(scope, varName);
                 if (varOrigin.equals(Origin.CLASS_FIELD)) {
                     code.append(String.format("putfield(this, %s.%s, %s).%s;\n",
-                        varName,
-                        OllirUtils.toOllir(node.getJmmChild(0)),
-                        expr,
-                        OllirUtils.toOllir(node.getJmmChild(0))
+                            varName,
+                            OllirUtils.toOllir(node.getJmmChild(0)),
+                            expr,
+                            OllirUtils.toOllir(node.getJmmChild(0))
                     ));
                     break;
                 }
@@ -306,9 +301,9 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                     s.setValue(visitExpression.get(2));
                 }
                 code.append(String.format("%s :=.%s %s;\n",
-                   dest,
-                   OllirUtils.toOllir(node.getJmmChild(0)),
-                   expr
+                        dest,
+                        OllirUtils.toOllir(node.getJmmChild(0)),
+                        expr
                 ));
                 break;
             }
@@ -335,8 +330,8 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
     private List<String> visitReturnStatement(JmmNode node, String scope) {
         String retVal = visit(node.getJmmChild(0), scope).get(0);
         code.append(String.format("ret.%s %s;\n",
-            OllirUtils.toOllir(symbolTable.getReturnType(scope)),
-            retVal
+                OllirUtils.toOllir(symbolTable.getReturnType(scope)),
+                retVal
         ));
         return null;
     }
@@ -469,11 +464,9 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                 return String.format("$%d.%s[%s].i32", paramIndex, arrName, fixedArrIdx);
             }
             case CLASS_FIELD: {
-                // TODO: Something here
-                String array = generateTempVar() + "i.32";
-                String getField = String.format("getfield(this,%s.i32).i32", arrName);
-                code.append(String.format("%s :=.i32 %s;\n", array, getField));
-                return String.format("%s[%s].i32", array, fixedArrIdx);
+                String tempVar = generateTempVar();
+                code.append(String.format("%s.array.i32 :=.array.i32 getfield(this, %s.array.i32).array.i32;\n", tempVar, arrName));
+                return String.format("%s[%s].i32", tempVar, fixedArrIdx);
             }
             default: {
                 return String.format("%s[%s].i32", arrName, fixedArrIdx);
