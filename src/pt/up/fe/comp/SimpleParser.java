@@ -85,9 +85,6 @@ public class SimpleParser implements JmmParser {
             }
 
             var root = ((JmmNode) rootNode).sanitize();
-            System.out.println(root.toTree());
-
-
             return new JmmParserResult((JmmNode) root, Collections.emptyList(), config);
 
         } catch (ParseException e) {

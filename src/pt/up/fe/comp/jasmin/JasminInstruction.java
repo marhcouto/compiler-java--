@@ -136,13 +136,11 @@ public class JasminInstruction {
         var firstArg = ((Operand) instruction.getFirstArg());
         var secondArg = ((LiteralElement) instruction.getSecondArg()).getLiteral().replace("\"", "");
 
-        System.out.println("stack now: " + this.jasminUtils.getCurrentStack());
         code.append("\t"+this.jasminUtils.loadElement(firstArg, this.varTable));
 
         for(Element element : instruction.getListOfOperands()){
             code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
         }
-        System.out.println("stack now: " + this.jasminUtils.getCurrentStack());
 
         code.append("\tinvokevirtual " +this.jasminUtils.getJasminType(firstArg.getType()) +  "/" + secondArg + "(");
         code.append(createListOperands(instruction));
@@ -154,7 +152,6 @@ public class JasminInstruction {
             this.jasminUtils.subCurrentStack();
         }
 
-        System.out.println("stack now: " + this.jasminUtils.getCurrentStack());
         if(!method.getReturnType().getTypeOfElement().equals(ElementType.VOID)
          && !isAssign){
             code.append("\tpop\n");
@@ -163,8 +160,6 @@ public class JasminInstruction {
         }
 
         this.jasminUtils.addCurrentStack();
-        System.out.println("stack now: " + this.jasminUtils.getCurrentStack());
-        System.out.println("------------------");
 
         return code.toString();
 
@@ -218,14 +213,11 @@ public class JasminInstruction {
         var firstArg = ((Operand) instruction.getFirstArg());
         var methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral().replace("\"", "");;
 
-        System.out.println("stack now: " + this.jasminUtils.getCurrentStack());
         code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
 
         for(Element element : instruction.getListOfOperands()){
             code.append("\t" +this.jasminUtils.loadElement(element, this.varTable) );
         }
-        System.out.println("tamanho " + instruction.getListOfOperands().size());
-        System.out.println("stack now: " + this.jasminUtils.getCurrentStack());
 
         code.append("\tinvokespecial " +this.jasminUtils.getJasminType(firstArg.getType()));
         code.append("/" + methodName + "(");
@@ -238,7 +230,6 @@ public class JasminInstruction {
         for(int i = 0; i < instruction.getListOfOperands().size(); i++){
             this.jasminUtils.subCurrentStack();
         }
-        System.out.println("stack now: " + this.jasminUtils.getCurrentStack());
 
         if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)
          && !isAssign){
@@ -249,8 +240,6 @@ public class JasminInstruction {
         }
 
         this.jasminUtils.addCurrentStack();
-        System.out.println("stack now: " + this.jasminUtils.getCurrentStack());
-        System.out.println("------------------");
 
         return code.toString();
 
@@ -789,8 +778,6 @@ public class JasminInstruction {
             default:
                 throw new NotImplementedException(op.getOpType());
         }
-
-        System.out.println("stack " + this.jasminUtils.getCurrentStack());
 
         this.jasminUtils.updateStackLimit();
         /*this.jasminUtils.subCurrentStack();

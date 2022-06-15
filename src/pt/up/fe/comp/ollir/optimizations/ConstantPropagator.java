@@ -16,7 +16,6 @@ public class ConstantPropagator extends AJmmVisitor<Object, Object> {
         addVisit("MethodBody", this::visitMethodBody);
         addVisit("VarName", this::visitVarName);
         setDefaultVisit((node, dummy) -> {
-            System.out.println(node);
             for (var child : node.getChildren()) {
                 visit(child);
             }
