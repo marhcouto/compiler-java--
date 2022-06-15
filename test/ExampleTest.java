@@ -10,15 +10,13 @@ public class ExampleTest {
 
     @Test
     public void testExpression() {
-        //TestUtils.mustFail(parseResult.getReports());
         try {
             File myFile = new File("test/fixtures/public/Fac.jmm");
             String myReader = new Scanner(myFile).useDelimiter("\\Z").next();
             var parserResult = TestUtils.parse(myReader);
-            parserResult.getReports().get(0).getException().get().printStackTrace();
-            //var analysisResult = TestUtils.analyse(parserResult);
+            TestUtils.analyse(parserResult);
         } catch (FileNotFoundException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
         }
     }
 

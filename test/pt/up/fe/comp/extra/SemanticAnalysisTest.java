@@ -1,9 +1,14 @@
-package pt.up.fe.comp;
+package pt.up.fe.comp.extra;
 
 import org.junit.Test;
+import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
+
+import static org.junit.Assert.assertEquals;
 
 public class SemanticAnalysisTest {
 
@@ -66,7 +71,11 @@ public class SemanticAnalysisTest {
 
     @Test
     public void varNotInit() {
-        mustFail(SpecsIo.getResource("fixtures/public/fail/semantic/varNotInt.jmm"));
+        // Should only raise WARNING
+        JmmParserResult parserResult = TestUtils.parse(SpecsIo.getResource("fixtures/public/fail/semantic/varNotInit.jmm"));
+        JmmSemanticsResult semanticsResult = TestUtils.analyse(parserResult);
+        assertEquals(1, semanticsResult.getReports().size());
+        assertEquals(ReportType.WARNING, semanticsResult.getReports().get(0).getType());
     }
 
     @Test
@@ -112,5 +121,11 @@ public class SemanticAnalysisTest {
     @Test
     public void whileAndIf() {
         noErrors(SpecsIo.getResource("fixtures/public/WhileAndIf.jmm"));
+    }
+
+    @Test
+    public void aDoesNotExtendB() {
+        var semantics = TestUtils.analyse(SpecsIo.getResource("fixtures/public/cpf/extra/cp2_error.jmm"));
+        TestUtils.mustFail(semantics.getReports());
     }
 }

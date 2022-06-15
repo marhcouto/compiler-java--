@@ -99,15 +99,6 @@ public class Cpf3_Ollir {
         CpUtils.assertEquals("Method return type", "BasicMethods", CpUtils.toString(method.getReturnType()), result);
     }
 
-    //i = i + 1
-    //t0 := i
-
-    @Test
-    public void TicTacToe() {
-        var result = getOllirResult("TicTacToe.jmm");
-        System.out.println(result.getOllirCode());
-    }
-
     /*checks if method declaration is correct (array)*/
     @Test
     public void section1_Basic_Method_Declaration_Array() {

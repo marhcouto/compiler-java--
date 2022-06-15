@@ -1,4 +1,4 @@
-package pt.up.fe.comp;
+package pt.up.fe.comp.extra;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -6,6 +6,8 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import pt.up.fe.comp.CpUtils;
+import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.specs.util.SpecsIo;
 
@@ -13,7 +15,6 @@ public class CustomTests {
 
 
     static JasminResult getJasminResult(String filename) {
-
         return TestUtils.backend(SpecsIo.getResource("fixtures/public/cpf/extra/" + filename));
     }
 
@@ -34,4 +35,10 @@ public class CustomTests {
         String expected = "Result: 1\nResult: 1\nResult: 1";
         CpUtils.runJasmin(getJasminResult("BigIf.jmm"), expected);
     }
+
+//    @Test
+//    public void TicTacToe() {
+//        var result = getOllirResult("TicTacToe.jmm");
+//        System.out.println(result.getOllirCode());
+//    }
 }
