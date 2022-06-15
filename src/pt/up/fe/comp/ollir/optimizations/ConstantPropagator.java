@@ -9,7 +9,7 @@ import java.util.*;
 
 public class ConstantPropagator extends AJmmVisitor<Object, Object> {
     private Map<String, JmmNode> scopeConstants;
-    private Set<String> blackListedVariables;
+    private Map<String, JmmNode> blackListedVariables;
 
     public ConstantPropagator() {
         addVisit("AsmOp", this::visitAsmOp);
@@ -28,13 +28,11 @@ public class ConstantPropagator extends AJmmVisitor<Object, Object> {
         if (node.getJmmParent().getKind().equals("Variable") || !scopeConstants.containsKey(node.get("image"))) {
             return null;
         }
-        System.out.println(String.format("Gonna replace node '%s' with parent '%s' at '%d' for '%s'", node, node.getJmmParent().toString(), node.getIndexOfSelf(), JmmNodeImpl.fromJson(scopeConstants.get(node.get("image")).toJson())));
         node.replace(JmmNodeImpl.fromJson(scopeConstants.get(node.get("image")).toJson()));
         return null;
     }
 
     private Object visitMethodBody(JmmNode node, Object dummy) {
-        System.out.println(node);
         scopeConstants = new HashMap<>();
         blackListedVariables = new CheckIfVarUsedInsideLoop().visit(node);
         for (var child: node.getChildren()) {
@@ -56,7 +54,7 @@ public class ConstantPropagator extends AJmmVisitor<Object, Object> {
         if (!node.getJmmChild(0).getKind().equals("VarName")) {
             return null;
         }
-        if (((valueNode.getKind().equals("IntegerLiteral") || valueNode.getKind().equals("True") || valueNode.getKind().equals("False"))) && !blackListedVariables.contains(varName)) {
+        if (((valueNode.getKind().equals("IntegerLiteral") || valueNode.getKind().equals("True") || valueNode.getKind().equals("False"))) && (!blackListedVariables.containsKey(varName) || Integer.parseInt(blackListedVariables.get(varName).get("line")) > Integer.parseInt(valueNode.get("line")))) {
             JmmNode constant = node.getJmmChild(1);
             constant.removeParent();
             scopeConstants.put(varName, constant);
