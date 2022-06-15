@@ -411,37 +411,42 @@ public class JasminInstruction {
         return code.toString();
     }
 
-
-
-    private String createLogicOpCode(String operation, Element leftOperand, Element rightOperand)
-    {
-        var code = new StringBuilder();
-        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-
-        if(leftOperand.isLiteral())
-        {
-            var leftLiteral = (LiteralElement) leftOperand;
-            code.append("\t" + ((leftLiteral.getLiteral().equals("0")) ? "pop" : "i") + operation + "\n");
-        }
-        else
-        {
-            code.append("\ti" + operation + "\n");
-        }
-        return code.toString();
-    }
-
     private String createArithmeticCode(String operation, Element leftOperand, Element rightOperand)
     {
         var code = new StringBuilder();
-        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-        code.append("\t" + operation + "\n");
+        List<String> availableOps = new ArrayList<>(Arrays.asList("iadd", "imul", "idvi", "isub"));
+        if(leftOperand.isLiteral() && rightOperand.isLiteral() && availableOps.contains(operation)) {
+            int result = 0;
+            LiteralElement left = (LiteralElement) leftOperand;
+            LiteralElement right = (LiteralElement) rightOperand;
+            switch (operation) {
+                case "iadd":
+                    result = Integer.parseInt(left.getLiteral()) + Integer.parseInt(right.getLiteral());
+                    break;
+                case "imul":
+                    result = Integer.parseInt(left.getLiteral()) * Integer.parseInt(right.getLiteral());
+                    break;
+                case "idiv":
+                    result = Integer.parseInt(left.getLiteral()) / Integer.parseInt(right.getLiteral());
+                    break;
+                case "isub":
+                    result = Integer.parseInt(left.getLiteral()) - Integer.parseInt(right.getLiteral());
+                    break;
+            }
+            System.out.println(left.getLiteral() + " " + operation + " " + right.getLiteral() +  " = " + result);
+            LiteralElement literal = new LiteralElement(result + "", new Type(ElementType.INT32));
+            code.append("\t" + jasminUtils.loadElement(literal, varTable));
+            this.jasminUtils.updateStackLimit();
+        } else{
+            code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
+            code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+            code.append("\t" + operation + "\n");
+            this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();
+            this.jasminUtils.subCurrentStack();
+            this.jasminUtils.addCurrentStack();
+        }
 
-        this.jasminUtils.updateStackLimit();
-        this.jasminUtils.subCurrentStack();
-        this.jasminUtils.subCurrentStack();
-        this.jasminUtils.addCurrentStack();
 
         return code.toString();
     }
@@ -555,6 +560,7 @@ public class JasminInstruction {
 
     private String doLogicalOptimizationIfNeeded(String operation ,LiteralElement literalElement)
     {
+
         if(operation.equals("and") && literalElement.getLiteral().equals("0"))
             return "\ticonst_0\n";
         else if(operation.equals("or") && literalElement.getLiteral().equals("1"))
@@ -582,7 +588,6 @@ public class JasminInstruction {
         {
             literal = (LiteralElement) rightOperand;
         }
-
 
         if(literal != null)
             result = doLogicalOptimizationIfNeeded(operation, literal);

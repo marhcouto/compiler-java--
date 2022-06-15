@@ -72,12 +72,12 @@ public class JasminUtils {
     public String getIConst(String _const) {
 
         var code = new StringBuilder();
-
-        if (Integer.parseInt(_const) < 6)
+        int value = Integer.parseInt(_const);
+        if (value < 6 && value >= 0)
             code.append("iconst_" + _const);
-        else if (Integer.parseInt(_const) < 128)
+        else if (value < 128 && value >= 0)
             code.append("bipush " + _const);
-        else if (Integer.parseInt(_const) < 32768)
+        else if (value < 32768 && value >= 0)
             code.append("sipush " + _const);
         else
             code.append("ldc " + _const);

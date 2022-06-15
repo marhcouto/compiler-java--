@@ -1,0 +1,25 @@
+import io;
+
+class ConstantFoldingAnd{
+
+    public static void main(String[] args) {
+        boolean a;
+        boolean b;
+
+        a = true;
+
+        b = a && false;
+        c = true && true;
+
+        if(b)
+        {
+            io.print(1);
+        }
+        else
+        {
+            io.print(0);
+        }
+
+    }
+
+}

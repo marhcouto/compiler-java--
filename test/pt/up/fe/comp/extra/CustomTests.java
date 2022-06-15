@@ -36,9 +36,32 @@ public class CustomTests {
         CpUtils.runJasmin(getJasminResult("BigIf.jmm"), expected);
     }
 
-//    @Test
-//    public void TicTacToe() {
-//        var result = getOllirResult("TicTacToe.jmm");
-//        System.out.println(result.getOllirCode());
-//    }
+    /*
+    Shifts
+     */
+    @Test
+    public void testShiftLeft(){
+        String expected = "40";
+        JasminResult jasminResult = getJasminResult("ShiftLeft.jmm");
+        CpUtils.runJasmin(jasminResult, expected);
+        CpUtils.matches(jasminResult, "ishl");
+    }
+
+    @Test
+    public void testShiftRight(){
+        String expected = "2";
+        JasminResult jasminResult = getJasminResult("ShiftRight.jmm");
+        CpUtils.runJasmin(jasminResult, expected);
+        CpUtils.matches(jasminResult, "ishr");
+    }
+
+    @Test
+    public void testConstantFoldingAnd(){
+        String expected = "0";
+        JasminResult jasminResult = getJasminResult("ConstantFoldingAnd.jmm");
+        CpUtils.runJasmin(jasminResult, expected);
+
+    }
+
+
 }
