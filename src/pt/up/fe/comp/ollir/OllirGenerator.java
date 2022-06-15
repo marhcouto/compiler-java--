@@ -362,7 +362,8 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
 
     public List<String> visitWhile(JmmNode node, String scope) {
         int labelIdx = labels++;
-        code.append(String.format("Loop%d: \n", labelIdx));
+        String loopString = String.format("Loop%d: \n", labelIdx);
+        code.append(loopString);
         List<String> conditionResult = visit(node.getJmmChild(0), scope);
         String condition = conditionResult.get(0);
         if (conditionResult.size() > 2 && conditionResult.get(1).equals("Constant")) {
@@ -371,6 +372,9 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                     visit(child, scope);
                 }
                 code.append(String.format("if (%s) goto Loop%d;\n", condition, labelIdx));
+            } else {
+                int startIndexOfLoopString = code.lastIndexOf(loopString);
+                code.delete(startIndexOfLoopString, startIndexOfLoopString + loopString.length());
             }
         } else {
             code.append(String.format("if (!.bool %s) goto EndLoop%d;\n", condition, labelIdx));
