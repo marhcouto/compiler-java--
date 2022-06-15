@@ -1,8 +1,12 @@
 package pt.up.fe.comp;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
+import org.eclipse.jgit.util.IO;
 import pt.up.fe.comp.jasmin.JasminEmitter;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
@@ -18,7 +22,7 @@ import pt.up.fe.specs.util.SpecsSystem;
 
 public class Launcher {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         SpecsSystem.programStandardInit();
 
         SpecsLogs.info("Executing with args: " + Arrays.toString(args));
@@ -43,6 +47,9 @@ public class Launcher {
         for(int i = 0; i < args.length; i++) {
             if (args[i].equals("-o")) {
                 config.put("optimize", "true");
+            }
+            if (args[i].equals("-d")) {
+                config.put("debug", "true");
             }
         }
 
@@ -87,7 +94,6 @@ public class Launcher {
             System.out.println(r.toString());
         }
 
-
         // TREE PRINT
         System.out.println("\n\nTREE:\n");
         System.out.println(parserResult.getRootNode().toTree());
@@ -103,6 +109,16 @@ public class Launcher {
         // JASMIN CODE PRINT
         System.out.println("\n\nJASMIN:\n");
         System.out.println(jasminResult.getJasminCode());
+
+        if (config.get("debug").equals("false")) {
+            writeJasminCode(args[args.length - 1], jasminResult);
+        }
+    }
+
+    private static void writeJasminCode(String inputFilePath, JasminResult result) throws IOException {
+        String fileName = Paths.get(inputFilePath).getFileName().toString();
+        String fileNameWOExtension = fileName.split("\\.")[0];
+        Files.writeString(Paths.get(fileNameWOExtension + ".j"), result.getJasminCode());
     }
 
 }
