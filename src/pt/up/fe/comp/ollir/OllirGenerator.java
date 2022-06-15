@@ -247,6 +247,11 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
     private List<String> visitVarName(JmmNode node, String scope) {
         Origin varOrigin = symbolTable.getSymbolOrigin(scope, node.get("image"));
         ExtendedSymbol variable = symbolTable.getSymbol(scope, node.get("image"));
+        if (node.get("line").equals("47")) {
+            System.out.println("DUDE");
+            System.out.println(node.get("image"));
+            System.out.println(varOrigin);
+        }
         switch (varOrigin) {
             case LOCAL:
                 if (!variable.getValue().equals("") && (variable.getCertaintyLimitLine() > Integer.parseInt(node.get("line")))) {
@@ -462,6 +467,13 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
             case PARAMS: {
                 int paramIndex = symbolTable.getParamIndex(scope, arrName);
                 return String.format("$%d.%s[%s].i32", paramIndex, arrName, fixedArrIdx);
+            }
+            case CLASS_FIELD: {
+                // TODO: Something here
+                String array = generateTempVar() + "i.32";
+                String getField = String.format("getfield(this,%s.i32).i32", arrName);
+                code.append(String.format("%s :=.i32 %s;\n", array, getField));
+                return String.format("%s[%s].i32", array, fixedArrIdx);
             }
             default: {
                 return String.format("%s[%s].i32", arrName, fixedArrIdx);
