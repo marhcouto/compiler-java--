@@ -27,12 +27,61 @@ The compilation process takes into account the structure and semantic validity o
 raising errors or warning when guidelines for the language are not met. Our project also
 implements optimizations, both in Ollir Code Generation and Jasmin Code Generation stages.
 
+## Syntactic-Analysis
+
+We defined the grammar in the file javacc/JmmGrammer.jj. The SimpleParser class is used to parse
+the program given, generating an AST and detecting any syntactical errors along the way.
+
 ## Semantic-Analysis
 
-For the Semantic Analysis part, our project resorts to the use of a Symbol Table, which stores 
-import paths, methods of the class, 
+### Symbol Table
+
+For the Semantic Analysis part, our project resorts to the use of a Symbol Table. This symbol table contains:
+- Import paths
+- Class name
+- Super class if exists
+- A table (Java Map) mapping each field's name string to its type and other information (Symbol class)
+- A table (Java Map) mapping each method's name string to an instance of Method. Each method has:
+    - A table (Java Map) mapping each parameter/local variable's name string to its type and other information (ExtendedSymbol class)
+    - Return Type
+
+This symbol table is generated with visitors that traverse the AST created in the previous step.
+
+### Analysis
+
+Semantic Analysis is also performed using visitors to visit the AST, using the data stored
+in the Symbol Table to perform type checks and other operations.
+
+Rules ensured by semantic analysis:
+
+**ERRORS:**
+- Check if an array access is being done to a variable that is not an array
+- Check if a variable is assigned a valid type (??)
+- Check if a variable as been declared (declared is correct??) before its use
+- Check if this is accessed in main (as it is a static method, it should not)
+- Check if access to property length is done to a non array variable
+- Check that the operators of binary operations and unary operations (symmetry (-) and negativity (!)) have valid types
+- Check if the condition of a loop is boolean
+- Check if a method call is performed on a variable that has that method and if the arguments are correct (extended thins ???)
+- Check if array is created with size of type int
+- Check if in an assignment the value assigned has the correct typing
+- Check if value returned by a method has correct typing (same as the one declared)
+
+**WARNINGS:**
+- Check if a variable has been assigned a value before it is used
+
+A warning is used in this situation as there is no way of being sure that the value has not
+been assigned a value without checking the flow of the program
+
 
 ## Code Generation
+
+### Ollir
+
+The ollir code is generated, once again, through the use of visitors to traverse the AST. 
+The ollir generation also uses the Symbol Table to check on information previously stored.
+
+### Jasmin
 
 ## Pros
 - Compiles any Java-- file to Jasmin 
@@ -42,6 +91,11 @@ import paths, methods of the class,
 ## Cons
 - Does not support overloading
 - Does not use Register Allocation
+
+## Extra tests
+Extra tests were created to further increase the testing of the tool and to showcase some 
+implementation details:
+
 
 [//]: # ()
 [//]: # (# Compilers Project)
