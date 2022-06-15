@@ -56,13 +56,13 @@ Rules ensured by semantic analysis:
 
 **ERRORS:**
 - Check if an array access is being done to a variable that is not an array
-- Check if a variable is assigned a valid type (??)
-- Check if a variable as been declared (declared is correct??) before its use
+- Check if a variable is assigned a valid type
+- Check if a variable has been declared before its use
 - Check if this is accessed in main (as it is a static method, it should not)
-- Check if access to property length is done to a non array variable
+- Check if access to property length is done to just array variables
 - Check that the operators of binary operations and unary operations (symmetry (-) and negativity (!)) have valid types
 - Check if the condition of a loop is boolean
-- Check if a method call is performed on a variable that has that method and if the arguments are correct (extended thins ???)
+- Check if a method call is performed on a variable that has that method and if the arguments are correct. If the class has a super class we consider all method calls valid because our compiler can't do type checking on imported classes. 
 - Check if array is created with size of type int
 - Check if in an assignment the value assigned has the correct typing
 - Check if value returned by a method has correct typing (same as the one declared)
@@ -75,18 +75,26 @@ been assigned a value without checking the flow of the program
 
 
 ## Code Generation
+Our program takes a file with Java-- code inside and then, by using the improved grammar without left recursion and with left factorization we create an AST composed by JmmNodes that represent the initial code.
 
-### Ollir
+We take that AST and create a symbol table with information regarding imports, classes, class fields, methods and local variables.
 
-The ollir code is generated, once again, through the use of visitors to traverse the AST. 
-The ollir generation also uses the Symbol Table to check on information previously stored.
+Then we take the AST and the Symbol Table and perform semantic analysis enforcing the rules mentioned above. We chose to use a rich AST to ease the development of OLLIR code, so during this phase we add information on each node about its scope and type. If that analysis fail we terminate the compilation flow.
 
-### Jasmin
+If the program is considered valid by our semantic rules then we create the OLLIR code. During this phase we might perform optimizations if the user chose to do so.
+
+At the end of the compiler flow we translate the OLLIR code into Jasmin code and perform optimization such as the use of 'const' instructions.
+
+The output of our compiler is a single .j file with jasmin code that must be later converted by the user to JVM bytecode by using the jar file found at libs folder.
 
 ## Pros
 - Compiles any Java-- file to Jasmin 
 - Supports negative numbers
-- Optimizes the code to a certain extent
+- Is able to perform constant propagation
+- Is able to perform instruction selection such as 'bipush', 'iconst', comparations with 0, uses 'iload' and 'istore', 'sipush'
+- Is able to perform constant folding with arithmetic expressions and comparations
+- Is able to perform short-circuit evaluation of boolean expressions
+- Is able to perform strength reduction in multiplication/divisions by factors of 2.
 
 ## Cons
 - Does not support overloading

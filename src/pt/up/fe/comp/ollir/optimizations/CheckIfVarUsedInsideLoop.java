@@ -12,10 +12,18 @@ public class CheckIfVarUsedInsideLoop extends PreorderJmmVisitor<Boolean, Map<St
     public CheckIfVarUsedInsideLoop() {
         addVisit("LoopBody", this::visitLoopBody);
         addVisit("AsmOp", this::visitAsmOp);
+        addVisit("WhileStm", this::visitWhileStm);
         addVisit("MethodBody", this::visitMethodBody);
     }
 
     private Map<String, JmmNode> visitLoopBody(JmmNode node, Boolean dummy) {
+        for (var child: node.getChildren()) {
+            visit(child, true);
+        }
+        return null;
+    }
+
+    private Map<String, JmmNode> visitWhileStm(JmmNode node, Boolean dummy) {
         for (var child: node.getChildren()) {
             visit(child, true);
         }

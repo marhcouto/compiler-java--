@@ -411,26 +411,6 @@ public class JasminInstruction {
         return code.toString();
     }
 
-
-
-    private String createLogicOpCode(String operation, Element leftOperand, Element rightOperand)
-    {
-        var code = new StringBuilder();
-        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-
-        if(leftOperand.isLiteral())
-        {
-            var leftLiteral = (LiteralElement) leftOperand;
-            code.append("\t" + ((leftLiteral.getLiteral().equals("0")) ? "pop" : "i") + operation + "\n");
-        }
-        else
-        {
-            code.append("\ti" + operation + "\n");
-        }
-        return code.toString();
-    }
-
     private String createArithmeticCode(String operation, Element leftOperand, Element rightOperand)
     {
         var code = new StringBuilder();
@@ -466,7 +446,6 @@ public class JasminInstruction {
             this.jasminUtils.subCurrentStack();
             this.jasminUtils.addCurrentStack();
         }
-
 
 
         return code.toString();
@@ -581,6 +560,7 @@ public class JasminInstruction {
 
     private String doLogicalOptimizationIfNeeded(String operation ,LiteralElement literalElement)
     {
+
         if(operation.equals("and") && literalElement.getLiteral().equals("0"))
             return "\ticonst_0\n";
         else if(operation.equals("or") && literalElement.getLiteral().equals("1"))
@@ -608,7 +588,6 @@ public class JasminInstruction {
         {
             literal = (LiteralElement) rightOperand;
         }
-
 
         if(literal != null)
             result = doLogicalOptimizationIfNeeded(operation, literal);
