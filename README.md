@@ -91,6 +91,10 @@ The output of our compiler is a single .j file with jasmin code that must be lat
 - Compiles any Java-- file to Jasmin 
 - Supports negative numbers
 - Is able to perform constant propagation
+- Is able to perform instruction selection such as 'bipush', 'iconst', comparations with 0, uses 'iload' and 'istore', 'sipush'
+- Is able to perform constant folding with arithmetic expressions and comparations
+- Is able to perform short-circuit evaluation of boolean expressions
+- Is able to perform strength reduction in multiplication/divisions by factors of 2.
 
 ## Cons
 - Does not support overloading
