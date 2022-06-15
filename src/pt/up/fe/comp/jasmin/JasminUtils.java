@@ -259,7 +259,17 @@ public class JasminUtils {
                         break;
                 }
             } else {
-                instrStr += "\tgetfield " + getJasminType(element.getType()) + "/" + operand.getName() + " ";
+
+                instrStr += "aload_0\n";
+                instrStr += "\tgetfield " + this.classUnit.getClassName() + "/" + operand.getName();
+                instrStr += (isArrayOperand ? " [" : " ") + getJasminType(element.getType()) ;
+
+                if (isArrayOperand) {
+                    instrStr += "\n\t" + loadArrayIndexes((ArrayOperand) operand, varTable);
+                    instrStr += "iaload";
+                    loads += 2;
+                }
+
             }
 
         }
@@ -368,7 +378,7 @@ public class JasminUtils {
         this.currentStack--;
     }
 
-    public void reset(){
+    public void resetStack(){
         this.currentStack = 0;
         this.stackLimit = 0;
     }

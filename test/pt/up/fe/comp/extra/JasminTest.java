@@ -91,4 +91,13 @@ public class JasminTest {
         var jasminResult = jasminGen.toJasmin(ollirResult);
     }
 
+    @Test
+    public void testGetfield() {
+        OllirResult ollirResult = new OllirResult(SpecsIo.getResource("fixtures/public/ollir/teste.ollir"), Collections.emptyMap());
+        var jasminGen = new JasminEmitter();
+        var jasminResult = jasminGen.toJasmin(ollirResult);
+
+        jasminResult.compile();
+    }
+
 }

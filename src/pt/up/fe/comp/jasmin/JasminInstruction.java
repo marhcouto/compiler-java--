@@ -726,7 +726,6 @@ public class JasminInstruction {
             case LTH:
                 code.append(createBranchCode("lt", leftOperand, rightOperand));
                 break;
-                //TODO
             case AND:
                 code.append(this.jasminUtils.loadElement(leftOperand, this.varTable));
                 code.append(this.jasminUtils.loadElement(rightOperand, this.varTable));
@@ -816,15 +815,17 @@ public class JasminInstruction {
         return code.toString();
     }
 
-    //TODO: VER QUANDO ACONTECE
     public String getCode(CondBranchInstruction instruction) {
         var code = new StringBuilder();
 
-        System.out.println("COND BRANCH");
-        code.append("NOT IMPLEMENTED");
-        //code.append(getCode(instruction.getCondition()));
-        //code.append(instruction.getLabel() + "\n");
+        code.append(getCode(instruction.getCondition()));
+        code.append(instruction.getLabel() + "\n");
 
         return code.toString();
+    }
+
+    public static void reset()
+    {
+        conditionalId = 0;
     }
 }
