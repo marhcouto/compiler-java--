@@ -414,15 +414,39 @@ public class JasminInstruction {
     private String createArithmeticCode(String operation, Element leftOperand, Element rightOperand)
     {
         var code = new StringBuilder();
+        List<String> availableOps = new ArrayList<>(Arrays.asList("iadd", "imul", "idvi", "isub"));
+        if(leftOperand.isLiteral() && rightOperand.isLiteral() && availableOps.contains(operation)) {
+            int result = 0;
+            LiteralElement left = (LiteralElement) leftOperand;
+            LiteralElement right = (LiteralElement) rightOperand;
+            switch (operation) {
+                case "iadd":
+                    result = Integer.parseInt(left.getLiteral()) + Integer.parseInt(right.getLiteral());
+                    break;
+                case "imul":
+                    result = Integer.parseInt(left.getLiteral()) * Integer.parseInt(right.getLiteral());
+                    break;
+                case "idiv":
+                    result = Integer.parseInt(left.getLiteral()) / Integer.parseInt(right.getLiteral());
+                    break;
+                case "isub":
+                    result = Integer.parseInt(left.getLiteral()) - Integer.parseInt(right.getLiteral());
+                    break;
+            }
+            System.out.println(left.getLiteral() + " " + operation + " " + right.getLiteral() +  " = " + result);
+            LiteralElement literal = new LiteralElement(result + "", new Type(ElementType.INT32));
+            code.append("\t" + jasminUtils.loadElement(literal, varTable));
+            this.jasminUtils.updateStackLimit();
+        } else{
+            code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
+            code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
+            code.append("\t" + operation + "\n");
+            this.jasminUtils.updateStackLimit();
+            this.jasminUtils.subCurrentStack();
+            this.jasminUtils.subCurrentStack();
+            this.jasminUtils.addCurrentStack();
+        }
 
-        code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-        code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-        code.append("\t" + operation + "\n");
-
-        this.jasminUtils.updateStackLimit();
-        this.jasminUtils.subCurrentStack();
-        this.jasminUtils.subCurrentStack();
-        this.jasminUtils.addCurrentStack();
 
         return code.toString();
     }
