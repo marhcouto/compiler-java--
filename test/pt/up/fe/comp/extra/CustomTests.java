@@ -9,8 +9,12 @@ import org.junit.Test;
 
 import pt.up.fe.comp.CpUtils;
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jasmin.JasminEmitter;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.SpecsIo;
+
+import java.util.Collections;
 
 public class CustomTests {
 
@@ -99,6 +103,7 @@ public class CustomTests {
         CpUtils.runJasmin(jasminResult, expected);
 
     }
+
 
 
 }

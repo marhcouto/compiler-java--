@@ -92,9 +92,10 @@ The output of our compiler is a single .j file with jasmin code that must be lat
 - Supports negative numbers
 - Is able to perform constant propagation
 - Is able to perform instruction selection such as 'bipush', 'iconst', comparations with 0, uses 'iload' and 'istore', 'sipush'
-- Is able to perform constant folding with arithmetic expressions and comparations
-- Is able to perform short-circuit evaluation of boolean expressions
-- Is able to perform strength reduction in multiplication/divisions by factors of 2.
+- Is able to perform constant folding with arithmetic expressions and comparations in Jasmin
+- Is able to perform short-circuit evaluation of boolean expressions in Jasmin
+- Is able to perform strength reduction in multiplication/divisions by factors of 2 in Jasmin
+- Is able to perform minimization of *gotos* in *while loops* (integrated in ollir generation)
 
 ## Cons
 - Does not support overloading
@@ -104,6 +105,11 @@ The output of our compiler is a single .j file with jasmin code that must be lat
 Extra tests were created to further increase the testing of the tool and to showcase some 
 implementation details:
 
+- Jasmin Optimization
+- Semantic Analysis
+- Jasmin Edges Cases
+
+Note: the tests are located in the folder test/pt/up/fe/comp/extra.
 
 [//]: # ()
 [//]: # (# Compilers Project)
