@@ -308,20 +308,9 @@ public class OllirGenerator extends AJmmVisitor<String, List<String>> {
                 break;
             }
             case "ArrAccess": {
-                String arrName = node.getJmmChild(0).getJmmChild(0).get("image");
-                String accessedIndex = visit(node.getJmmChild(0).getJmmChild(1), scope).get(0);
-                String arrAccess;
-                if (symbolTable.getSymbolOrigin(scope, arrName).equals(Origin.CLASS_FIELD)) {
-                    String fetchedField = generateTempVar();
-                    code.append(String.format("%s.array.i32 :=.array.i32 getfield(this, %s.array.i32).array.i32;\n", fetchedField, arrName));
-                    arrAccess = buildArrAccess(fetchedField, Origin.CLASS_FIELD, accessedIndex, null);
-                } else {
-                    arrAccess = buildArrAccess(node.getJmmChild(0), accessedIndex, scope);
-                }
-                code.append(String.format("%s :=.i32 %s;\n",
-                        arrAccess,
-                        expr
-                ));
+                List<String> arrAccess = visit(node.getJmmChild(0), scope);
+                code.append(String.format("%s :=.i32 %s;\n", arrAccess.get(0), expr));
+                break;
             }
         }
         return null;

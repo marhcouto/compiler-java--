@@ -267,6 +267,9 @@ public class TypeChecker extends PostorderJmmVisitor<Object, Object> {
         JmmNode orig = node.getJmmChild(1);
         if (matchExpectedType(orig, dest.get("type"), dest.getAttributes().contains("arr"))) {
             orig.put("type", dest.get("type"));
+            if (dest.getAttributes().contains("arr")) {
+                orig.put("arr", "true");
+            }
             return null;
         }
         reports.add(new Report(
