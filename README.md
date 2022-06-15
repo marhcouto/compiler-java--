@@ -119,11 +119,18 @@ considering 'ifne' an if statement on jasmin
 - '-v' enables print from the different compiling phases
 - '-o' enables constant propagation optimizations
 
+### To play TicTacToe
+
+In Linux/Mac, run :
+```
+./TicTacToe.sh
+``
+
 [//]: # ()
 [//]: # (# Compilers Project)
 
 [//]: # ()
-[//]: # (For this project, you need to install [Java]&#40;https://jdk.java.net/&#41;, [Gradle]&#40;https://gradle.org/install/&#41;, and [Git]&#40;https://git-scm.com/downloads/&#41; &#40;and optionally, a [Git GUI client]&#40;https://git-scm.com/downloads/guis&#41;, such as TortoiseGit or GitHub Desktop&#41;. Please check the [compatibility matrix]&#40;https://docs.gradle.org/current/userguide/compatibility.html&#41; for Java and Gradle versions.)
+[//]: # (Fo this project, you need to install [Java]&#40;https://jdk.java.net/&#41;, [Gradle]&#40;https://gradle.org/install/&#41;, and [Git]&#40;https://git-scm.com/downloads/&#41; &#40;and optionally, a [Git GUI client]&#40;https://git-scm.com/downloads/guis&#41;, such as TortoiseGit or GitHub Desktop&#41;. Please check the [compatibility matrix]&#40;https://docs.gradle.org/current/userguide/compatibility.html&#41; for Java and Gradle versions.)
 
 [//]: # ()
 [//]: # (## Project setup)
