@@ -434,7 +434,7 @@ public class JasminInstruction {
     private String createArithmeticCode(String operation, Element leftOperand, Element rightOperand)
     {
         var code = new StringBuilder();
-        List<String> availableOps = new ArrayList<>(Arrays.asList("iadd", "imul", "idvi", "isub"));
+        List<String> availableOps = new ArrayList<>(Arrays.asList("iadd", "imul", "idiv", "isub"));
         if(leftOperand.isLiteral() && rightOperand.isLiteral() && availableOps.contains(operation)) {
             int result = 0;
             LiteralElement left = (LiteralElement) leftOperand;
