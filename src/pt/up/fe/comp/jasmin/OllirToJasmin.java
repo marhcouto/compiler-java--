@@ -27,7 +27,6 @@ public class OllirToJasmin {
     {
         var code = new StringBuilder();
 
-        this.classUnit.show();
 
         JasminInstruction.reset();
 
@@ -35,7 +34,6 @@ public class OllirToJasmin {
         code.append(createJasminFields());
         code.append(createJasminMethods());
 
-        System.out.println(code.toString());
 
         return code.toString();
     }
@@ -162,13 +160,17 @@ public class OllirToJasmin {
                 (method.getVarTable().containsKey("this") || method.isStaticMethod() ? 0 : 1);
 
         this.jasminUtils.resetStack();
+
         for (int i = 0; i < method.getInstructions().size(); i++) {
 
-            var jasminInstruction = new JasminInstruction(classUnit, method);
+            if(i<method.getInstructions().size()-1) method.getInstr(i).addSucc(method.getInstr(i+1));
+
+            JasminInstruction jasminInstruction = new JasminInstruction(classUnit, method);
 
             methodBody += jasminInstruction.getCode(method.getInstr(i));
             instruction_stack = jasminInstruction.getStackLimit();
             limit_stack = Math.max(instruction_stack, limit_stack);
+
 
         }
 

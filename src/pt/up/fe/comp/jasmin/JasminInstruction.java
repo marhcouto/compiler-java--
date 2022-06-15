@@ -1,4 +1,5 @@
 package pt.up.fe.comp.jasmin;
+import jdk.jshell.execution.FailOverExecutionControlProvider;
 import org.eclipse.jgit.util.io.IsolatedOutputStream;
 import org.specs.comp.ollir.*;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
@@ -16,7 +17,6 @@ public class JasminInstruction {
     private JasminUtils jasminUtils;
     private static int conditionalId = 0;
 
-
     JasminInstruction(ClassUnit classUnit, Method method)
     {
         this.classUnit = classUnit;
@@ -24,6 +24,7 @@ public class JasminInstruction {
         this.labels = method.getLabels();
         this.varTable = method.getVarTable();
         this.jasminUtils = new JasminUtils(this.classUnit);
+
     }
 
     @Deprecated
@@ -253,7 +254,7 @@ public class JasminInstruction {
 
     private String getArrayLength(CallInstruction instruction){
         var code = new StringBuilder();
-        instruction.show();
+
         code.append("\t" + this.jasminUtils.loadElement(instruction.getFirstArg(), this.varTable));
         code.append("\t" + "arraylength\n");
 
@@ -366,17 +367,43 @@ public class JasminInstruction {
                 }
                 else return "";
 
+                System.out.println(instruction);
+
 
 
                 if(this.varTable.get(dest.getName()).getVirtualReg() == this.varTable.get(operand.getName()).getVirtualReg())
                 {
                     var code = new StringBuilder();
-                    code.append("\t" + this.jasminUtils.loadElement(operand, this.varTable));
                     code.append("\tiinc " + this.varTable.get(operand.getName()).getVirtualReg() + " " + literalElement.getLiteral()  +"\n");
                     return code.toString();
 
                 }
+                else if(instruction.getPredecessors() != null ) {
 
+                    Node successor = instruction.getSuccessors().get(0);
+                    if(successor instanceof AssignInstruction)
+                    {
+                        Instruction instruction1 = ((AssignInstruction) successor).getRhs();
+
+                        if (instruction1 instanceof SingleOpInstruction)
+                        {
+
+                            Operand destOperand = (Operand) ((AssignInstruction) successor).getDest();
+                            Operand assignOperand = (Operand) ((SingleOpInstruction) instruction1).getSingleOperand();
+
+                            if(this.varTable.get(destOperand.getName()).getVirtualReg()  == this.varTable.get(operand.getName()).getVirtualReg())
+                            {
+                                var code = new StringBuilder();
+                                code.append("\tiinc " + this.varTable.get(destOperand.getName()).getVirtualReg() + " " + literalElement.getLiteral()  +"\n");
+                                code.append("\t" + this.jasminUtils.loadElement(destOperand, this.varTable));
+                                code.append("\t" + this.jasminUtils.storeElement(assignOperand, this.varTable));
+
+                                return code.toString();
+                            }
+                        }
+                    }
+
+                }
                 return "";
             }
             return "";
@@ -394,6 +421,10 @@ public class JasminInstruction {
         if(o1 instanceof ArrayOperand) {
             code.append(jasminUtils.loadArrayRefAndIndex((ArrayOperand) o1, varTable));
 
+        }
+
+        for (Node node: instruction.getSuccessors()) {
+            instruction.getRhs().addSucc(node);
         }
 
         String result = checkIfIincOptimization(o1, instruction.getRhs());
@@ -884,4 +915,7 @@ public class JasminInstruction {
     {
         conditionalId = 0;
     }
+
+
+
 }
