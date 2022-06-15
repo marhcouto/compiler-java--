@@ -6,6 +6,8 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 public class ExtendedSymbol extends pt.up.fe.comp.jmm.analysis.table.Symbol {
     private final Origin origin;
     private int index;
+    private int certaintyLimitLine = Integer.MAX_VALUE;
+    private String value = "";
 
     public static ExtendedSymbol fromSymbol(Symbol symbol, Origin origin) {
         return new ExtendedSymbol(symbol.getType(), symbol.getName(), -1, origin);
@@ -37,5 +39,17 @@ public class ExtendedSymbol extends pt.up.fe.comp.jmm.analysis.table.Symbol {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public void setValue(String value) { this.value = value; }
+
+    public String getValue() { return value; }
+
+    public int getCertaintyLimitLine() {
+        return certaintyLimitLine;
+    }
+
+    public void setCertaintyLimitLine(int certaintyLimitLine) {
+        this.certaintyLimitLine = certaintyLimitLine;
     }
 }

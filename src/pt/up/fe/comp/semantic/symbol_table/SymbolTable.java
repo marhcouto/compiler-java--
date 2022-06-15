@@ -3,6 +3,7 @@ package pt.up.fe.comp.semantic.symbol_table;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.semantic.models.ExtendedSymbol;
 import pt.up.fe.comp.semantic.models.Method;
 import pt.up.fe.comp.semantic.models.Origin;
 
@@ -18,10 +19,10 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
     private final String thisSuper;
     private final String className;
     private final List<String> imports;
-    private final Map<String, Symbol> fields;
+    private final Map<String, ExtendedSymbol> fields;
     private final Map<String, Method> methods;
 
-    public SymbolTable(String superName, String className, List<String> imports, Map<String, Symbol> fields, Map<String, Method> methods, List<Report> reports) {
+    public SymbolTable(String superName, String className, List<String> imports, Map<String, ExtendedSymbol> fields, Map<String, Method> methods, List<Report> reports) {
         this.thisSuper = superName;
         this.className = className;
         this.imports = imports;
@@ -30,7 +31,7 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
         this.reports = reports;
     }
 
-    public SymbolTable(String superName, String className, List<String> imports, Map<String, Symbol> fields, Map<String, Method> methods) {
+    public SymbolTable(String superName, String className, List<String> imports, Map<String, ExtendedSymbol> fields, Map<String, Method> methods) {
         this(superName, className, imports, fields, methods, Collections.emptyList());
     }
 
@@ -47,6 +48,10 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
     @Override
     public String getSuper() {
         return thisSuper;
+    }
+
+    public List<ExtendedSymbol> getExtendedFields() {
+        return new LinkedList<>(fields.values());
     }
 
     @Override
@@ -90,7 +95,7 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
         return methods.get(methodName).getVariables().containsKey(symbolName) || (fields.containsKey(symbolName) && !methodName.equals("main")) || hasSymbolInImportPath(symbolName);
     }
 
-    public Symbol getSymbol(String methodName, String symbolName) {
+    public ExtendedSymbol getSymbol(String methodName, String symbolName) {
         if (methods.get(methodName).getVariables().containsKey(symbolName)) {
             return methods.get(methodName).getVariables().get(symbolName);
         }
@@ -98,9 +103,9 @@ public class SymbolTable implements pt.up.fe.comp.jmm.analysis.table.SymbolTable
             return fields.get(symbolName);
         }
         if (hasSymbolInImportPath(symbolName)) {
-            return new Symbol(
+            return new ExtendedSymbol(
                 new Type(symbolName, false),
-                "symbolName"
+                "symbolName", Origin.IMPORT_PATH
             );
         }
         return null;

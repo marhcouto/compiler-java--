@@ -68,7 +68,6 @@ public class JasminUtils {
             try (FileOutputStream outp = new FileOutputStream(out_file);) {
                 classFile.write(outp);
             }
-            // System.out.println("Generated: " + out_file.getPath());
             return out_file;
         } catch (java.io.FileNotFoundException e) {
             throw new RuntimeException("Class could not be created: " + e.getMessage(), e);

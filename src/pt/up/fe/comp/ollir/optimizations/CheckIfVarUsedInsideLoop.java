@@ -39,6 +39,7 @@ public class CheckIfVarUsedInsideLoop extends PreorderJmmVisitor<Boolean, Map<St
     }
 
     private Map<String, JmmNode> visitAsmOp(JmmNode node, Boolean insideLoop) {
+        if (!node.getJmmChild(0).getKind().equals("VarName")) return null;
         String varName = node.getJmmChild(0).get("image");
         if (insideLoop != null && !blacklistedVariables.containsKey(varName)) {
             blacklistedVariables.put(varName, node.getJmmChild(0));

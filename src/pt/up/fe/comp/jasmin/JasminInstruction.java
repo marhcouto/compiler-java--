@@ -235,8 +235,6 @@ public class JasminInstruction {
         if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)
          && !isAssign){
             code.append("\tpop\n");
-            /*this.jasminUtils.updateStackLimit();
-            this.jasminUtils.subCurrentStack();*/
             return code.toString();
         }
 
@@ -516,14 +514,13 @@ public class JasminInstruction {
                     result = Integer.parseInt(left.getLiteral()) - Integer.parseInt(right.getLiteral());
                     break;
             }
-            System.out.println(left.getLiteral() + " " + operation + " " + right.getLiteral() +  " = " + result);
             LiteralElement literal = new LiteralElement(result + "", new Type(ElementType.INT32));
-            code.append("\t" + jasminUtils.loadElement(literal, varTable));
+            code.append("\t").append(jasminUtils.loadElement(literal, varTable));
             this.jasminUtils.updateStackLimit();
         } else{
-            code.append("\t" + this.jasminUtils.loadElement(leftOperand, this.varTable));
-            code.append("\t" + this.jasminUtils.loadElement(rightOperand, this.varTable));
-            code.append("\t" + operation + "\n");
+            code.append("\t").append(this.jasminUtils.loadElement(leftOperand, this.varTable));
+            code.append("\t").append(this.jasminUtils.loadElement(rightOperand, this.varTable));
+            code.append("\t").append(operation).append("\n");
             this.jasminUtils.updateStackLimit();
             this.jasminUtils.subCurrentStack();
             this.jasminUtils.subCurrentStack();

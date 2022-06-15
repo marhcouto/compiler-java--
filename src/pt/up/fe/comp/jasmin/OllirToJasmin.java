@@ -27,13 +27,11 @@ public class OllirToJasmin {
     {
         var code = new StringBuilder();
 
-
         JasminInstruction.reset();
 
         code.append(createJasminHeader());
         code.append(createJasminFields());
         code.append(createJasminMethods());
-
 
         return code.toString();
     }
@@ -171,9 +169,7 @@ public class OllirToJasmin {
             instruction_stack = jasminInstruction.getStackLimit();
             limit_stack = Math.max(instruction_stack, limit_stack);
 
-
         }
-
 
         code.append("\t.limit stack "+ limit_stack +"\n");
         code.append("\t.limit locals " + limitLocals + "\n");

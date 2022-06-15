@@ -127,7 +127,6 @@ public class Cpf3_Ollir {
         var ollirResult = getOllirResult("arithmetic/Arithmetic_and.jmm");
 
         var method = CpUtils.getMethod(ollirResult, "main");
-        System.out.println(ollirResult.getOllirCode());
         CpUtils.assertHasOperation(OperationType.ANDB, method, ollirResult);
     }
 
@@ -136,7 +135,6 @@ public class Cpf3_Ollir {
         var ollirResult = getOllirResult("arithmetic/Arithmetic_less.jmm");
 
         var method = CpUtils.getMethod(ollirResult, "main");
-        System.out.println(ollirResult.getOllirCode());
         CpUtils.assertHasOperation(OperationType.LTH, method, ollirResult);
 
     }

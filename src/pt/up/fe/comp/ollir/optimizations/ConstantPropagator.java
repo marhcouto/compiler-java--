@@ -60,7 +60,6 @@ public class ConstantPropagator extends AJmmVisitor<Object, Object> {
             node.getJmmParent().removeJmmChild(node);
         } else if (scopeConstants.containsKey(varName)) {
             // Removes variable if it is no longer a constant
-            System.out.println("Removed Constant");
             scopeConstants.remove(varName);
         }
         return null;

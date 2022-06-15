@@ -33,39 +33,39 @@ public class SymbolTableFactory {
         );
     }
 
-    public static SymbolTable fromJmmSymbolTable(pt.up.fe.comp.jmm.analysis.table.SymbolTable symbolTable, JmmNode root) {
-        SymbolTable newSymbolTable = new SymbolTable(
-            symbolTable.getSuper(),
-            symbolTable.getClassName(),
-            symbolTable.getImports(),
-            buildFieldsFromList(symbolTable.getFields()),
-            buildMethodsFromList(symbolTable)
-        );
-        new IndexAdd(newSymbolTable).visit(root);
-        return newSymbolTable;
-    }
-
-    private static Map<String, Symbol> buildFieldsFromList(List<Symbol> fields) {
-        Map<String, Symbol> fieldMap = new HashMap<>();
-        for (var field: fields) {
-            fieldMap.put(field.getName(), field);
-        }
-        return fieldMap;
-    }
-
-    private static Map<String, Method> buildMethodsFromList(pt.up.fe.comp.jmm.analysis.table.SymbolTable symbolTable) {
-        Map<String, Method> methodMap = new HashMap<>();
-        for (var methodName: symbolTable.getMethods()) {
-            Map<String, ExtendedSymbol> scopeSymbols = new HashMap<>();
-            for (var param: symbolTable.getParameters(methodName)) {
-                scopeSymbols.put(param.getName(), ExtendedSymbol.fromSymbol(param, Origin.PARAMS));
-            }
-            for (var localVar: symbolTable.getLocalVariables(methodName)) {
-                scopeSymbols.put(localVar.getName(), ExtendedSymbol.fromSymbol(localVar, Origin.LOCAL));
-            }
-            Method curMethod = new Method(methodName, symbolTable.getReturnType(methodName), scopeSymbols);
-            methodMap.put(curMethod.getName(), curMethod);
-        }
-        return methodMap;
-    }
+//    public static SymbolTable fromJmmSymbolTable(pt.up.fe.comp.jmm.analysis.table.SymbolTable symbolTable, JmmNode root) {
+//        SymbolTable newSymbolTable = new SymbolTable(
+//            symbolTable.getSuper(),
+//            symbolTable.getClassName(),
+//            symbolTable.getImports(),
+//            buildFieldsFromList(symbolTable.getFields()),
+//            buildMethodsFromList(symbolTable)
+//        );
+//        new IndexAdd(newSymbolTable).visit(root);
+//        return newSymbolTable;
+//    }
+//
+//    private static Map<String, ExtendedSymbol> buildFieldsFromList(List<ExtendedSymbol> fields) {
+//        Map<String, ExtendeSymbol> fieldMap = new HashMap<>();
+//        for (var field: fields) {
+//            fieldMap.put(field.getName(), field);
+//        }
+//        return fieldMap;
+//    }
+//
+//    private static Map<String, Method> buildMethodsFromList(pt.up.fe.comp.jmm.analysis.table.SymbolTable symbolTable) {
+//        Map<String, Method> methodMap = new HashMap<>();
+//        for (var methodName: symbolTable.getMethods()) {
+//            Map<String, ExtendedSymbol> scopeSymbols = new HashMap<>();
+//            for (var param: symbolTable.getParameters(methodName)) {
+//                scopeSymbols.put(param.getName(), ExtendedSymbol.fromSymbol(param, Origin.PARAMS));
+//            }
+//            for (var localVar: symbolTable.getLocalVariables(methodName)) {
+//                scopeSymbols.put(localVar.getName(), ExtendedSymbol.fromSymbol(localVar, Origin.LOCAL));
+//            }
+//            Method curMethod = new Method(methodName, symbolTable.getReturnType(methodName), scopeSymbols);
+//            methodMap.put(curMethod.getName(), curMethod);
+//        }
+//        return methodMap;
+//    }
 }
